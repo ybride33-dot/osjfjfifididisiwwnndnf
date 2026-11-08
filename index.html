@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.3'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1857,6 +1857,8 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
+    /* 클라우드 두뇌(온라인·무료·키 0) — 폰 GPU 0 부하. 실패/오프라인이면 폰 두뇌로 */
+    if(LLM.CLOUD.ok){ try{ const cr=await LLM.cloudAsk(t,rag); if(cr&&cr.trim().length>1) return R(cr.trim()); }catch(e){} }
     if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
     if(LLM.ready&&!LLM.busy){ try{
       if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
@@ -2733,7 +2735,7 @@ function openPanel(name){
     lbOff.style.cssText='width:100%;padding:8px;margin-top:3px;border-radius:9px;border:1px solid #665;background:#181818;color:#aaa;font-size:11.5px';
     lbOff.onclick=function(){ try{ store.set('jvs-llm','off'); }catch(e){} toast('해제 — 재시작하면 기존 엔진만 사용'); };
     panelBody.appendChild(lbOff);
-    panelBody.insertAdjacentHTML('beforeend','<div style="font-size:10.5px;opacity:.7;margin-top:4px">정직 사양: 폰 안에서 도는 소형 진짜 AI — 문맥 이해·자연 대화는 크게 위지만 깊은 지식은 406토픽 DB가 보조. 계정·키·서버 없음.</div>');
+    panelBody.insertAdjacentHTML('beforeend','<div style="font-size:10.5px;opacity:.7;margin-top:4px">정직 사양: 온라인 = 무료 공개 두뇌 우선(폰 부하 0·렉 0), 오프라인 = 폰 속 두뇌가 버팀. 계정·키·로그인 없음.</div>');
     panelBody.insertAdjacentHTML('beforeend','<div class="sec">목소리</div>');
     const sel=document.createElement('select');
     let html='<option value="auto-male">🤖 자동 (남자 톤)</option><option value="auto-female">🤖 자동 (여자 톤)</option><option value="gg">🎵 구글 고음질 (온라인)</option>';
@@ -3130,6 +3132,31 @@ function tgLoop(){
 const LLM={eng:null,ready:false,busy:false,kind:null,
   MODELS:{lite:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',std:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',pro:'gemma-2-2b-it-q4f16_1-MLC'},
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
+  /* 클라우드 두뇌 — 온라인일 때만 폰 부하 0. 키·계정 없는 공개 HF 추론 */
+  CLOUD:{on:false,ok:false,lat:0},
+  async cloudPing(){
+    const t0=Date.now();
+    try{ const r=await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-0.5B-Instruct',{method:'HEAD',signal:AbortSignal.timeout(6000)});
+      LLM.CLOUD.ok=(r.ok||r.status===401||r.status===403||r.status===503); LLM.CLOUD.lat=Date.now()-t0; }
+    catch(e){ LLM.CLOUD.ok=false; }
+    return LLM.CLOUD.ok;
+  },
+  async cloudAsk(t,ref){
+    if(!LLM.CLOUD.ok)return null;
+    const t0=Date.now();
+    try{
+      const sys='너는 자비스 — 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~4문장, 담백하게. 모르면 정직하게 모른다고 한다.';
+      const res=await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-0.5B-Instruct/v1/chat/completions',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({messages:[{role:'system',content:sys}].concat(ref?[{role:'system',content:'참고자료(소화해서 활용): '+ref}]:[]).concat([{role:'user',content:t}]),max_tokens:180,temperature:0.7}),
+        signal:AbortSignal.timeout(25000)});
+      if(!res.ok)return null;
+      const j=await res.json();
+      const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+      LLM.CLOUD.lat=Date.now()-t0;
+      return (c&&c.trim().length>1)?c.trim():null;
+    }catch(e){ return null; }
+  },
   sleepT:null,
   kick(){
     try{ clearTimeout(LLM.sleepT); }catch(e){}
@@ -3240,6 +3267,7 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
 })();
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
+try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 클라우드 두뇌 연결 — 온라인 중엔 폰이 쉽니다 (렉 0)'); }catch(e){} },2500); }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
 let li=0;
 const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형 대화 엔진 (문맥스택·벡터검색) .. ONLINE','> 황금 성운 필드 '+nebula.n.toLocaleString()+' 파티클 .... 생성','> 가상 워크스페이스 V:\\ ............ 마운트','> 코드 샌드박스 (격리 실행) ............ ONLINE','> 장기기억 · 자기해킹 · 자율성장 ...... ARMED','> 폰 제어 (손전등/진동/알람/GPS) ...... READY','> 스타크 허드 (플로팅 패널 5종) ....... STANDBY','> 자기해킹 엔진 (실측 자기최적화) ...... ARMED','> 심층 지식 DB '+KNOW.length+'토픽 · 상식 '+FACTS.length+' · 논문 '+PAPERS.length+' .. LOADED','','  환영합니다, 사장님. 중앙을 터치하거나 말씀하세요.'];
