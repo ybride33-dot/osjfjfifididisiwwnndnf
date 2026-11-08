@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.3'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.4'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3132,24 +3132,22 @@ function tgLoop(){
 const LLM={eng:null,ready:false,busy:false,kind:null,
   MODELS:{lite:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',std:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',pro:'gemma-2-2b-it-q4f16_1-MLC'},
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
-  /* 클라우드 두뇌 — 온라인일 때만 폰 부하 0. 키·계정 없는 공개 HF 추론 */
+  /* 클라우드 두뇌 — 무료·키 0·계정 0. Pollinations 공개 엔드포인트(OpenAI 호환). 실패 시 폰 두뇌가 받는 구조라 서버 상태와 무관하게 안전 */
   CLOUD:{on:false,ok:false,lat:0},
   async cloudPing(){
     const t0=Date.now();
-    try{ const r=await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-0.5B-Instruct',{method:'HEAD',signal:AbortSignal.timeout(6000)});
-      LLM.CLOUD.ok=(r.ok||r.status===401||r.status===403||r.status===503); LLM.CLOUD.lat=Date.now()-t0; }
+    try{ const r=await fetch('https://text.pollinations.ai/ping',{signal:AbortSignal.timeout(6000)});
+      LLM.CLOUD.ok=r.ok||r.status===404||r.status===405; LLM.CLOUD.lat=Date.now()-t0; }
     catch(e){ LLM.CLOUD.ok=false; }
     return LLM.CLOUD.ok;
   },
   async cloudAsk(t,ref){
-    if(!LLM.CLOUD.ok)return null;
     const t0=Date.now();
     try{
-      const sys='너는 자비스 — 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~4문장, 담백하게. 모르면 정직하게 모른다고 한다.';
-      const res=await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-0.5B-Instruct/v1/chat/completions',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({messages:[{role:'system',content:sys}].concat(ref?[{role:'system',content:'참고자료(소화해서 활용): '+ref}]:[]).concat([{role:'user',content:t}]),max_tokens:180,temperature:0.7}),
-        signal:AbortSignal.timeout(25000)});
+      const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~5문장, 담백하고 자연스럽게. 모르면 지어내지 말고 정직하게. 어려운 말은 쉽게 풀어준다.'+(ref?'\n참고자료(소화해서 자연스럽게 활용, 복사 금지): '+ref:'');
+      const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'openai',messages:[{role:'system',content:sys},{role:'user',content:t}],max_tokens:220,temperature:0.7}),
+        signal:AbortSignal.timeout(30000)});
       if(!res.ok)return null;
       const j=await res.json();
       const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
