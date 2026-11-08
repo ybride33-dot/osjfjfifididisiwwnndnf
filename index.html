@@ -402,7 +402,7 @@ async function cvbRecord(key){
 }
 function cvbDelete(key){ if(CVBANK){ delete CVBANK[key]; cvbSave(); } openPanel('settings'); }
 function loadV(){ try{ VOICES=speechSynthesis.getVoices()||[]; }catch{ VOICES=[]; } }
-if('speechSynthesis' in window){ loadV(); speechSynthesis.onvoiceschanged=loadV; }
+if('speechSynthesis' in window){ loadV(); speechSynthesis.onvoiceschanged=loadV; let _vt=0; const _vp=setInterval(()=>{ loadV(); if(VOICES.length||++_vt>12)clearInterval(_vp); },250); }
 function pickV(lang){ const pool=VOICES.filter(v=>lang==='en'?/^en/i.test(v.lang):/^ko/i.test(v.lang)); if(!pool.length)return null;
   const sv=pool.find(v=>v.voiceURI===voiceSel); if(sv)return sv;
   /* 남성 목소리 우선순위: 확실한 한국어 남성 TTS 네이밍 → 남성 키워드 → 나머지 */
@@ -1387,7 +1387,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='15.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='15.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
