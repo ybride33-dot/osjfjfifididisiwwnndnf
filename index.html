@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.5'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.6'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1857,7 +1857,14 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
-    /* 클라우드 두뇌 — 무료 서버 예절(실측: 45초/답·답변 ~10초). 간격 밖이면 요청 없이 폰두뇌로 즉시 넘김 */
+    /* 0층 — Gemini(키 있을 때): 2~3초 프리미엄 답변. 4.5초 간격 가드 */
+    if(LLM.hasGem()&&Date.now()-LLM.GEM.last>4500&&Date.now()>LLM.GEM.cool){ try{
+      LLM.GEM.last=Date.now();
+      let gref=rag;
+      try{ const w=await wikiLookup(t); if(w)gref=(gref?gref+'\n':'')+'【위키백과:'+w.title+'】 '+w.extract.slice(0,600); }catch(e){}
+      const gr=await LLM.gemAsk(t,gref); if(gr&&gr.trim().length>1) return R(gr.trim());
+    }catch(e){} }
+    /* 1층 — 무료 공개 서버 예절(실측: 45초/답·답변 ~10초). 간격 밖이면 요청 없이 폰두뇌로 즉시 넘김 */
     if(LLM.CLOUD.ok&&Date.now()-LLM.CLOUD.last>46000&&Date.now()>LLM.CLOUD.cool){ try{
       LLM.CLOUD.last=Date.now();
       let ref2=rag;
@@ -2730,6 +2737,29 @@ function openPanel(name){
         catch(err){ lstat.textContent='⚠ '+err.message; } };
       panelBody.appendChild(b);
     });
+    const gsec=document.createElement('div'); gsec.style.cssText='margin:8px 0 2px;font-size:11px;color:#ffd58a';
+    gsec.textContent='🔑 Gemini 키(선택) — 넣으면 답변 2~3초 프리미엄 두뇌. 키는 이 폰에만 저장(외부 전송·레포 저장 없음)';
+    panelBody.appendChild(gsec);
+    const gin=document.createElement('input'); gin.type='text'; gin.placeholder='AIza... 로 시작하는 키를 붙여넣기';
+    gin.style.cssText='width:100%;box-sizing:border-box;padding:9px;margin:3px 0;border-radius:8px;border:1px solid #775;background:#141008;color:#ffe9c4;font-size:12px';
+    try{ gin.value=store.get('jvs-gk')||''; }catch(e){}
+    panelBody.appendChild(gin);
+    const gsave=document.createElement('button'); gsave.textContent='🔑 키 저장 + 연결 테스트';
+    gsave.style.cssText='width:100%;padding:9px;margin:2px 0;border-radius:9px;border:1px solid #ffb64a;background:linear-gradient(140deg,#3a2508,#221502);color:#ffd58a;font-weight:700;font-size:12px';
+    gsave.onclick=async function(){
+      const k=gin.value.trim();
+      if(k.length<20){ toast('⚠ 키가 짧다 — AIza... 전체가 복사됐는지 확인'); return; }
+      try{ store.set('jvs-gk',k); LLM.GEM.key=k; LLM.GEM.cool=0; }catch(e){}
+      gsave.textContent='연결 테스트 중…';
+      const tr=await LLM.gemAsk('연결 테스트 — "자비스 온라인"이라고 한마디만.');
+      gsave.textContent='🔑 키 저장 + 연결 테스트';
+      toast(tr?('✅ Gemini 연결 성공 — '+LLM.GEM.lat+'ms. 이제 답변 2~3초, 구글이 모델 올리면 자동 발전'):('⚠ 연결 실패 — 키 재확인 필요. 무료 서버+폰 두뇌 체제로 계속 작동'));
+    };
+    panelBody.appendChild(gsave);
+    const gdel=document.createElement('button'); gdel.textContent='키 삭제 — 무료 서버·폰 두뇌 체제로 복귀';
+    gdel.style.cssText='width:100%;padding:7px;margin:2px 0;border-radius:9px;border:1px solid #665;background:#181818;color:#aaa;font-size:11px';
+    gdel.onclick=function(){ try{ store.set('jvs-gk',''); }catch(e){} LLM.GEM.key=null; gin.value=''; toast('키 삭제 완료 — 무료 서버+폰 두뇌 체제로 계속'); };
+    panelBody.appendChild(gdel);
     const lpBtn=document.createElement('button'); lpBtn.id='lpBtn';
     const lpLabel=function(){ return PERF.lowPower?'🌙 로우파워 비전 ON — 코어 15fps 최소 움직임 (탭해서 해제)':'🌙 로우파워 비전 OFF — 렉 민감형 모드 (탭해서 ON)'; };
     lpBtn.textContent=lpLabel();
@@ -3139,6 +3169,35 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
   /* 클라우드 두뇌 — 무료·키 0·계정 0. Pollinations 공개 엔드포인트(OpenAI 호환). 실패 시 폰 두뇌가 받는 구조라 서버 상태와 무관하게 안전 */
   CLOUD:{on:false,ok:false,lat:0,last:0,cool:0},
+  /* 0층 두뇌 — Gemini 키(사장님 소유·폰에만 저장·레포에 안 들어감). 구글이 모델 올리면 자동 발전 */
+  GEM:{key:null,last:0,cool:0,lat:0,mi:0},
+  GMODELS:['gemini-2.0-flash','gemini-2.5-flash','gemini-1.5-flash'],
+  hasGem(){ try{ if(LLM.GEM.key)return true; const k=store.get('jvs-gk'); if(k&&k.length>20){LLM.GEM.key=k;return true;} }catch(e){} return false; },
+  async gemAsk(t,ref){
+    let k=LLM.GEM.key; if(!k){ try{ k=store.get('jvs-gk'); }catch(e){} }
+    if(!k||k.length<20)return null;
+    const t0=Date.now();
+    const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~5문장, 담백하고 자연스럽게. 모르면 지어내지 말고 정직하게. 어려운 말은 쉽게.'+(ref?'\n참고자료(소화해서 자연스럽게 활용, 복사 금지): '+ref:'');
+    for(let off=0;off<LLM.GMODELS.length;off++){
+      const mi=(LLM.GEM.mi+off)%LLM.GMODELS.length;
+      try{
+        const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+LLM.GMODELS[mi]+':generateContent?key='+encodeURIComponent(k),{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{role:'user',parts:[{text:sys+'\n\n[사장님] '+t}]}],generationConfig:{maxOutputTokens:300,temperature:0.7}}),
+          signal:AbortSignal.timeout(20000)});
+        if(!res.ok){
+          if(res.status===404)continue; /* 모델 은퇴 → 다음 모델 */
+          if(res.status===429||res.status===403)LLM.GEM.cool=Date.now()+60000;
+          return null;
+        }
+        const j=await res.json();
+        const c=j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]&&j.candidates[0].content.parts[0].text;
+        if(c&&c.trim().length>1){ LLM.GEM.mi=mi; LLM.GEM.lat=Date.now()-t0; return c.trim(); }
+        return null;
+      }catch(e){ return null; }
+    }
+    return null;
+  },
   async cloudPing(){
     const t0=Date.now();
     try{ const r=await fetch('https://text.pollinations.ai/ping',{signal:AbortSignal.timeout(6000)});
@@ -3286,6 +3345,7 @@ async function wikiLookup(t){
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
 try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
+try{ setTimeout(function(){ if(LLM.hasGem())toast('🔑 Gemini 프리미엄 두뇌 감지 — 답변 2~3초 체제, 사장님'); },3200); }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
 let li=0;
 const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형 대화 엔진 (문맥스택·벡터검색) .. ONLINE','> 황금 성운 필드 '+nebula.n.toLocaleString()+' 파티클 .... 생성','> 가상 워크스페이스 V:\\ ............ 마운트','> 코드 샌드박스 (격리 실행) ............ ONLINE','> 장기기억 · 자기해킹 · 자율성장 ...... ARMED','> 폰 제어 (손전등/진동/알람/GPS) ...... READY','> 스타크 허드 (플로팅 패널 5종) ....... STANDBY','> 자기해킹 엔진 (실측 자기최적화) ...... ARMED','> 심층 지식 DB '+KNOW.length+'토픽 · 상식 '+FACTS.length+' · 논문 '+PAPERS.length+' .. LOADED','','  환영합니다, 사장님. 중앙을 터치하거나 말씀하세요.'];
