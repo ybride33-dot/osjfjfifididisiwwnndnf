@@ -1391,7 +1391,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -2236,23 +2236,31 @@ async function brain(text){
       return R('현재 켠 손전등이 없습니다.'); }
     try{
       if(!navigator.mediaDevices) throw new Error('이 환경은 카메라 API 미지원 (https 또는 로컬 파일로 열어주세요)');
-      torchStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+      torchStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:320},height:{ideal:240}}});
       torchTrack=torchStream.getVideoTracks()[0];
-      /* 실측 검증: applyConstraints는 미지원 기기에서도 조용히 성공하는 경우가 있어 실제 capability로 재확인 */
-      const caps=(typeof torchTrack.getCapabilities==='function')?torchTrack.getCapabilities():{};
-      let okT=false;
-      if(caps&&caps.torch){
-        try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); okT=true; }catch(e1){
-          try{ await torchTrack.applyConstraints({torch:true}); okT=true; }catch(e2){} }
-      } else {
-        /* capability 조회 실패 시 기존 2중 시도로 진행 */
-        try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); okT=true; }catch(e1){
-          try{ await torchTrack.applyConstraints({torch:true}); okT=true; }catch(e2){} }
-      }
-      if(!okT){
+      /* torch 지원 실측 — capabilities에서 확인 (지원 안 하면 시도도 의미 없음) */
+      const caps=(typeof torchTrack.getCapabilities==='function')?(torchTrack.getCapabilities()||{}):{};
+      const supported=!!caps.torch;
+      if(!supported){
         torchStream.getTracks().forEach(x=>x.stop()); torchStream=null; torchTrack=null;
-        throw new Error('이 브라우저가 카메라 플래시(torch) 제약을 미지원 — 크롬·삼성인터넷 최신버전에서 "손전등" 재시도'); }
-      return {reply:'🔦 손전등 ON (실측 '+ (caps&&caps.torch?'torch capability 확인':'제약 적용 완료') +') — 불 들어왔는지 화면 확인하고, 안 들어왔으면 말해라 — 삼성 인터넷으로 열어서 재시도하는 게 정답일 수 있음. "손전등 꺼줘" 하면 끕니다.',actions:[{label:'손전등 끄기',type:'run',content:'console.log("손전등은 채팅에서 \\"손전등 꺼줘\\"로 끕니다")'}]};
+        return R('정직 리포트 — 이 브라우저는 웹에서 플래시 제어(torch)를 노출 안 합니다. 지금 열 브라우저에서는 기술적으로 불가능한 게 맞습니다. 대안 ① 삼성 인터넷 앱으로 이 주소 열고 "손전등" 재시도 ② 크롬 최신버전 업데이트 후 재시도 ③ 그래도 안 되면 그 브라우저가 진짜 미노출이라 폰 손전등 위젯을 쓰는 게 답입니다.'); }
+      /* 2중 방식 시도 */
+      let errT=null;
+      try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); }catch(e1){
+        try{ await torchTrack.applyConstraints({torch:true}); }catch(e2){ errT=e2; } }
+      /* 실측 검증: constraints 재조회 — 실제로 torch:true가 박혔는지 (조용한 무시 감지) */
+      await new Promise(r=>setTimeout(r,60));
+      let verify=false;
+      try{ const now=(typeof torchTrack.getConstraints==='function')?torchTrack.getConstraints():null;
+        const st=(now&&now.advanced&&now.advanced[0]&&now.advanced[0].torch===true)||(now&&now.torch===true);
+        verify=!!st; }catch(e){}
+      if(errT&&!verify){
+        torchStream.getTracks().forEach(x=>x.stop()); torchStream=null; torchTrack=null;
+        return R('정직 리포트 — 플래시 켜기 요청이 브라우저에서 거부됐습니다('+(errT.message||errT.name)+'). 권한이 "카메라 허용"인지 주소창 🔒에서 확인하시고, 삼성 인터넷으로 열면 성공률이 가장 높습니다.'); }
+      if(!verify){
+        /* 조용히 무시된 케이스 — 성공 보고 금지, 정직 안내 */
+        return R('🔦 제약 적용은 완료했지만 브라우저가 실제 점등을 검증할 수 없습니다 — 불이 안 들어왔다면 이 브라우저가 torch를 조용히 무시하는 중이라는 뜻입니다. 삼성 인터넷으로 열어서 "손전등" 다시 말씀하세요. ("손전등 꺼줘"로 정리 가능)'); }
+      return {reply:'🔦 손전등 ON — 실측 검증 통과(constraints에 torch 박힘 확인). "손전등 꺼줘" 하면 끕니다.',actions:[{label:'손전등 끄기',type:'run',content:'console.log("손전등은 채팅에서 \\"손전등 꺼줘\\"로 끕니다")'}]};
     }catch(e){
       if(/NotAllowed|Permission|denied/i.test(e.name+' '+(e.message||''))){
         return R('카메라 권한이 차단돼 있습니다 — 주소창 왼쪽 🔒 → 권한 → 카메라 "허용"으로 바꾸고 "손전등" 다시 말씀하세요.'); }
