@@ -93,7 +93,7 @@
 <header>
   <div style="display:flex;align-items:center;gap:10px">
     <button id="filesBtn" title="파일 &amp; 코어 데이터"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></button>
-    <div><div class="t1">J.A.R.V.I.S</div><div class="t2">MOBILE CORE · GOLDEN NEBULA v6 · SINGULARITY</div></div>
+    <div><div class="t1">J.A.R.V.I.S</div><div class="t2" id="verSub">MOBILE CORE · GOLDEN NEBULA · SINGULARITY</div></div>
   </div>
   <div id="lv">LV.1 · 0 XP</div>
 </header>
@@ -272,6 +272,7 @@ const DPR=Math.min(devicePixelRatio||1,2); let W,H,asp;
 function resize(){ W=innerWidth;H=innerHeight; cv.width=W*DPR;cv.height=H*DPR; gl.viewport(0,0,cv.width,cv.height); gl.clear(gl.COLOR_BUFFER_BIT); asp=W/H; }
 addEventListener('resize',resize); resize();
 const glowEl=document.getElementById('coreGlow'), stTxt=document.getElementById('stTxt');
+try{ document.getElementById('verSub').textContent='MOBILE CORE · GOLDEN NEBULA v'+JVS_VER+' · SINGULARITY'; }catch(e){}
 function frame(now){
   requestAnimationFrame(frame);
   try{ if(typeof LLM!=='undefined'&&LLM.busy)return; }catch(e){} /* 두뇌 계산 중 GPU 양보 — 코어 정지, 완료 즉시 재개 */
@@ -291,7 +292,7 @@ function frame(now){
   const bind=(b,l,s)=>{gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,s,gl.FLOAT,false,0,0);};
   bind(nebula.bp,A.pos,3); bind(nebula.bc,A.col,3); bind(nebula.bs,A.size,1); bind(nebula.bq,A.phase,1); bind(nebula.bsp,A.spin,1);
   gl.drawArrays(gl.POINTS,0,Math.max(4000,Math.round(nebula.n*(typeof PERF!=='undefined'?PERF.nebFrac:1))));
-  const gs=(2.7/dist)*(0.85+boost*0.4)*(0.94+0.06*Math.sin(time*7+Math.sin(time*19)*0.7));
+  const gs=Math.min(1.55,(2.7/dist)*(0.85+boost*0.4)*(0.94+0.06*Math.sin(time*7+Math.sin(time*19)*0.7)));
   glowEl.style.transform='translate(-50%,-50%) scale('+gs.toFixed(3)+')';
   glowEl.style.background=THEMES[tOrder[tIdx]].glow;
 }
@@ -1392,7 +1393,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.8'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.9'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3202,6 +3203,14 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
       const f=PERF.ticks; PERF.ticks=0; if(f<5)return;
       PERF.fps=f;
       if(typeof LLM!=='undefined'&&LLM.busy){ PERF.forceLow(); PERF.low=0; PERF.high=0; return; }
+      if(typeof LLM!=='undefined'&&LLM.ready&&f<10){
+        PERF.llmLow=(PERF.llmLow||0)+1;
+        if(PERF.llmLow>=3){ PERF.llmLow=0;
+          try{ if(LLM.eng&&typeof LLM.eng.unload==='function')LLM.eng.unload(); }catch(e){}
+          LLM.ready=false; LLM.eng=null; PERF.forced=false; PERF.tier=0; PERF.apply();
+          try{ toast('🛡 비상 차단 — 이 폰에서 두뇌가 너무 무거워 자동 수면시킴. 코어 원래 화력 완전 복구. 설정에서 경량(0.5GB)으로 재이식 권장'); }catch(e){}
+          return; }
+      } else { PERF.llmLow=0; }
       if(f<32){ PERF.low++; PERF.high=0; }
       else if(f>55){ PERF.high++; PERF.low=0; }
       else { PERF.low=0; PERF.high=0; }
