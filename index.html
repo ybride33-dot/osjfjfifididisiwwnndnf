@@ -275,7 +275,11 @@ const glowEl=document.getElementById('coreGlow'), stTxt=document.getElementById(
 try{ document.getElementById('verSub').textContent='MOBILE CORE · GOLDEN NEBULA v'+JVS_VER+' · SINGULARITY'; }catch(e){}
 function frame(now){
   requestAnimationFrame(frame);
-  try{ if(typeof LLM!=='undefined'&&LLM.busy){ PERF.llmThrottle=(PERF.llmThrottle||0)+1; if(PERF.llmThrottle%3!==0)return; } }catch(e){} /* 두뇌 계산 중 코어 1/3 감속 렌더(정지 아님) — 체감 끊김 제거 */
+  try{ if(typeof LLM!=='undefined'&&LLM.busy){ PERF.llmThrottle=(PERF.llmThrottle||0)+1;
+    if(PERF.lowPower){ if(PERF.llmThrottle%4!==0)return; } /* 로우파워: 두뇌 중 15fps */
+    else if(PERF.llmThrottle%3!==0)return; } /* 평상시: 두뇌 중 20fps */
+  }catch(e){} /* 두뇌 계산 중 코어 감속 렌더(정지 아님) — 체감 끊김 제거 */
+  if(typeof PERF!=='undefined'&&PERF.lowPower&&!LLMbusyNow()){ PERF.lpThrottle=(PERF.lpThrottle||0)+1; if(PERF.lpThrottle%4!==0)return; } /* 로우파워 평상시 15fps */
   const time=now/1000; boost=Math.max(0,boost-0.012);
   if(!drag){ yaw+=vyaw; pitch+=vpitch; vyaw*=0.94; vpitch*=0.94; if(now-lastTouch>2600) yaw+=0.0032; }
   pitch=Math.max(-1.25,Math.min(1.25,pitch));
@@ -1393,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -2719,6 +2723,12 @@ function openPanel(name){
         catch(err){ lstat.textContent='⚠ '+err.message; } };
       panelBody.appendChild(b);
     });
+    const lpBtn=document.createElement('button'); lpBtn.id='lpBtn';
+    const lpLabel=function(){ return PERF.lowPower?'🌙 로우파워 비전 ON — 코어 15fps 최소 움직임 (탭해서 해제)':'🌙 로우파워 비전 OFF — 렉 민감형 모드 (탭해서 ON)'; };
+    lpBtn.textContent=lpLabel();
+    lpBtn.style.cssText='width:100%;padding:8px;margin-top:3px;border-radius:9px;border:1px solid #a87;background:#221502;color:#ffd58a;font-size:11.5px';
+    lpBtn.onclick=function(){ PERF.setLowPower(!PERF.lowPower); lpBtn.textContent=lpLabel(); };
+    panelBody.appendChild(lpBtn);
     const lbOff=document.createElement('button'); lbOff.textContent='두뇌 해제 (기존 엔진만 사용)';
     lbOff.style.cssText='width:100%;padding:8px;margin-top:3px;border-radius:9px;border:1px solid #665;background:#181818;color:#aaa;font-size:11.5px';
     lbOff.onclick=function(){ try{ store.set('jvs-llm','off'); }catch(e){} toast('해제 — 재시작하면 기존 엔진만 사용'); };
@@ -3190,7 +3200,14 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
   }
 };
 /* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
-const PERF={ticks:0,fps:60,tier:0,nebFrac:1,low:0,high:0,forced:false,saved:0};
+const PERF={ticks:0,fps:60,tier:0,nebFrac:1,low:0,high:0,forced:false,saved:0,lowPower:false,lpThrottle:0,llmThrottle:0};
+function LLMbusyNow(){ try{ return !!(typeof LLM!=='undefined'&&LLM.busy); }catch(e){ return false; } }
+PERF.setLowPower=function(on){
+  PERF.lowPower=!!on;
+  try{ store.set('jvs-lp',on?'1':'0'); }catch(e){}
+  try{ toast(on?'🌙 로우파워 비전 — 움직임 15fps 최소화(두뇌 응답 최우선). 해제: 설정':'⚡ 로우파워 해제 — 원래 조형 복귀'); }catch(e){}
+};
+try{ if(store.get('jvs-lp')==='1'){ PERF.lowPower=true; } }catch(e){}
 PERF.apply=function(){ PERF.nebFrac=[1,0.8,0.65,0.55,0.45,0.36,0.28,0.2][PERF.tier]; };
 PERF.forceLow=function(){ if(!PERF.forced){ PERF.forced=true; PERF.saved=PERF.tier; }
   if(PERF.tier<2){ PERF.tier=2; PERF.apply(); try{ toast('🧠 이식 중 — 절전 렌더 모드 전환 (발열·렉 방지)'); }catch(e){} } };
@@ -3203,6 +3220,7 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
       if(document.hidden){ PERF.ticks=0; return; }
       const f=PERF.ticks; PERF.ticks=0; if(f<5)return;
       PERF.fps=f;
+      if(PERF.lowPower&&PERF.tier<5){ PERF.tier=5; PERF.apply(); }
       if(typeof LLM!=='undefined'&&LLM.busy){ PERF.forceLow(); PERF.low=0; PERF.high=0; return; }
       if(typeof LLM!=='undefined'&&LLM.ready&&f<10){
         PERF.llmLow=(PERF.llmLow||0)+1;
