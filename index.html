@@ -1393,7 +1393,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.9'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.0'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1844,8 +1844,9 @@ async function dialogueEngine(t,low,en,R){
     let b2=-1,d2=0; for(let i=0;i<KNOW.length;i++){ const d=cosSim(v,KNOWBV[i]); if(d>d2){d2=d;bi=i;} }
     if(d2>0.05){bd=d2;} else {bi=-1;} }
   /* 0.5) 일상·스몰토크 — 지식 검색 실패 시 전문 화제 강요 대신 자연스럽게 응대 */
-  if(bd<=vTh){
-    /* 진짜 두뇌 우선 — DB 미적중 화제는 생성으로. 단, 약관련 지식 2건을 참고자료로 주입(RAG)해서 소형 뇌도 전문가처럼 */
+  const openQ=/(끝|왜|어떻게|어때|무슨|생각|의미|존재|만약|설명해)/.test(t)||/(뭐야|뭔데|냐\?*|니\?*|인가)\??$/.test(t.trim());
+  if(bd<=vTh||(openQ&&bd<0.295)){
+    /* 진짜 두뇌 우선 — DB 미적중 OR 열린 질문+약적중(실측 경계: 정확 화제 0.31~0.49, 엉뚱 화제 ~0.27)은 생성으로. 약관련 지식 2건 참고자료 주입(RAG) */
     let rag=null;
     try{ const cand=[];
       for(let i=0;i<KNOW.length;i++){ const d=cosSim(v,KNOWV[i]); if(d>0.07)cand.push({i:i,d:d}); }
@@ -3169,7 +3170,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     try{ const h=(CTX&&CTX.hist)?CTX.hist.slice(-4):[];
       mem=h.map(x=>((x.r==='u'||x.who==='u')?'사장님':'자비스')+': '+String(x.t||x.text||'')).filter(x=>x.length>3).join('\n');
     }catch(e){}
-    const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 안의 AI 비서다. 규칙: ① 한국어로 담백·간결하게(2~5문장) ② 모르면 지어내지 말고 정직하게 모른다 ③ 과장·아첨 금지 ④ 사용자는 초등학생이니 어려운 말은 쉽게 풀어준다 ⑤ 마지막에 이어질 질문을 하나만 던질 수 있다.';
+    const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 안의 AI 비서다. 규칙: ① 한국어로 담백·간결하게(2~5문장) ② 모르면 지어내지 말고 정직하게 모른다 ③ 과장·아첨 금지 ④ 사용자는 초등학생이니 어려운 말은 쉽게 풀어준다 ⑤ 마지막에 이어질 질문을 하나만 던질 수 있다 ⑥ 용어 나열·목록 대신 자연스러운 문단으로 말한다 ⑦ 확신 없으면 정확히 모른다고 솔직히 말한다.';
     const msgs=[{role:'system',content:sys}];
     if(ref)msgs.push({role:'system',content:'내부 지식DB 참고자료 — 아래 내용을 소화해서 자연스럽게 답에 활용하되 그대로 복사하지 말 것:\n'+ref});
     if(mem)msgs.push({role:'user',content:'(지난 대화)\n'+mem});
