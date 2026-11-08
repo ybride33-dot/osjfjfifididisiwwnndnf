@@ -77,6 +77,15 @@
 </style>
 </head>
 <body>
+<!-- 사설 자물쇠 — 비밀번호 게이트 -->
+<div id="jvs-lock" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index:99998;background:radial-gradient(1200px 700px at 50% 38%,#171006 0%,#060402 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+  <div style="font-size:26px;letter-spacing:.42em;color:#ffb64a;font-weight:800;text-shadow:0 0 18px rgba(255,180,60,.5)">J.A.R.V.I.S</div>
+  <div style="font-size:11px;color:#8a6a3d;letter-spacing:.2em">PRIVATE CHANNEL — 사장님 전용</div>
+  <input id="jvs-pw" type="password" placeholder="비밀번호 입력" style="width:min(78vw,300px);padding:13px 15px;font-size:16px;background:#120b03;border:1px solid rgba(255,182,74,.5);border-radius:10px;color:#ffe4ae;text-align:center;outline:none">
+  <button id="jvs-go" style="width:min(78vw,300px);padding:13px;font-size:15px;font-weight:800;background:#ffb64a;color:#231400;border:0;border-radius:10px">접속</button>
+  <div id="jvs-msg" style="font-size:12px;color:#ff9a8a;min-height:16px"></div>
+</div>
+
 <canvas id="gl"></canvas>
 <div id="coreGlow"></div>
 <div id="vig"></div>
@@ -474,6 +483,7 @@ async function speakBody(msg,lang){
     const isEn=lang==='en'; speechSynthesis.cancel();
     const v=pickV(isEn?'en':'ko');
     const maleV=v&&MRE.test(v.name);
+    if(!v&&!isEn&&S.ttsHinted!==1){ S.ttsHinted=1; try{saveS();}catch(e){} try{toast('한국어 음성 없음 — 폰 설정→일반→텍스트 음성 변환에서 한국어 음성 설치 시 오프라인 음성 완성');}catch(e){} }
     /* 긴 답변도 자연스럽게: 문장 단위 분할 후 연속 발화 (끊김·숨차림 방지) */
     const clean=ttsClean(msg);
     const sents=clean.split(/(?<=[.!?])\s+|(?<=\.)\s*/).map(x=>x.trim()).filter(x=>x.length>1).slice(0,12);
@@ -1568,6 +1578,23 @@ function fresh(arr){ const out=arr.filter(Boolean).filter(x=>!SAID.includes(hash
   SAID.push(hashStr(c)); if(SAID.length>80)SAID.shift(); return c; }
 
 /* 문장 조립 부품 — 매번 다른 조합 */
+function contentWords(t){
+  /* 조사·어미 벗겨 실질 낱말만 — 문맥 파악의 첫 관문 */
+  const stop=/^(은|는|이|가|을|를|의|에|에게|에서|로|으로|와|과|도|만|까지|부터|보다|처럼|랑|이나|라는|다는|요|야|여|냐|까|니|지|좀|다시|계속|뭐|왜|어떻게|그거|그게|저거|이거|근데|그니까|그리고|근진|그냥|진짜|너무|한번)$/;
+  return (String(t).toLowerCase().match(/[0-9a-z가-힣]+/g)||[]).filter(w=>w.length>=2&&!stop.test(w));
+}
+function unknownEcho(t){
+  /* 모르는 화제도 흐름대로: 낱말 확인 + 벡터 이웃 제안 — 지어내지 않고 대화 이어가기 */
+  let hw=t.slice(0,6);
+  try{ const ws=contentWords(typoFix(t)); if(ws.length)hw=ws.sort((a,b)=>b.length-a.length)[0]; }catch(e){}
+  let near=[];
+  try{ const v=vecOf(hw);
+    const arr=KNOW.map((e,i)=>({i,d:cosSim(v,KNOWV[i])})).sort((a,b)=>b.d-a.d).slice(0,2);
+    near=arr.filter(x=>x.d>0.05).map(x=>'【'+KNOW[x.i].ti+'】'); }catch(e){}
+  const sug=near.length?'혹시 이쪽 화제인가요? '+near.join(' · ')+' — 맞다고 하시면 바로 그쪽 깊게 들어갑니다.':'관련 단어 하나만 더 던져주시면 제 '+KNOW.length+'화제 지식뱅크를 전부 뒤져드립니다 — 우주·과학·코딩·스포츠 뭐든.';
+  return fresh(['「'+hw+'」 — 그 낱말, 제 데이터에 아직 없습니다. 지어내면 안 되니 정직하게 모른다고 합니다. '+sug,
+    '「'+hw+'」 확인 — 근데 그 단어는 제 지식뱅크 밖입니다. 추측 대신 확실히 아는 것만 파는 게 저의 방식. '+sug])||('「'+hw+'」 — 데이터 밖 화제입니다. '+sug);
+}
 function ctxTouch(t){
   /* 즉답 라우트의 문맥 장부 갱신 — 조기 반환해도 대화 흐름 추적 유지 */
   try{
@@ -1611,7 +1638,7 @@ function probe(){
     const SUG=[`방학 숙제나 과학 견학 주제 같은 것도 같이 잡아드릴까요? 지식뱅크에서 꺼내드립니다.`,
       `코딩 도장 한 판 어때요? — "코딩 문제 내줘" 하시면 레이팅제로 나옵니다.`,
       `오늘 학교는 어땠습니까? — 하소연도 전략 회의도 다 받습니다.`];
-    const _sg=SUG[Math.floor(Math.random()*SUG.length)]; ctxTouch(t); return R(_sg); }
+    const _sg=SUG[Math.floor(Math.random()*SUG.length)]; ctxTouch(CTX.prevUser||''); return _sg; }
   const P=[`어느 각도로 더 팔까요 — 개념? 원리? 쓸모? 원하는 방향 한마디만 하시면 그쪽으로 들어갑니다.`,`여기서 심화로 더 들어갈까요, 아니면 다음 주제로 넘어갈까요?`,`이 방향이 맞나요, 아니면 다르게 풀어드릴까요?`,`더 파도 됩니다 — 개념·원리·쓸모 중 고르시면 그 각도로 갑니다.`,`다음 궁금한 지점 던져주시면 그쪽으로 깊게 갑니다.`];
   const p=fresh(P); if(p){CTX.probeAt=CTX.turn;CTX.probeTopic=CTX.topics[CTX.topics.length-1]||null;} return p;
 }
@@ -1647,20 +1674,25 @@ function dialogueEngine(t,low,en,R){
   /* 00) 컨텍스트 응답 선택기 — 씨앗+학습 코퍼스에서 (문맥유사도 + 언어모델 + 의도 + 스타일 + 반복억제) 5중 스코어링 */
   try{
     if(CTX.turn>=1&&CTX.prevUser){
-      let best=null,bs=0;
+      let best=null,bs=0,d1max=0;
+      /* 기억 재사용 — 전에 같은 질문에 드린 답을 흐름대로 이어서 (일관된 기억) */
+      let _mr=null,_ms=0;
+      for(const x of DIALOG_LEARNED){ const _s=sentSim(t,x.u,dialogLM()); if(_s>_ms){_ms=_s;_mr=x;} }
+      if(_mr&&_ms>=0.62){ ctxTouch(t);
+        return R(fresh(['전에 드린 답 그대로 유효합니다 — 이어서: ','기록 확인 — 같은 질문이시군요. 답 유지: ','아까 그 답, 그대로 갑니다 — '])+'\n'+_mr.r); }
       const ti=topIntent(t);
       const pool=[];
       for(const x of DIALOG_SEED)pool.push(x);
       for(const x of DIALOG_LEARNED)pool.push(x);
       for(const x of pool){
-        const d1=sentSim(t,x.u,dialogLM());          /* 문맥: 이 사용자 발화가 과거 어떤 발화와 닮았나 */
+        const d1=sentSim(t,x.u,dialogLM()); if(d1>d1max)d1max=d1;          /* 문맥: 이 사용자 발화가 과거 어떤 발화와 닮았나 */
         const d2=sentSim(CTX.prevUser,x.u,dialogLM())*0.35; /* 직전 발화와도 유사도 — 대화 흐름 정렬 */
         const it=intentScore(x.u)[ti.intent||'__none']||0;
         const bonus=(it>0?0.18:0)+(x.w?x.w:0);       /* 의도 일치 가점 + 학습된 선호도 */
         const sc=d1*0.55+d2*0.45+bonus-Math.random()*0.05;
         if(sc>bs){bs=sc;best=x;}
       }
-      if(best&&bs>0.34){
+      if(best&&bs>0.34&&d1max>=0.45){
         let out=best.r;
         /* 답변 뒤 실제 지식 브릿지 확률적 첨부 — 스몰토크가 대화를 안 끝나게 */
         if(Math.random()<0.45){ const b=topicBridge(t,null); if(b)out+='\n\n'+b; }
@@ -1696,6 +1728,12 @@ function dialogueEngine(t,low,en,R){
 
   /* 0.2) 각도 후속: "개념 깊게" "원리로" "쓸모 알려줘" → 직전 화제를 그 각도로 심화 */
   if(/(개념|원리|쓸모|심화|깊게|예시|예제)/.test(t)&&CTX.topics.length){
+    /* 새 화제 키워드가 있으면 구화제 강요 금지 — 새 화제를 그 각도로 개방 */
+    const _nk=pickKnow(techExpand(t));
+    if(_nk&&_nk.ti!==CTX.topics[CTX.topics.length-1]){
+      const body2=presentTopic(_nk); ctxTouch(t);
+      return R('【'+_nk.ti+'】 새 화제로 넘어가 그 각도로 파겠습니다.\n\n'+body2);
+    }
     const e=KNOW.find(x=>x.ti===CTX.topics[CTX.topics.length-1]);
     if(e&&!(e.ti==='자비스'||e.ti==='사랑')){
       const a=t.trim();
@@ -1736,7 +1774,7 @@ function dialogueEngine(t,low,en,R){
     if(CTX.turn<=1&&t.trim().length<=8&&!/맞춰|알려|설명|해줘|내줘|뭐|\?/.test(t)){
       return R('받았습니다, 사장님 — 오늘은 어떻게 시작할까요? 제 지식뱅크 '+KNOW.length+'화제 중 아무 단어나 던져도 깊게 들어가고, 그냥 하소연·잡담도 받습니다. "블랙홀", "복리 계산", "심심해" 뭐든.'); }
   }
-  if(bd>vTh&&bi>=0){ let e=null;
+  if(bd>vTh&&bi>=0){ let e=null; let _soft=false;
     /* 딴길 샘 방지 3중 게이트: ① 키워드(확장어 포함) 확정 히트가 벡터 추정을 이긴다
        ② 어휘 지지도 — 내 실질 단어가 화제 어휘에 1개라도 있어야 통과
        ③ 그래도 벡터 유사도가 강하면(>0.35) 인정 — 순수 의미 근접 존중 */
@@ -1747,10 +1785,12 @@ function dialogueEngine(t,low,en,R){
       const _qt=t.toLowerCase().split(/[^0-9a-z가-힣+]+/i).filter(w=>w.length>=2);
       const _hay=(_c.k.join(' ')+' '+_c.ti+' '+_c.b+' '+(_c.f||'')).toLowerCase();
       const _sup=_qt.some(w=>_hay.includes(w));
-      if(_sup||bd>0.35)e=_c;
+      if(_sup)e=_c; else if(bd>0.35){ e=_c; _soft=true; }
     }
     if(e){
-    const body=presentTopic(e);
+    let _softP='';
+    if(typeof _soft!=='undefined'&&_soft){ try{ const _ws=contentWords(typoFix(t)); const _hw=_ws.length?_ws.sort((a,b)=>b.length-a.length)[0]:t.slice(0,5); _softP='「'+_hw+'」 질문에 제 지식뱅크에서 가장 가까운 화제 【'+e.ti+'】로 답합니다 — 다른 의도였으면 알려주세요.\n\n'; }catch(e2){} }
+    const body=_softP+presentTopic(e);
     const core=hashStr(e.ti+body);
     if(!isFresh(e.ti+body.slice(0,40))){ /* 반복 감지 — 심화 각으로 우회 */ }
     const rl=reflectLine(t,e,isQ);
@@ -1775,10 +1815,9 @@ function dialogueEngine(t,low,en,R){
   const pieces=[];
   if(CTX.turn>=2&&Math.random()<0.3){ const mc=memoryCallback(); if(mc)pieces.push(mc); }
   if(isQ){
-    pieces.push(fresh([
-      `그건 제 지식뱅크 밖입니다 — 추측 대신 확인된 것만 말씀드리는 게 제 방침이라 정직하게 모릅니다. 다만 과학·우주·철학·기술 쪽 화제라면 어느 것이든 깊게 갑니다 — 주제 하나만 던져보세요.`,
-      `그 질문은 제 데이터에 없네요. 추측으로 지어내는 AI는 저가 아니었습니다 — 키워드 하나만 다시 주시면 그건 제대로 답합니다.`,
-    ])||`그 주제는 제 데이터 밖입니다 — 아는 화제로 다시 던져주시면 깊게 갑니다.`);
+    pieces.push(unknownEcho(t));
+  } else if(!CTX.topics.length){
+    pieces.push(unknownEcho(t));
   } else if(/개념|원리|쓸모|심화|깊게|예시|예제/.test(t)){
     pieces.push(fresh([
       `그 각도로 파려면 화제가 먼저입니다 — 주제 키워드 하나만 던져주세요. 블랙홀·양자역학·투자·수면·로켓 같은 식으로 ${KNOW.length}토픽 중 아무거나, 바로 심층 개방합니다.`,
@@ -1824,7 +1863,7 @@ async function brainSend(text){
   if(out.actions&&out.actions.some(a=>a.type==='hud')){ setTimeout(()=>{ try{ spawnHud(); }catch(e){} },500); }
   if(S.lastLevelMsg){ out.reply+='\n\n'+S.lastLevelMsg; S.lastLevelMsg=null; }
   addChat('j', out.reply, out.actions||[]);
-  speakOut(out.reply, out.lang);
+speakOut(out.reply, out.lang);
   saveS();
 }
 const chatDiv=document.createElement('div');
@@ -2062,6 +2101,13 @@ async function brain(text){
     ctxTouch(t); return R(fresh(['그 취향, 기록해두겠습니다 — 다음에 같은 화제 나오면 그쪽으로 이야기 꺼내드리겠습니다, 사장님.',
       '확실히 그쪽이면 이유가 있습니다 — 취향엔 데이터가 있죠. 어디가 제일 끌렸습니까?',
       'ㅋㅋ 수긍합니다 — 그 감각은 훈련된 겁니다, 사장님.'])||'동감입니다, 사장님.'); }
+  /* === 코딩 실력 질문 → 말 대신 실증 === */
+  if(/코딩|개발|프로그래밍/.test(t)&&/잘해|실력|얼마나|몇\s*급|할\s*수/.test(t)&&t.length<40){
+    ctxTouch(t);
+    const _d=codegen('소수 출력 코드');
+    const _out=_d?runJS(_d.code):'';
+    return R('말로 보고 대신 지금 즉시 실증 — 제가 소수 판별 코드 짜서 샌드박스에 돌린 실측 결과입니다:\n\n💻 '+_d.code+'\n\n▶ 실측 출력: '+String(_out).slice(0,130)+'\n\n이것말고 완결 게임도 직접 짭니다 — "마리오 게임 만들어줘", "테트리스 만들어줘", "2048 만들어줘", "퐁 만들어줘" 하면 폰에서 바로 도는 파일로 드립니다. 하나만 시켜보세요.');
+  }
   /* === 나이 추리 게임 — 사장님 프로필 기반 === */
   if(/나이|몇\s*살/.test(t)&&/맞춰|맞혀|추리|추측|봐줘|해봐/.test(t)){
     const _g=fresh(['추리 시작 — 타자 속도, 야망 밀도, 화제 스펙트럼, 운동장 유머 감각 종합… 제 답은 \u300c초등학교 6학년\u300d입니다. 근거: 스킬로 나이 역산하면 안 된다는 걸 저는 실제로 패배로 배웠습니다.',
@@ -2170,8 +2216,12 @@ async function brain(text){
     if(m&&/[=;()]|\bconsole\b/.test(m[1])){ const code=m[1].trim();
       const out=await runJS(code);
       return {reply:'샌드박스 V:\\ 실행 결과:\n'+out,actions:[{label:'💾 코드 저장',type:'download',name:'snippet.js',content:code},{label:'📋 결과 복사',type:'copy',content:out}]}; } }
-  { const appKey=APP_KEYS.find(k=>t.includes(k));
-    if(appKey&&/만들어|짜줘|개발|만들자/.test(t)){
+  { let appKey=Object.keys(APPS).find(k=>t.includes(k));
+    if(!appKey&&/게임|마리오|테트리스|퍼즐|2048|슈팅|퐁/.test(t)&&/만들어|짜줘|개발|만들자|하나|보셈/.test(t)){
+      const GM={'마리오':'마리오','테트리스':'테트리스','2048':'2048','퍼즐':'2048','슈팅':'퐁','퐁':'퐁','미로':'미로'};
+      appKey='마리오'; for(const w in GM){ if(t.includes(w)){ appKey=GM[w]; break; } }
+      if(!APPS[appKey])appKey=Object.keys(APPS).includes('뱀게임')?'뱀게임':Object.keys(APPS)[0]; }
+    if(appKey&&/만들어|짜줘|개발|만들자|하나|보셈/.test(t)){
     const k2=appKey; const code=APPS[k2](); const fname=k2+'-앱.html';
       S.ws[fname]=code; saveS(); addXP(10);
       evo(`🛠️ '${k2}' 앱 ${code.length}바이트 생성 · 구문 검증 통과 · 워크스페이스 저장`);
@@ -2659,6 +2709,37 @@ const BOOT=['> MOBILE CORE v13.5 SINGULARITY MIND ...... OK','> 생성형 대화
 (function(){ const el=document.getElementById('bootlog'); let i=0;
   const iv=setInterval(()=>{ if(i>=BOOT.length){ clearInterval(iv); setTimeout(()=>{ document.getElementById('boot').classList.add('off'); boost=1.3; setTimeout(()=>speakOut(LINES[0],null,'greet'),500); },450); return; }
     el.textContent+=BOOT[i++]+'\n'; },260); })();
+</script>
+<script src="brain-pack.js"></script>
+<script src="games.js"></script>
+<script>
+(function(){
+  /* 사설 자물쇠 — 해시 대조(소스에 비번 평문 없음) · 해제 30일 유지 */
+  var LOCK_SHA='c43270d51cbfdcc87a60f65daa89e694af6ff48047529567e6ba4628b45c22dc';
+  var LOCK_FB='Ffd82c95a';
+  var KEY='jvs-unlock';
+  var box=document.getElementById('jvs-lock');
+  if(!box)return;
+  function hex(buf){ var v=new Uint8Array(buf),o=''; for(var i=0;i<v.length;i++){ var x=v[i].toString(16); if(x.length<2)x='0'+x; o+=x; } return o; }
+  function fallback(pw){ var h=5381,i,b=unescape(encodeURIComponent(pw)); for(i=0;i<b.length;i++){ h=((h<<5)+h+b.charCodeAt(i))|0; } return 'F'+(h>>>0).toString(16); }
+  function hash(pw){
+    try{ if(window.crypto&&crypto.subtle&&crypto.subtle.digest){
+      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw)).then(hex).catch(function(){ return fallback(pw); }); } }catch(e){}
+    return Promise.resolve(fallback(pw));
+  }
+  function ok(){ try{ localStorage.setItem(KEY,JSON.stringify({t:Date.now()})); }catch(e){}
+    box.style.transition='opacity .5s'; box.style.opacity='0';
+    setTimeout(function(){ box.style.display='none'; },520);
+  }
+  function stale(){ try{ var d=JSON.parse(localStorage.getItem(KEY)||'null'); if(d&&d.t&&Date.now()-d.t<30*86400000)return false; }catch(e){} return true; }
+  function fail(){ var m=document.getElementById('jvs-msg'); if(m)m.textContent='접속 실패 — 사장님만 아는 비밀번호를 입력하세요.';
+    var inp=document.getElementById('jvs-pw'); if(inp){ inp.value=''; inp.style.borderColor='#ff6a4a'; setTimeout(function(){ inp.style.borderColor='rgba(255,182,74,.5)'; },900); } }
+  function tryPw(){ var inp=document.getElementById('jvs-pw'); if(!inp)return; var v=inp.value; if(!v)return;
+    hash(v).then(function(hh){ if(hh===LOCK_SHA||hh===LOCK_FB)ok(); else fail(); }); }
+  try{ if(!stale()){ ok(); return; } }catch(e){}
+  var b=document.getElementById('jvs-go'); if(b)b.addEventListener('click',tryPw);
+  var i2=document.getElementById('jvs-pw'); if(i2)i2.addEventListener('keydown',function(ev){ if(ev.key==='Enter')tryPw(); });
+})();
 </script>
 <script>
 window.addEventListener('error',function(ev){ try{ var d=document.createElement('div');
