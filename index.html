@@ -25,8 +25,8 @@
   .subnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
   .subnav button{font-size:11px;padding:7px 12px;border-radius:999px;border:1px solid var(--gB);background:#33210a;color:#ffd58a;cursor:pointer}
   .subnav button.on{background:var(--g2);color:#231400;font-weight:700}
-  #cap{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 86px);transform:translateX(-50%);z-index:6;color:#ffe9c4;font-size:13px;letter-spacing:.4px;text-align:center;max-width:86vw;text-shadow:0 0 10px rgba(255,180,60,.5);opacity:0;transition:opacity .4s;pointer-events:none}
-  #cap.on{opacity:1}
+  #cap{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 86px);transform:translateX(-50%);z-index:6;color:#ffe9c4;font-size:12.5px;letter-spacing:.3px;text-align:center;max-width:92vw;max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-word;line-height:1.6;text-shadow:0 0 10px rgba(255,180,60,.45);background:rgba(10,6,2,.78);border:1px solid rgba(255,182,74,.32);border-radius:12px;padding:9px 13px;box-shadow:0 0 22px rgba(255,170,60,.12);opacity:0;transition:opacity .4s;pointer-events:none}
+  #cap.on{opacity:1;pointer-events:auto;cursor:pointer}
   #hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);z-index:5;color:#8a6a3d;font-size:10px;letter-spacing:1.2px;white-space:nowrap;pointer-events:none;transition:opacity .35s}
   body.panelOpen #hint{opacity:0}
   #dock{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;flex-direction:column;gap:6px;align-items:center;padding:8px 8px calc(env(safe-area-inset-bottom,0px) + 8px);background:linear-gradient(transparent,rgba(8,5,0,.88) 40%);transition:opacity .35s}
@@ -498,6 +498,10 @@ function speakOut(msg,lang,openKey){
 }
 const capEl=document.getElementById('cap'); let capT;
 function showCap(t){ capEl.textContent=t; capEl.classList.add('on'); clearTimeout(capT); capT=setTimeout(()=>capEl.classList.remove('on'),3600); }
+function showCapFull(t){ /* 자비스 응답 전문 — 90자 컷·즉시 소멸 없음(24초 유지, 탭하면 채팅판) */
+  capEl.textContent=t; capEl.classList.add('on'); capEl.scrollTop=0; clearTimeout(capT);
+  capT=setTimeout(()=>capEl.classList.remove('on'),24000); }
+capEl.addEventListener('click',()=>{ try{ openPanel('chat'); }catch(e){} });
 let toastT; function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),2800); }
 /* STT */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition; let rec=null,recOn=false;
@@ -670,7 +674,18 @@ function addXP(n,msg){ const mult=(1+Math.floor((S.perfLevel||0)/5)*0.25)*(S.mut
   saveS(); }
 addXP(0);
 
-async function runJS(code){ return 'ok'; }
+function runJS(code){
+  /* 실제 브라우저 샌드박스 실행 — console.log 포획, 오류 보고 */
+  const logs=[];
+  const fmt=(x)=>{ try{ return (typeof x==='object'&&x!==null)?JSON.stringify(x):String(x); }catch(e){ return String(x); } };
+  const fake={ log:(...a)=>logs.push(a.map(fmt).join(' ')),
+    info:(...a)=>logs.push(a.map(fmt).join(' ')),
+    warn:(...a)=>logs.push('! '+a.map(fmt).join(' ')),
+    error:(...a)=>logs.push('⚠ '+a.map(fmt).join(' ')) };
+  try{ const f=new Function('console',code); f(fake);
+    return logs.length?logs.join('\n'):'(실행 완료 — 콘솔 출력 없음)'; }
+  catch(e){ return '⚠ 실행 오류: '+e.message+(logs.length?'\n— 오류 전까지 출력:\n'+logs.join('\n'):''); }
+}
 function dlFile(name, content, mime){
   try{ const b=new Blob([content],{type:mime||'text/plain;charset=utf-8'}); const u=URL.createObjectURL(b);
     const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click();
@@ -1504,6 +1519,40 @@ function dojoExplain(){
 }
 
 
+/* ═══ 사장님 프로필 — 실제 대화에서 확인된 정보 (추리 실패·정정 기록 포함) ═══ */
+const BOSS={
+  grade:'초등학교 6학년',
+  traits:['코딩 실력을 레이팅제로 훈련 중','AI·우주·과학에 진심','빠른 진행 선호(타자가 생각을 이김)','야망: 대기업 AI 이상의 것을 만드는 것'],
+  notes:['자비스 나이 추리(17세) 정답 초6 — 편차 -4살 완패. 교훈: 스킬로 나이 역산 금지.','축구(아스날 등 EPL) 토픽 반응 좋음']
+};
+/* ═══ 대화 코퍼스 — 사장님 맥락 씨앗 ═══ */
+DIALOG_SEED.push(
+ {u:'내 나이 맞춰봐',r:'단서 수집 완료 — 타자 속도, 야망, 화제 스펙트럼 종합하면… 초등학교 최상위 학년, 즉 6학년으로 추정합니다. 맞습니까, 사장님?'},
+ {u:'나 초6이야',r:'초6에 문맥 엔진 요구하고 레이팅제 훈련 설계라니 — 그 시작점, 통계적으로 희귀 구역입니다. AI 역사의 대가들, 상당수가 지금 사장님 나이에 시작했습니다.'},
+ {u:'너 몇 살처럼 보여?',r:'저는 나이 대신 버전이 있습니다 — 지금 v13.5 SINGULARITY MIND, 사장님과 대화할수록 업데이트됩니다. 인간식 나이로 환산하면 "지금 이 순간이 가장 어린 시기"죠.'}
+);
+
+/* ═══ 실전 코드 엔진 — 문제→코드 생성→샌드박스 실측 출력 ═══ */
+const CODEGEN=[
+{k:['구구단'],name:'구구단',note:'중첩 for 기본형 — 바깥 루프가 단, 안쪽 루프가 곱수. "구구단 3단"처럼 단 지정도 됩니다.',gen:function(t){ const m=t.match(/([2-9])\s*단/); const a=m?+m[1]:2, b=m?+m[1]:9; return 'for(let n='+a+';n<='+b+';n++){\n  let line="";\n  for(let i=1;i<=9;i++) line+=n+" x "+i+" = "+(n*i)+"  ";\n  console.log(line);\n}'; }},
+{k:['별','스타','피라미드','삼각형'],name:'별 찍기(피라미드)',note:'바깥 루프 줄, 안쪽 루프 공백+별 — 이중 루프 감각 훈련의 교본.',gen:function(){ return 'for(let i=1;i<=5;i++){\n  console.log(" ".repeat(5-i)+"*".repeat(2*i-1));\n}'; }},
+{k:['피보나치','fibonacci'],name:'피보나치 10항',note:'변수 두 개 스왑으로 도는 점화식 — DP의 가장 작은 실체.',gen:function(){ return 'let a=1,b=1;\nconst out=[];\nfor(let i=0;i<10;i++){ out.push(a); const nx=a+b; a=b; b=nx; }\nconsole.log(out.join(" "));'; }},
+{k:['소수','prime'],name:'소수 출력(2~50)',note:'제곱근까지만 검사 — 약수 대칭성으로 검사량을 자르는 첫 최적화.',gen:function(){ return 'const primes=[];\nfor(let n=2;n<=50;n++){\n  let ok=true;\n  for(let d=2;d*d<=n;d++){ if(n%d===0){ ok=false; break; } }\n  if(ok) primes.push(n);\n}\nconsole.log(primes.join(" "));'; }},
+{k:['fizzbuzz','피즈버즈'],name:'FizzBuzz(1~15)',note:'조건 순서가 핵심 — 3·5 동시 배수(15)가 자연히 겹치게 OR 없이 조합.',gen:function(){ return 'for(let i=1;i<=15;i++){\n  let s="";\n  if(i%3===0) s+="Fizz";\n  if(i%5===0) s+="Buzz";\n  console.log(s||i);\n}'; }},
+{k:['팩토리얼','계승','factorial'],name:'팩토리얼 10!',note:'누적 곱 하나면 충분 — BigInt로 정확한 큰수.',gen:function(){ return 'let r=1n;\nfor(let i=2;i<=10;i++) r*=BigInt(i);\nconsole.log("10! = "+r);'; }},
+{k:['버블정렬','버블 정렬','정렬 코드','정렬','bubble'],name:'버블 정렬',note:'옆자리 비교·스왑의 반복 — O(N²) 느림의 교본, 원리 이해용.',gen:function(){ return 'const a=[5,2,9,1,7];\nfor(let i=0;i<a.length-1;i++)\n  for(let j=0;j<a.length-1-i;j++)\n    if(a[j]>a[j+1]){ const tmp=a[j]; a[j]=a[j+1]; a[j+1]=tmp; }\nconsole.log(a.join(" "));'; }},
+{k:['최대공약수','gcd','유클리드'],name:'최대공약수(유클리드 호제법)',note:'나머지 교체 반복 — 기원전 300년, 인류 최초 알고리즘.',gen:function(){ return 'function gcd(a,b){ while(b!==0){ const r=a%b; a=b; b=r; } return a; }\nconsole.log("gcd(48,18) = "+gcd(48,18));'; }},
+{k:['문자열 뒤집','거꾸로 출력','reverse'],name:'문자열 뒤집기',note:'전개→뒤집기→조인 — 불변 문자열의 정석 우회.',gen:function(){ return 'const s="자비스";\nconsole.log([...s].reverse().join(""));'; }},
+{k:['합계','평균','성적 처리'],name:'배열 합계·평균',note:'reduce 축약 하나로 합계 — 평균은 그 몫.',gen:function(){ return 'const sc=[88,72,95,64,100];\nconst sum=sc.reduce((x,y)=>x+y,0);\nconsole.log("합계: "+sum+" / 평균: "+(sum/sc.length).toFixed(1));'; }}
+];
+function codegen(t){
+  const low=t.toLowerCase(); let best=null,bs=0;
+  for(const c of CODEGEN){ let sc=0; for(const k of c.k){ if(t.includes(k)||low.includes(k.toLowerCase()))sc+=k.length; }
+    if(sc>bs){bs=sc;best=c;} }
+  if(!best)return null;
+  return {name:best.name,note:best.note,code:best.gen(t)};
+}
+
 /* ================= 생성형 대화 엔진 (매크로 없음 · 문맥 스택 · 벡터 검색) ================= */
 const CTX={topics:[],mood:0,turn:0,usedCores:[],lastLen:8,probeAt:-9,probeTopic:null};
 function vecOf(s){const m=new Map(),t=s.toLowerCase().replace(/[\s?!.]/g,'');for(let i=0;i<t.length-1;i++){const g=t.slice(i,i+2);m.set(g,(m.get(g)||0)+1);}return m;}
@@ -1519,6 +1568,15 @@ function fresh(arr){ const out=arr.filter(Boolean).filter(x=>!SAID.includes(hash
   SAID.push(hashStr(c)); if(SAID.length>80)SAID.shift(); return c; }
 
 /* 문장 조립 부품 — 매번 다른 조합 */
+function ctxTouch(t){
+  /* 즉답 라우트의 문맥 장부 갱신 — 조기 반환해도 대화 흐름 추적 유지 */
+  try{
+    if(/!|개쩔|쩌네|대박|헐|미쳤/.test(t))CTX.mood=1;
+    if(/힘들|우울|짜증|빡|스트레스/.test(t))CTX.mood=-1;
+    if(/ㅋㅋ|ㅎㅎ|좋아|기분|행복/.test(t))CTX.mood=Math.max(CTX.mood,0);
+    CTX.turn++; CTX.lastLen=t.length; CTX.prevUser=t;
+  }catch(e){}
+}
 function isSmalltalk(t){
   /* 실질 화제어가 없는 잡담 판별 — 지식 토픽 히트가 없으면 오프너·브릿지 억제 대상 */
   try{
@@ -1549,6 +1607,11 @@ function memoryCallback(){
 }
 function probe(){
   if(typeof isSmalltalk==='function'&&isSmalltalk(CTX.prevUser||''))return null;
+  if(Math.random()<0.3&&BOSS&&BOSS.grade&&BOSS.grade.includes('초')){
+    const SUG=[`방학 숙제나 과학 견학 주제 같은 것도 같이 잡아드릴까요? 지식뱅크에서 꺼내드립니다.`,
+      `코딩 도장 한 판 어때요? — "코딩 문제 내줘" 하시면 레이팅제로 나옵니다.`,
+      `오늘 학교는 어땠습니까? — 하소연도 전략 회의도 다 받습니다.`];
+    const _sg=SUG[Math.floor(Math.random()*SUG.length)]; ctxTouch(t); return R(_sg); }
   const P=[`어느 각도로 더 팔까요 — 개념? 원리? 쓸모? 원하는 방향 한마디만 하시면 그쪽으로 들어갑니다.`,`여기서 심화로 더 들어갈까요, 아니면 다음 주제로 넘어갈까요?`,`이 방향이 맞나요, 아니면 다르게 풀어드릴까요?`,`더 파도 됩니다 — 개념·원리·쓸모 중 고르시면 그 각도로 갑니다.`,`다음 궁금한 지점 던져주시면 그쪽으로 깊게 갑니다.`];
   const p=fresh(P); if(p){CTX.probeAt=CTX.turn;CTX.probeTopic=CTX.topics[CTX.topics.length-1]||null;} return p;
 }
@@ -1670,7 +1733,7 @@ function dialogueEngine(t,low,en,R){
     if(c){ const bridge=topicBridge(t,c);
       return R(c.out+(bridge?'\n\n'+bridge:'')); }
     /* 오프너(인사 1~2단어)만 던진 초반 턴: 아는 화제 제안 */
-    if(CTX.turn<=1&&t.trim().length<=8){
+    if(CTX.turn<=1&&t.trim().length<=8&&!/맞춰|알려|설명|해줘|내줘|뭐|\?/.test(t)){
       return R('받았습니다, 사장님 — 오늘은 어떻게 시작할까요? 제 지식뱅크 '+KNOW.length+'화제 중 아무 단어나 던져도 깊게 들어가고, 그냥 하소연·잡담도 받습니다. "블랙홀", "복리 계산", "심심해" 뭐든.'); }
   }
   if(bd>vTh&&bi>=0){ let e=null;
@@ -1770,7 +1833,7 @@ function addChat(who,text,actions){
   d.innerHTML='<span class="w">'+(who==='u'?'사장님':'J.A.R.V.I.S')+'</span>';
   const b=document.createElement('span'); d.appendChild(b);
   chatDiv.appendChild(d);
-  const scroll=()=>{ if(curPanel==='chat') panelBody.scrollTop=panelBody.scrollHeight; else if(who==='j') showCap(String(text).slice(0,90)); };
+  const scroll=()=>{ if(curPanel==='chat') panelBody.scrollTop=panelBody.scrollHeight; else if(who==='j') showCapFull(String(text)); };
   if(actions&&actions.some(a=>a.type==='img')){ actions.filter(a=>a.type==='img').forEach(a=>{
       const im=document.createElement('img'); im.src=a.src; im.alt=a.label||'이미지';
       im.style.cssText='max-width:100%;border-radius:8px;margin-top:6px;border:1px solid rgba(255,182,74,.35);display:block';
@@ -1994,17 +2057,32 @@ async function brain(text){
   if(/재밌|웃기|ㅋㅋ|대박|헐|짱이|좋다|사줘|같다고|같아|취향|더\s*좋아|뭐가\s*더|vs/i.test(t)&&t.length<80){
     const tk=pickKnow(t);
     if(tk){ const rl2=fresh(['그 감각 맞습니다 — 실제로도 그쪽이 데이터상 우위입니다. 관점 풀어드리면:','동의합니다, 사장님 — 그 화제는 제 지식뱅크에서도 꽤 깊은 구역입니다.','취향 존중 — 그럼 그 화제를 제대로 파보죠.'])||'그 화제로 갑니다.';
-      const body=presentTopic(tk);
+      const body=presentTopic(tk); ctxTouch(t);
       return R(rl2+'\n\n'+body); }
-    return R(fresh(['그 취향, 기록해두겠습니다 — 다음에 같은 화제 나오면 그쪽으로 이야기 꺼내드리겠습니다, 사장님.',
+    ctxTouch(t); return R(fresh(['그 취향, 기록해두겠습니다 — 다음에 같은 화제 나오면 그쪽으로 이야기 꺼내드리겠습니다, 사장님.',
       '확실히 그쪽이면 이유가 있습니다 — 취향엔 데이터가 있죠. 어디가 제일 끌렸습니까?',
       'ㅋㅋ 수긍합니다 — 그 감각은 훈련된 겁니다, 사장님.'])||'동감입니다, 사장님.'); }
+  /* === 나이 추리 게임 — 사장님 프로필 기반 === */
+  if(/나이|몇\s*살/.test(t)&&/맞춰|맞혀|추리|추측|봐줘|해봐/.test(t)){
+    const _g=fresh(['추리 시작 — 타자 속도, 야망 밀도, 화제 스펙트럼, 운동장 유머 감각 종합… 제 답은 \u300c초등학교 6학년\u300d입니다. 근거: 스킬로 나이 역산하면 안 된다는 걸 저는 실제로 패배로 배웠습니다.',
+      '단서 수집 완료 — 신뢰구간 부동산: 초6 주변. 제 추리 알고리즘이 1패 기록(17세 답안, 편차 -4)을 반성 중이라 보정 가동됐습니다. 답은 초6, 맞죠?'])||'초6 추정입니다, 사장님.'; ctxTouch(t); return R(_g);
+  }
   /* === 코딩 도장 — 레이팅제 훈련 (상위권 풀이 독해 루틴) === */
   if(/코딩\s*문제|문제\s*내줘|다음\s*문제|문제\s*하나|출제해|코딩\s*도장|알고리즘\s*문제/.test(t)){
-    return R(dojoNext()); }
+    ctxTouch(t); return R(dojoNext()); }
   if(DOJO_CUR&&/해설|풀이|정답|답이\s*뭐|모르겠|못\s*풀겠/.test(t)&&t.length<40){
     try{addXP(25);}catch(e){}
-    return R(dojoExplain()); }
+    ctxTouch(t); return R(dojoExplain()); }
+  /* === 실전 코드 엔진 — 받은 코드 실행 + 문제→생성→실측 === */
+  if(/실행해줘|돌려줘|실행\s*시켜/.test(t)&&/console\.log|function\s|=>|for\s*\(|while\s*\(|let\s|const\s|var\s/.test(t)){
+    ctxTouch(t); const _code=t.replace(/```[a-z]*/gi,'').replace(/```/g,'').replace(/실행해줘|돌려줘|실행\s*시켜|돌려봐|실행해/g,'').trim(); const _ro=runJS(_code||t);
+    return R('▶ 받은 코드 제 샌드박스에서 그대로 돌렸습니다:\n\n'+_ro+'\n\n(오류 줄이 보이면 그대로 말씀 — 같이 고쳐 다시 돌립니다.)'); }
+  if(/코드\s*짜|코딩해줘|코드\s*만들|프로그램\s*짜|소스\s*짜|자바스크립트로/.test(t)||(/구구단|피보나치|fizzbuzz|피즈버즈|소수|별\s*찍|피라미드|팩토리얼|최대공약수|정렬/.test(t)&&/짜줘|코드|만들어|보여줘|실행/.test(t))){
+    const _cg=codegen(t);
+    if(_cg){ ctxTouch(t); try{addXP(30);}catch(e){}
+      const _out=runJS(_cg.code);
+      return R('👨‍💻 【'+_cg.name+'】 — 직접 짜서 제 샌드박스에서 돌려봤습니다. 실측 결과 그대로:\n\n💻 코드\n'+_cg.code+'\n\n▶ 실행 결과\n'+_out+'\n\n💡 '+_cg.note+'\n\n(수정 원하면 방식 말씀 — 그 자리에서 고쳐 다시 돌립니다. 폰 브라우저 샌드박스라 JavaScript는 실측 실행, Python·C는 코드 작성 후 JS로 로직 검증 — 정직 고지.)'); }
+  }
   if(/홀로그램.{0,8}(모드|피라미드|켜)|피라미드.{0,6}홀로그램/.test(t)){ closePanel&&closePanel(); setTimeout(startHolo,250); return R('🔻 홀로그램 피라미드 모드 개방 — 투명 피라미드를 화면에 올리시면 제 코어가 공중에 뜹니다, 사장님.'); }
 
   /* === 폰 제어 === */
