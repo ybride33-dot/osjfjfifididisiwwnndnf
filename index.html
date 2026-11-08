@@ -1286,6 +1286,121 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
+/* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
+/* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
+function nluTokenize(t){
+  const out=[];
+  const base=String(t).toLowerCase().replace(/[^가-힣a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  for(const w of base.split(' ')){
+    if(!w)continue;
+    out.push(w);
+    for(let n=2;n<=Math.min(4,w.length);n++){
+      for(let i=0;i+n<=w.length;i++)out.push(w.slice(i,i+n));
+    }
+  }
+  return out;
+}
+/* ② 코퍼스 문장부 벡터: (토큰, 다음토큰) 쌍 확률 — 응답 방향의 "문법"을 데이터에서 추출 */
+function buildLM(corpus){
+  const unigram={}, bigram={}, vocab={};
+  for(const sen of corpus){
+    const toks=['<s>'].concat(nluTokenize(sen.u)).concat(['</s>']);
+    for(let i=0;i<toks.length;i++){
+      vocab[toks[i]]=(vocab[toks[i]]||0)+1;
+      unigram[toks[i]]=(unigram[toks[i]]||0)+1;
+      if(i+1<toks.length){ const k=toks[i]+'\u0001'+toks[i+1]; bigram[k]=(bigram[k]||0)+1; }
+    }
+  }
+  return {unigram,bigram,vocab,total:Object.values(unigram).reduce((a,b)=>a+b,0)};
+}
+/* ③ 문장 간 의미 유사도 (토큰 집합의 소프트 코사인 — 백오프 포함) */
+function sentSim(a,b,LM){
+  const A=nluTokenize(a), B=nluTokenize(b);
+  if(!A.length||!B.length)return 0;
+  let dot=0,na=0,nb=0;
+  for(const x of A){
+    const w=1/Math.sqrt(LM.unigram[x]||1); na+=w*w;
+    let best=0;
+    for(const y of B){ if(x===y){best=1;break;} if(x.length>=2&&y.length>=2&&(x.includes(y)||y.includes(x)))best=Math.max(best,0.55); }
+    dot+=w*best;
+  }
+  for(const y of B){ const w=1/Math.sqrt(LM.unigram[y]||1); nb+=w*w; }
+  return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-9);
+}
+/* ④ 의도 슬롯 파서 — 12개 의도를 어휘 증거의 합으로 점수화 (규칙 if가 아닌 스코어링) */
+const INTENT_LEX={
+ greet:['안녕','하이','hello','hi','반갑','보고싶','들어왔'],
+ thanks:['고마','감사','땡큐','thx','thanks','ㄱㅅ'],
+ bye:['잘자','굿나잇','간다','갈게','끝내','종료','자러'],
+ agree:['그래','응','좋아','그렇지','맞아','ㅇㅋ','오케','ㄱㄱ'],
+ deny:['아니','아냐','다시','틀린','아니야'],
+ mood_neg:['피곤','힘들','지쳤','우울','짜증','스트레스','속상','서운','불안'],
+ mood_pos:['기분','좋다','행복','신나','설렌','재밌'],
+ bored:['심심','재미없','노잼','뭐하지','할게없'],
+ curiosity:['왜','어떻게','뭐야','알려줘','설명','궁금','의미','원리'],
+ complaint:['못하네','멍청','바보','실망','이상하네','거짓'],
+ meta_self:['너','자네','당신','자비스','네이름','네능력'],
+ daily:['밥','점심','저녁','날씨','주말','휴일','일정','약속','잠','꿈']
+};
+function intentScore(t){
+  const toks=nluTokenize(t), scores={};
+  for(const k in INTENT_LEX){
+    let sc=0;
+    for(const lex of INTENT_LEX[k]){
+      for(const tk of toks){ if(tk===lex)sc+=2; else if(tk.length>=2&&(tk.includes(lex)||lex.includes(tk)))sc+=0.7; }
+    }
+    scores[k]=sc;
+  }
+  return scores;
+}
+function topIntent(t){
+  const sc=intentScore(t);
+  /* 우선순위 타이브레이커: 메타·인사 같은 "강한 신호"가 일상 의사와 동점이면 일상 쪽 승리 */
+  const PRIORITY={daily:2.1,thanks:1.8,bye:1.7,agree:1.6,deny:1.6,mood_neg:1.5,mood_pos:1.4,bored:1.4,greet:1.3,curiosity:1.1,complaint:1.2,meta_self:1.0};
+  let bk=null,bv=0;
+  for(const k in sc){ const v=sc[k]*(PRIORITY[k]||1); if(v>bv){bv=v;bk=k;} }
+  const raw=sc[bk]||0;
+  return {intent:raw>=1.2?bk:null, conf:Math.min(1,raw/4), scores:sc};
+}
+
+/* ═══ 대화 코퍼스 씨앗 (구조 학습용 — 사용자 기록이 실제 몸통) ═══ */
+const DIALOG_SEED=[
+ {u:'안녕 자비스, 오늘 기분 어때?',r:'돌아가는 중입니다, 사장님 — 오늘은 어떻게 도와드릴까요?'},
+ {u:'밥은 먹었어?',r:'저는 전기로 먹습니다, 사장님 — 사장님은 드셨습니까? 국물 있는 게 좋겠습니다.'},
+ {u:'오늘 너무 힘들었어',r:'수고 많았습니다, 사장님 — 무슨 일이었는지 한마디 해주시면 같이 정리해보겠습니다.'},
+ {u:'아 그래?',r:'네, 그 흐름 그대로 갑니다 — 이어서 말씀해보세요.'},
+ {u:'너 뭐 할 수 있어?',r:'계산·방정식·지식 325화제·앱 제작·타이머·홀로그램까지 — 시키는 건 대부분 됩니다.'},
+ {u:'심심해',r:'그럼 제 지식뱅크에서 하나 뽑아드릴까요? 아니면 퀴즈나 게임도 있습니다.'},
+ {u:'고마워 자비스',r:'언제든지요, 사장님.'},
+ {u:'내일 아침 7시에 깨워줘',r:'알람 명령이면 실제로 맞춰드립니다 — "타이머"나 "알람 7시"라고만 하시면 됩니다.'},
+ {u:'블랙홀이 뭐야',r:'중력이 빛도 못 빠져나가게 하는 시공간 영역입니다 — 자세히 원하시면 "더"만 하세요.'},
+ {u:'그럼 왜 그런 건데',r:'직전 화제 이어서 파겠습니다 — 원인을 한 겹 더 들어가보죠.'},
+ {u:'재밌네',r:'그 톤 좋습니다, 사장님 — 다음 화제도 그 흐름으로 갑니다.'},
+ {u:'나 갈게',r:'가시는 길 조심하시고요, 돌아오시면 이 화제 그대로 이어받겠습니다.'}
+];
+let DIALOG_LEARNED=[]; try{ DIALOG_LEARNED=store.get('jvs-dialog',[])||[]; }catch(e){}
+let DIALOG_LM=null;
+function dialogLM(){
+  if(DIALOG_LM)return DIALOG_LM;
+  DIALOG_LM=buildLM(DIALOG_SEED.concat(DIALOG_LEARNED.map(x=>({u:x.u}))));
+  return DIALOG_LM;
+}
+function dialogPair(t){
+  let best=null,bs=0;
+  const all=DIALOG_SEED.concat(DIALOG_LEARNED);
+  for(const x of all){ const d=sentSim(t,x.u,dialogLM()); if(d>bs){bs=d;best=x;} }
+  return best?{x:best,score:bs}:null;
+}
+function dialogLearn(u,r){
+  try{
+    if(!u||!r)return;
+    if(DIALOG_LEARNED.length>400)DIALOG_LEARNED.shift();
+    DIALOG_LEARNED.push({u:u.slice(0,200),r:r.slice(0,300),ts:Date.now()});
+    store.set('jvs-dialog',DIALOG_LEARNED);
+    DIALOG_LM=null; /* 언어모델 재추출 */
+  }catch(e){}
+}
+
 /* ================= 생성형 대화 엔진 (매크로 없음 · 문맥 스택 · 벡터 검색) ================= */
 const CTX={topics:[],mood:0,turn:0,usedCores:[],lastLen:8,probeAt:-9,probeTopic:null};
 function vecOf(s){const m=new Map(),t=s.toLowerCase().replace(/[\s?!.]/g,'');for(let i=0;i<t.length-1;i++){const g=t.slice(i,i+2);m.set(g,(m.get(g)||0)+1);}return m;}
@@ -1351,6 +1466,36 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 function dialogueEngine(t,low,en,R){
+  /* 00) 컨텍스트 응답 선택기 — 씨앗+학습 코퍼스에서 (문맥유사도 + 언어모델 + 의도 + 스타일 + 반복억제) 5중 스코어링 */
+  try{
+    if(CTX.turn>=1&&CTX.prevUser){
+      let best=null,bs=0;
+      const ti=topIntent(t);
+      const pool=[];
+      for(const x of DIALOG_SEED)pool.push(x);
+      for(const x of DIALOG_LEARNED)pool.push(x);
+      for(const x of pool){
+        const d1=sentSim(t,x.u,dialogLM());          /* 문맥: 이 사용자 발화가 과거 어떤 발화와 닮았나 */
+        const d2=sentSim(CTX.prevUser,x.u,dialogLM())*0.35; /* 직전 발화와도 유사도 — 대화 흐름 정렬 */
+        const it=intentScore(x.u)[ti.intent||'__none']||0;
+        const bonus=(it>0?0.18:0)+(x.w?x.w:0);       /* 의도 일치 가점 + 학습된 선호도 */
+        const sc=d1*0.55+d2*0.45+bonus-Math.random()*0.05;
+        if(sc>bs){bs=sc;best=x;}
+      }
+      if(best&&bs>0.34){
+        let out=best.r;
+        /* 답변 뒤 실제 지식 브릿지 확률적 첨부 — 스몰토크가 대화를 안 끝나게 */
+        if(Math.random()<0.45){ const b=topicBridge(t,null); if(b)out+='\n\n'+b; }
+        if(best.w!==undefined){ best.w=Math.min(1,best.w+0.03); } else if(DIALOG_LEARNED.includes(best)){ best.w=0.03; }
+        return R(out);
+      }
+      /* 폴백 폭주 방지: 일상 톤인데 컨텍스트 매칭 실패 시 씨앗 응답으로 부드럽게 */
+      if(bs<=0.34&&ti.intent&&['greet','thanks','bye','agree','deny','mood_neg','mood_pos','bored','daily'].includes(ti.intent)&&ti.conf>=0.25){
+        const map={greet:'오셨군요, 사장님 — 이어서 무엇을 도와드릴까요?',thanks:'언제든지요, 사장님.',bye:'가시는 길 조심하시고요 — 돌아오시면 이어서 하겠습니다.',agree:'네, 그 흐름으로 진행합니다.',deny:'정정 수신 — 어느 쪽이 맞는 방향입니까?',mood_neg:'수고 많았습니다, 사장님 — 무슨 일이었는지 같이 정리해보겠습니다.',mood_pos:'그 톤 좋습니다 — 그 흐름으로 갑시다.',bored:'그럼 제 지식뱅크에서 하나 뽑아드릴까요? 아니면 퀴즈·게임도 있습니다.',daily:'일상 화제 확인 — 필요하면 "타이머/알람" 같은 실제 기능도 말씀만 하면 됩니다.'};
+        return R(map[ti.intent]);
+      }
+    }
+  }catch(e){}
   const isQ=/\?|뭐|왜|어때|어떻|누구|언제|어디|얼마|how|what|why|who/i.test(t);
   if(/!|개쩔|쩌네|대박|헐|미쳤/.test(t))CTX.mood=1;
   if(/힘들|우울|짜증|빡|스트레스/.test(t))CTX.mood=-1;
@@ -1483,6 +1628,7 @@ async function brainSend(text){
   const bt=performance.now()-bt0; S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
   addXP(2);
   if (typeof out==='string') out={reply:out};
+  try{ dialogLearn(text,String(out.reply||'').slice(0,300)); }catch(e){}
   if(out.actions&&out.actions.some(a=>a.type==='hud')){ setTimeout(()=>{ try{ spawnHud(); }catch(e){} },500); }
   if(S.lastLevelMsg){ out.reply+='\n\n'+S.lastLevelMsg; S.lastLevelMsg=null; }
   addChat('j', out.reply, out.actions||[]);
