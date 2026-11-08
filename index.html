@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.4'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.5'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1857,8 +1857,13 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
-    /* 클라우드 두뇌(온라인·무료·키 0) — 폰 GPU 0 부하. 실패/오프라인이면 폰 두뇌로 */
-    if(LLM.CLOUD.ok){ try{ const cr=await LLM.cloudAsk(t,rag); if(cr&&cr.trim().length>1) return R(cr.trim()); }catch(e){} }
+    /* 클라우드 두뇌 — 무료 서버 예절(실측: 45초/답·답변 ~10초). 간격 밖이면 요청 없이 폰두뇌로 즉시 넘김 */
+    if(LLM.CLOUD.ok&&Date.now()-LLM.CLOUD.last>46000&&Date.now()>LLM.CLOUD.cool){ try{
+      LLM.CLOUD.last=Date.now();
+      let ref2=rag;
+      try{ const w=await wikiLookup(t); if(w)ref2=(ref2?ref2+'\n':'')+'【위키백과:'+w.title+'】 '+w.extract.slice(0,600); }catch(e){}
+      const cr=await LLM.cloudAsk(t,ref2); if(cr&&cr.trim().length>1) return R(cr.trim());
+    }catch(e){} }
     if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
     if(LLM.ready&&!LLM.busy){ try{
       if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
@@ -3133,7 +3138,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
   MODELS:{lite:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',std:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',pro:'gemma-2-2b-it-q4f16_1-MLC'},
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
   /* 클라우드 두뇌 — 무료·키 0·계정 0. Pollinations 공개 엔드포인트(OpenAI 호환). 실패 시 폰 두뇌가 받는 구조라 서버 상태와 무관하게 안전 */
-  CLOUD:{on:false,ok:false,lat:0},
+  CLOUD:{on:false,ok:false,lat:0,last:0,cool:0},
   async cloudPing(){
     const t0=Date.now();
     try{ const r=await fetch('https://text.pollinations.ai/ping',{signal:AbortSignal.timeout(6000)});
@@ -3148,7 +3153,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
       const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'openai',messages:[{role:'system',content:sys},{role:'user',content:t}],max_tokens:220,temperature:0.7}),
         signal:AbortSignal.timeout(30000)});
-      if(!res.ok)return null;
+      if(!res.ok){ if(res.status===402||res.status===429)LLM.CLOUD.cool=Date.now()+90000; return null; }
       const j=await res.json();
       const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
       LLM.CLOUD.lat=Date.now()-t0;
@@ -3263,9 +3268,24 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
     }catch(e){}
   },1000);
 })();
+/* 위키백과 조회 — 검색 API(문서명 확정)→요약. 키 0·CORS 허용·브라우저 직결 */
+async function wikiLookup(t){
+  try{
+    let q=String(t||'').replace(/(뭐야|뭔데|알려줘|설명해|설명|에 대해|이란|어때|해줘|줘|어떻게 돼|어떻게 되|\?|？)/g,' ').replace(/\s+/g,' ').trim();
+    if(q.length<2)q=String(t||'').trim();
+    const sr=await fetch('https://ko.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(q)+'&srlimit=1&format=json&origin=*',{signal:AbortSignal.timeout(8000)});
+    const sj=await sr.json();
+    const ti=sj&&sj.query&&sj.query.search&&sj.query.search[0]&&sj.query.search[0].title;
+    if(!ti)return null;
+    const wr=await fetch('https://ko.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(ti),{signal:AbortSignal.timeout(8000)});
+    const wj=await wr.json();
+    const ex=wj&&wj.extract;
+    return (ex&&ex.length>40)?{title:ti,extract:ex}:null;
+  }catch(e){ return null; }
+}
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
-try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 클라우드 두뇌 연결 — 온라인 중엔 폰이 쉽니다 (렉 0)'); }catch(e){} },2500); }catch(e){}
+try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
 let li=0;
 const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형 대화 엔진 (문맥스택·벡터검색) .. ONLINE','> 황금 성운 필드 '+nebula.n.toLocaleString()+' 파티클 .... 생성','> 가상 워크스페이스 V:\\ ............ 마운트','> 코드 샌드박스 (격리 실행) ............ ONLINE','> 장기기억 · 자기해킹 · 자율성장 ...... ARMED','> 폰 제어 (손전등/진동/알람/GPS) ...... READY','> 스타크 허드 (플로팅 패널 5종) ....... STANDBY','> 자기해킹 엔진 (실측 자기최적화) ...... ARMED','> 심층 지식 DB '+KNOW.length+'토픽 · 상식 '+FACTS.length+' · 논문 '+PAPERS.length+' .. LOADED','','  환영합니다, 사장님. 중앙을 터치하거나 말씀하세요.'];
