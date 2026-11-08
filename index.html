@@ -275,7 +275,7 @@ const glowEl=document.getElementById('coreGlow'), stTxt=document.getElementById(
 try{ document.getElementById('verSub').textContent='MOBILE CORE · GOLDEN NEBULA v'+JVS_VER+' · SINGULARITY'; }catch(e){}
 function frame(now){
   requestAnimationFrame(frame);
-  try{ if(typeof LLM!=='undefined'&&LLM.busy)return; }catch(e){} /* 두뇌 계산 중 GPU 양보 — 코어 정지, 완료 즉시 재개 */
+  try{ if(typeof LLM!=='undefined'&&LLM.busy){ PERF.llmThrottle=(PERF.llmThrottle||0)+1; if(PERF.llmThrottle%3!==0)return; } }catch(e){} /* 두뇌 계산 중 코어 1/3 감속 렌더(정지 아님) — 체감 끊김 제거 */
   const time=now/1000; boost=Math.max(0,boost-0.012);
   if(!drag){ yaw+=vyaw; pitch+=vpitch; vyaw*=0.94; vpitch*=0.94; if(now-lastTouch>2600) yaw+=0.0032; }
   pitch=Math.max(-1.25,Math.min(1.25,pitch));
@@ -1393,7 +1393,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.0'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3142,7 +3142,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
       const st=document.getElementById('llmStat');
       const wl=await import('https://esm.run/@mlc-ai/web-llm@0.2');
       if(st) st.textContent='모델 받는 중… (WiFi 권장 · 화면 켜둔 채 유지)';
-      LLM.eng=await wl.CreateMLCEngine(LLM.MODELS[kind]||LLM.MODELS.std,{initProgressCallback:r=>{
+      LLM.eng=await wl.CreateMLCEngine(LLM.MODELS[kind]||LLM.MODELS.std,{logLevel:'ERROR',initProgressCallback:r=>{
         const el=document.getElementById('llmStat');
         if(el) el.textContent='이식 중… '+Math.round((r.progress||0)*100)+'% — '+String(r.text||'').slice(0,90);
       }});
@@ -3191,7 +3191,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
 };
 /* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
 const PERF={ticks:0,fps:60,tier:0,nebFrac:1,low:0,high:0,forced:false,saved:0};
-PERF.apply=function(){ PERF.nebFrac=[1,0.55,0.32,0.18][PERF.tier]; };
+PERF.apply=function(){ PERF.nebFrac=[1,0.8,0.65,0.55,0.45,0.36,0.28,0.2][PERF.tier]; };
 PERF.forceLow=function(){ if(!PERF.forced){ PERF.forced=true; PERF.saved=PERF.tier; }
   if(PERF.tier<2){ PERF.tier=2; PERF.apply(); try{ toast('🧠 이식 중 — 절전 렌더 모드 전환 (발열·렉 방지)'); }catch(e){} } };
 PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.saved||0; PERF.apply(); } };
@@ -3215,8 +3215,8 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
       if(f<32){ PERF.low++; PERF.high=0; }
       else if(f>55){ PERF.high++; PERF.low=0; }
       else { PERF.low=0; PERF.high=0; }
-      if(PERF.low>=2&&PERF.tier<3){ PERF.low=0; PERF.tier++; PERF.apply(); toast('⚡ 성능 모드 '+PERF.tier+' — 실측 '+f+'fps 저하, 렌더 자동 경량화'); }
-      else if(PERF.high>=4&&PERF.tier>0&&!PERF.forced){ PERF.high=0; PERF.tier--; PERF.apply(); toast('⚡ 성능 복귀 — 단계 '+PERF.tier+' (실측 '+f+'fps)'); }
+      if(PERF.low>=2&&PERF.tier<7){ PERF.low=0; PERF.tier++; PERF.apply(); toast('⚡ 성능 모드 '+PERF.tier+'/7 — 실측 '+f+'fps, 렌더 미세 조정'); }
+      else if(PERF.high>=6&&PERF.tier>0&&!PERF.forced){ PERF.high=0; PERF.tier--; PERF.apply(); }
     }catch(e){}
   },1000);
 })();
