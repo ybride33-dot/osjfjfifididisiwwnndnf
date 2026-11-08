@@ -1391,7 +1391,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.3'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1821,11 +1821,11 @@ function dialogueEngine(t,low,en,R){
   }
 
   /* === 탱그램 HUD 호출 — "Tony" === */
-  if(/^tony$|토니|tony/i.test(t.replace(/\s/g,''))&&t.length<20){
+  if(/^(tony|도니|토니|돈이|돈니|tony|dony|donnie)[!.,?~]*$/i.test(t.trim())||/tony|토니|돈이\s*(하|불러|켜|모드)/i.test(t)&&t.length<25){
     ctxTouch(t);
-    if(typeof TG!=='undefined'&&TG.on){ TG.pulse=1; showTGHub(); }
-    else{ try{ store.set('jvs-ui','tangram'); }catch(e){} setTimeout(()=>{ try{ bootTangram(); }catch(e){} },200); }
-    return R('🅃 𝐓𝐚𝐧𝐠𝐫𝐚𝐦 𝐇𝐔𝐃 기동 — 영화형 리액터 코어로 전환합니다, Tony. 중앙을 탭하면 날짜·날씨·성장 그래프 허드가 펼쳐집니다. 복귀는 우상단 "원래 코어로".');
+    try{ if(typeof TG!=='undefined'&&TG.on)tgExit(); }catch(e){}
+    setTimeout(()=>{ try{ showTGHub(); }catch(e){} },250);
+    return R('🅃 𝐉𝐀𝐑𝐕𝐈𝐒 𝐇𝐔𝐃 전개 — 기존 코어 위로 청색 네온 패널 펼칩니다. 날짜·날씨·성장 그래프 확인하세요, 사장님. ("Tony" 한 번 더 = 닫기)');
   }
   /* === AI 모델 비교 — 실제 비교표 (은유·통계 회피 금지) === */
   if(/비교해|비교해\s*봐|누가\s*더|vs|이겨|이길|잘해\?|한테\s*밀|따라잡/.test(t)&&/(gpt|chatgpt|제미니|gemini|클로드|claude|시리|빅스비|알렉사|네이버|클로바|다른\s*ai|다른\s*에이|다른\s*모델|대기업|구글|애플|삼성|openai|오픈에이)/i.test(t)){
@@ -1975,6 +1975,7 @@ function addChat(who,text,actions){
 function evo(msg){ S.evoLog.push({t:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),m:msg}); if(S.evoLog.length>200)S.evoLog.shift(); addXP(5); saveS(); }
 
 function typoFix(t){ let x=t.replace(/([^0-9])\1{2,}/g,'$1$1');
+  x=x.replace(/^(돈이|돈니|도니|토닌|토니가)(?=[\s!.,?~]*$)/,'토니').replace(/^돈이\s*(하|켜|불러|모드|펼쳐)/,'토니 $1');
   const D={'엄마나':'얼마나','업마나':'얼마나','떄문':'때문','왜냐믄':'왜냐면','미칫':'미친','어떟게':'어떻게','뭐여':'뭐야','뭐야여':'뭐야','이거여':'이거야','그거여':'그거야','안녕하세여':'안녕하세요','블랙홀어':'블랙홀','그러니까까':'그러니까','어쩌라고여':'어쩌라고','심심해여':'심심해','그럼여':'그럼','아니여':'아니요','그렇습니다여':'그렇습니다'};
   for(const k in D)x=x.split(k).join(D[k]);
   return x.trim(); }
@@ -2924,7 +2925,7 @@ function tgGraph(cvs,data,color,glow,label,fmt){
 function showTGHub(){
   const old=document.getElementById('tgHub'); if(old){ old.remove(); return; } /* 토글 */
   const hub=document.createElement('div'); hub.id='tgHub';
-  hub.style.cssText='position:fixed;z-index:9002;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);width:min(92vw,400px);max-height:82vh;overflow-y:auto;background:linear-gradient(165deg,rgba(10,26,42,.92),rgba(5,12,22,.95));border:1px solid rgba(120,200,255,.45);border-radius:16px;box-shadow:0 0 40px rgba(80,170,255,.25),inset 0 0 30px rgba(60,140,220,.08);color:#d7efff;padding:16px 16px 12px;transition:transform .38s cubic-bezier(.2,1.4,.4,1),opacity .3s;opacity:0';
+  hub.style.cssText='position:fixed;z-index:9002;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);width:min(92vw,400px);max-height:82vh;overflow-y:auto;background:linear-gradient(165deg,rgba(8,18,34,.94),rgba(4,10,20,.96));border:1.5px solid rgba(110,190,255,.6);border-radius:20px;box-shadow:0 0 46px rgba(70,160,255,.35),0 0 90px rgba(40,120,220,.18),inset 0 0 34px rgba(60,140,220,.10);color:#d7efff;padding:18px 16px 12px;transition:transform .38s cubic-bezier(.2,1.4,.4,1),opacity .3s;opacity:0';
   requestAnimationFrame(()=>{ hub.style.transform='translate(-50%,-50%) scale(1)'; hub.style.opacity='1'; });
   const today=new Date();
   const yoil=['일','월','화','수','목','금','토'][today.getDay()];
