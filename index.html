@@ -1648,6 +1648,8 @@ async function brain(text){
   else { for(const pat in S.custom){ try{ if(new RegExp(pat,'i').test(t)) return {reply:S.custom[pat]}; }catch{} } }
   /* === 지능 코어 v4 (방정식·복리·통계·수론·진법·날짜·단위) — 전 엔진 최우선 === */
   { const _sc=singularCore(t,low,en); if(_sc) return R(_sc); }
+  if(/홀로그램.{0,8}(모드|피라미드|켜)|피라미드.{0,6}홀로그램/.test(t)){ closePanel&&closePanel(); setTimeout(startHolo,250); return R('🔻 홀로그램 피라미드 모드 개방 — 투명 피라미드를 화면에 올리시면 제 코어가 공중에 뜹니다, 사장님.'); }
+
   /* === 폰 제어 === */
   if(/손전등|플래시|torch|flashlight/i.test(t)){
     if(/끄|off|stop/i.test(t)){ try{ if(torchTrack){ await torchTrack.applyConstraints({advanced:[{torch:false}]}); torchStream.getTracks().forEach(x=>x.stop()); torchTrack=torchStream=null; return R('손전등을 껐습니다.'); } }catch{}
@@ -2102,12 +2104,80 @@ function openPanel(name){
     const ab=document.createElement('button'); ab.textContent='자율성장: '+(S.autonomy?'ON':'OFF'); ab.style.cssText=tb.style.cssText;
     ab.onclick=()=>{ S.autonomy=!S.autonomy; saveS(); ab.textContent='자율성장: '+(S.autonomy?'ON':'OFF'); };
     panelBody.appendChild(ab);
+    const hb=document.createElement('button'); hb.textContent='🔻 홀로그램 피라미드 모드'; hb.style.cssText='margin-top:8px;padding:10px 16px;border-radius:5px;border:1px solid var(--gB);background:#33210a;color:#ffd58a;cursor:pointer';
+    hb.onclick=()=>{ closePanel(); setTimeout(startHolo,300); };
+    panelBody.appendChild(hb);
     panelBody.insertAdjacentHTML('beforeend','<div class="sec">데이터</div>');
     const wb=document.createElement('button'); wb.textContent='🧹 전체 초기화(기억/파일/성장)'; wb.style.cssText=tb.style.cssText+';color:#ff8f7a';
     wb.onclick=()=>{ if(confirm('전부 초기화할까요?')){ S=Object.assign({},store.get('jvs-state-default',{})); store.set('jvs-state',{}); location.reload(); } };
     panelBody.appendChild(wb);
   }
 }
+/* ═══ 홀로그램 피라미드 모드 — 페퍼스 고스트 4면 실시간 렌더 ═══ */
+let holoOn=false, holoRAF=null, holoCv=null, holoX=null;
+const HOLO_P=[]; (function(){ for(let i=0;i<240;i++){ const th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1), r=0.5+0.5*Math.pow(Math.random(),1.5);
+  HOLO_P.push({x:r*Math.sin(ph)*Math.cos(th),y:r*Math.sin(ph)*Math.sin(th),z:r*Math.cos(ph),s:0.5+Math.random()*1.7,sp:0.004+Math.random()*0.010}); } })();
+function holoObj(ctx,a){
+  const T=0.42, ca=Math.cos(T), sa=Math.sin(T);
+  ctx.save();
+  const g=ctx.createRadialGradient(0,0,0,0,0,60); g.addColorStop(0,'rgba(255,240,190,.95)'); g.addColorStop(.35,'rgba(255,190,80,.55)'); g.addColorStop(1,'rgba(255,160,40,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,60,0,6.2832); ctx.fill();
+  for(const p of HOLO_P){ const aa=a*p.sp*9;
+    const x1=p.x*Math.cos(aa)-p.z*Math.sin(aa), z1=p.x*Math.sin(aa)+p.z*Math.cos(aa);
+    const y2=p.y*ca-z1*sa, z2=p.y*sa+z1*ca;
+    const per=1/(1.55-z2*0.9);
+    ctx.globalAlpha=Math.max(0.06,Math.min(0.95,(z2+1.1)/1.8));
+    ctx.fillStyle='#ffcf7a';
+    ctx.beginPath(); ctx.arc(x1*95*per, y2*95*per, Math.max(.4,p.s*1.5*per), 0, 6.2832); ctx.fill(); }
+  ctx.globalAlpha=0.85; ctx.strokeStyle='#ffe9b0'; ctx.lineWidth=1.4;
+  for(let k=0;k<3;k++){ const rr=78+k*16, tilt=0.5+k*0.35, cy2=Math.sin(a*1.4+k*2.1)*6;
+    ctx.beginPath();
+    for(let i=0;i<=64;i++){ const th=i/64*6.2832+a*(k%2?0.7:-0.5);
+      const x=Math.cos(th)*rr, yy=Math.sin(th)*rr*Math.sin(tilt)*0.28+cy2;
+      const per=1/(1.55-(Math.sin(th)*Math.sin(tilt))*0.9);
+      const sx=x*per, sy=yy*per;
+      if(i===0)ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy); }
+    ctx.closePath(); ctx.stroke(); }
+  ctx.globalAlpha=0.9; ctx.fillStyle='#fff3d0'; ctx.font='700 15px monospace'; ctx.textAlign='center';
+  ctx.fillText('J.A.R.V.I.S',0,120);
+  ctx.restore();
+}
+function holoDraw(){
+  if(!holoOn)return;
+  try{
+    const cv=holoCv, ctx=cv.getContext('2d');
+    const W=window.innerWidth, H=window.innerHeight;
+    if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+    const a=Date.now()*0.001;
+    const R=Math.min(W,H)*0.30;
+    const quads=[[0.25,0.25,0],[0.75,0.25,Math.PI/2],[0.75,0.75,Math.PI],[0.25,0.75,Math.PI*1.5]];
+    for(const q of quads){
+      ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+      ctx.translate(W*q[0],H*q[1]); ctx.rotate(q[2]); ctx.scale(R/120,R/120);
+      holoObj(ctx,a); ctx.restore(); }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.fillStyle='rgba(255,200,110,.5)'; ctx.font='11px monospace'; ctx.textAlign='center';
+    ctx.fillText('피라미드를 화면 중앙에 올리고 어두운 방에서 45도 각도로 보세요', W/2, H-14);
+  }catch(e){}
+  holoRAF=requestAnimationFrame(holoDraw);
+}
+function startHolo(){
+  if(holoOn)return;
+  holoCv=document.createElement('canvas'); holoCv.style.cssText='position:fixed;inset:0;z-index:2000;background:#000';
+  holoX=document.createElement('button'); holoX.textContent='✕ 나가기'; holoX.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:2001;background:#33210a;border:1px solid #ffb64a;color:#ffd58a;padding:8px 14px;border-radius:6px;font-size:12px';
+  holoX.onclick=stopHolo;
+  document.body.appendChild(holoCv); document.body.appendChild(holoX);
+  holoOn=true; holoDraw();
+  toast('🔻 홀로그램 피라미드 모드 — 투명 피라미드를 화면에 올리세요');
+}
+function stopHolo(){
+  holoOn=false; try{ if(holoRAF)cancelAnimationFrame(holoRAF); }catch(e){}
+  try{ if(holoCv)holoCv.remove(); if(holoX)holoX.remove(); }catch(e){}
+  holoCv=holoX=null;
+}
+
 function applyBackup(str){ try{
   const o=JSON.parse(str);
   if(!o||typeof o!=='object'||!('xp' in o)){ toast('백업 형식 아님 — jarvis-데이터백업.json 파일만 가능'); return false; }
@@ -2146,5 +2216,5 @@ try{
 }catch(e){}
 if('serviceWorker' in navigator){ addEventListener('load',function(){ try{ navigator.serviceWorker.register('./sw.js').catch(function(){}); }catch(e){} }); }
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a573262c89d4735f',t:'MTc5NDEyNTkyOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a573262c89d4735f',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
