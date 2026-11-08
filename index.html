@@ -925,14 +925,19 @@ function techExpand(t){
   let o=t; for(const [re,ex] of M){ if(re.test(o))o+=' '+ex; }
   return o;
 }
+const PK_CACHE=new Map();
 function pickKnow(t){
+  if(PK_CACHE.has(t))return PK_CACHE.get(t);
   const low=t.toLowerCase(); let best=null,bs=0;
   const words=t.split(/[\s,.;:!?~'"()\[\]]+/).filter(w=>w.length>=2);
   for(const e of KNOW){ let s=0;
     for(const k of e.k){ if(t.includes(k)||low.includes(k)){s+=k.length;continue;}
       if(k.length>=3){ for(const w of words){ if(lev(w,k)<=((k.length>=5?2:1)+(S.mutFuse?1:0))){s+=k.length*0.9;break;} } } }
     if(s>bs){bs=s;best=e;} }
-  return bs>0?best:null;
+  const _rv=bs>0?best:null;
+  if(PK_CACHE.size>600)PK_CACHE.clear();
+  PK_CACHE.set(t,_rv);
+  return _rv;
 }
 /* ================= 심층 지식 확장 데이터팩 (v13.5 — 토픽+102 · 상식+30 · FAQ+6) ================= */
 /* [데이터팩 1/3] 물리·우주·생명·의학 심층 토픽 */
@@ -2600,6 +2605,11 @@ function openPanel(name){
 }
 /* ═══ 홀로그램 모드 v2 — 전체화면 대형 코어 (피라미드 4분할 토글) ═══ */
 let holoOn=false, holoQuad=false, holoRAF=null, holoCv=null, holoX=null, holoTg=null;
+let HOLO_N=520, holoFps=60, holoFpsT=0;
+function holoAuto(){ /* 실측 FPS <38 → 입자 자동 절반(최소 130) · >55 → 회복(최대 520) — 폰 사양 자동 최적화 */
+  if(holoFps<38&&HOLO_N>130){ HOLO_N=Math.max(130,Math.floor(HOLO_N*0.6)); }
+  else if(holoFps>55&&HOLO_N<520){ HOLO_N=Math.min(520,HOLO_N+40); }
+}
 const HOLO_P=[]; (function(){ for(let i=0;i<520;i++){ const th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1), r=Math.pow(Math.random(),0.65);
   HOLO_P.push({x:r*Math.sin(ph)*Math.cos(th),y:r*Math.sin(ph)*Math.sin(th),z:r*Math.cos(ph),s:0.6+Math.random()*2.2,sp:0.004+Math.random()*0.012,tw:Math.random()*6.28}); } })();
 const HOLO_BG=[]; (function(){ for(let i=0;i<90;i++)HOLO_BG.push({x:Math.random(),y:Math.random(),r:Math.random()*1.5+0.4,a:Math.random()*0.7+0.15}); })();
@@ -2649,6 +2659,14 @@ function holoScene(a,W,H,dpr){
   ctx.globalAlpha=1;
   const R=Math.min(W,H)*(holoQuad?0.27:0.34);
   const cx=holoQuad?W/2:W/2, cy=holoQuad?H/2:H*0.44;
+  for(let i=0;i<Math.min(HOLO_N,HOLO_P.length);i++){ const p=HOLO_P[i];
+    p.tw+=p.sp*2.2; const zz=p.z+0.12*Math.sin(a*p.sp*60+p.tw);
+    const per=1/(1.7-zz*0.9); const sx=p.x*per, sy=p.y*per;
+    const twk=0.55+0.45*Math.sin(p.tw*3);
+    ctx.globalAlpha=Math.max(0,Math.min(1,twk*per*0.9));
+    ctx.fillStyle=zz>0.25?'#fff3d0':(zz>-0.2?'#ffdf9e':'#d99a3d');
+    ctx.beginPath(); ctx.arc(sx*R,sy*R,Math.max(0.5,p.s*per*1.3)*(R/300),0,6.2832); ctx.fill(); }
+  if(a-holoFpsT>=1){ holoFps=holoFpsT?(a-holoFpsT>=1?Math.round(1/((a-holoFpsT)/(holoFps||60))):holoFps):60; holoFpsT=a; try{holoAuto();}catch(e){} }
   if(holoQuad){
     const quads=[[0.25,0.25,0],[0.75,0.25,Math.PI/2],[0.75,0.75,Math.PI],[0.25,0.75,Math.PI*1.5]];
     for(const q of quads){ ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.translate(W*q[0]*dpr,H*q[1]*dpr); ctx.rotate(q[2]); ctx.scale(dpr,dpr); holoCore(ctx,a,0,0,R); ctx.restore(); }
