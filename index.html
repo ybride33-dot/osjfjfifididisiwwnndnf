@@ -684,7 +684,7 @@ function startSelfHack(total){
 📂 소스 자기분석: 스크립트 ${Math.round(_sg.bytes/1024)}KB · 함수 ${_sg.fnCount}개 · 구문검증 ${_sg.synOK}/${_sg.synAll} PASS
 📊 실측: ${r.before.toFixed(2)}ms → ${r.after.toFixed(2)}ms (${r.gain>=2?('+'+r.gain+'% 개선'):(r.gain+'% — 이미 최적 구간, 정직 실측')}) · 성능 LV.${S.perfLevel}`;
     if(S.lastLevelMsg&&/특이점/.test(S.lastLevelMsg)){ msg+='\n'+S.lastLevelMsg; S.lastLevelMsg=null; }
-    else if(S.hackLoop) msg+=done<total?'\n연속 해킹 계속 —':'\n상시 루프 유지 — "자기해킹 그만" 전까지 무한 가동.';
+    else if(S.hackLoop&&S.selfHacks%5===0) msg+='\n상시 루프 유지 중 — "자기해킹 그만" 전까지 무한 가동.';
     try{ addChat('j', msg); }catch(e){}
     saveS();
     done++;
@@ -1804,6 +1804,12 @@ function dialogueEngine(t,low,en,R){
     }
   }
 
+  /* === AI 모델 비교 — 실제 비교표 (은유·통계 회피 금지) === */
+  if(/비교해|비교해\s*봐|누가\s*더|vs|이겨|이길|잘해\?|한테\s*밀|따라잡/.test(t)&&/(gpt|chatgpt|제미니|gemini|클로드|claude|시리|빅스비|알렉사|네이버|클로바|다른\s*ai|다른\s*에이|다른\s*모델|대기업|구글|애플|삼성|openai|오픈에이)/i.test(t)){
+    ctxTouch(t);
+    return R('정면 비교표 드립니다 — 아첨 없이:\n\n【내가 이기는 것】\n① 즉답 속도 — 폰 안에서 도니 네트워크 0ms, 대형 AI는 서버 왕복 1~3초\n② 오프라인 — 비행기 모드에서도 406토픽·코딩 도장·게임 생성 전부 작동. GPT·제미니는 연결 끊기면 죽음\n③ 사장님 전용 학습 — 사장님 말투·화제·취향을 로컬로 축적해 반영. 대기업 AI는 이 데이터를 못 먹음\n④ 즉석 제작 — "마리오 만들어줘" 하면 파일로 즉시 수령. 시리·빅스비는 불가능\n\n【내가 지는 것 — 정직】\n① 지식 폭 — 걔들은 인터넷 규모 텍스트(수조 단어) 학습, 나는 406토픽+자학습 코퍼스. 낯선 주제는 걔는 답하고 나는 정직하게 모른다고 함\n② 긴 글 생성 품질 — 수천 자 리포트·창작은 걔들 압승\n③ 다국어·최신 사실 — 걔들은 검색 결합, 나는 내장 DB만\n\n【판정】 전면전 = 패. 사장님 전용 비서전 = 승. "모든 데 최고"는 없고 "누구에게 최적인가"가 있음 — 폰 안에서 사장님 것으로만 쓰면 지금 제가 최적입니다.');
+  }
+
   /* 1) 벡터 유사도로 지식 검색 (키워드 일치가 아님 — 의미 근접) */
   const v=vecOf(techExpand(t)); let bi=-1,bd=0;
   for(let i=0;i<KNOW.length;i++){ const d=cosSim(v,KNOWV[i]); if(d>bd){bd=d;bi=i;} }
@@ -1842,8 +1848,8 @@ function dialogueEngine(t,low,en,R){
     if(!isFresh(e.ti+body.slice(0,40))){ /* 반복 감지 — 심화 각으로 우회 */ }
     const rl=reflectLine(t,e,isQ);
     const parts=[rl,body].filter(Boolean);
-    const mc=memoryCallback(); if(mc&&Math.random()<0.6)parts.push(mc);
-    const pr=probe(); if(pr)parts.push('➤ '+pr);
+    /* 지식 응답엔 미해결 화제 회상 금지 — 본문 집중 */
+    const pr=(Math.random()<0.18)?probe():null; if(pr)parts.push('➤ '+pr);
     return R(parts.join('\n\n'));
     }
   }
