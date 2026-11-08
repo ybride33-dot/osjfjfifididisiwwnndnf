@@ -38,7 +38,7 @@
   @keyframes mp{50%{box-shadow:0 0 18px rgba(157,255,206,.7)}}
   #send{background:var(--g2);color:#231400;font-weight:800}
   /* 패널 */
-  #panel{position:fixed;inset:0;z-index:12;background:rgba(4,2,0,.9);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 10px)}
+  #panel{position:fixed;inset:0;z-index:12;background:rgba(5,3,0,.965);display:none;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 10px)}
   #panel.open{display:flex}
   #panelBar{display:flex;justify-content:space-between;align-items:center;color:var(--g);font-family:Consolas,monospace;letter-spacing:2px;font-size:13px;padding:4px 4px 10px}
   #panelClose{background:none;border:1px solid var(--gB);color:var(--g);border-radius:4px;padding:6px 12px;cursor:pointer}
@@ -289,7 +289,7 @@ function frame(now){
   gl.uniform1f(U.time,time); gl.uniform1f(U.scale,DPR*(3.0/dist)*(H/700+0.45)); gl.uniform1f(U.boost,boost);
   const bind=(b,l,s)=>{gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,s,gl.FLOAT,false,0,0);};
   bind(nebula.bp,A.pos,3); bind(nebula.bc,A.col,3); bind(nebula.bs,A.size,1); bind(nebula.bq,A.phase,1); bind(nebula.bsp,A.spin,1);
-  gl.drawArrays(gl.POINTS,0,nebula.n);
+  gl.drawArrays(gl.POINTS,0,Math.max(4000,Math.round(nebula.n*(typeof PERF!=='undefined'?PERF.nebFrac:1))));
   const gs=(2.7/dist)*(0.85+boost*0.4)*(0.94+0.06*Math.sin(time*7+Math.sin(time*19)*0.7));
   glowEl.style.transform='translate(-50%,-50%) scale('+gs.toFixed(3)+')';
   glowEl.style.background=THEMES[tOrder[tIdx]].glow;
@@ -1391,7 +1391,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.4'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.5'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1950,6 +1950,7 @@ function addChat(who,text,actions){
   d.innerHTML='<span class="w">'+(who==='u'?'사장님':'J.A.R.V.I.S')+'</span>';
   const b=document.createElement('span'); d.appendChild(b);
   chatDiv.appendChild(d);
+  try{ const kids=chatDiv.children; for(let k=0;kids.length>60&&k<200;k++)chatDiv.removeChild(kids[0]); }catch(e){}
   const scroll=()=>{ if(curPanel==='chat') panelBody.scrollTop=panelBody.scrollHeight; else if(who==='j') showCapFull(String(text)); };
   if(actions&&actions.some(a=>a.type==='img')){ actions.filter(a=>a.type==='img').forEach(a=>{
       const im=document.createElement('img'); im.src=a.src; im.alt=a.label||'이미지';
@@ -2822,11 +2823,15 @@ function holoScene(a,W,H,dpr){
   ctx.fillStyle='rgba(255,210,120,.8)'; ctx.font=(11*dpr)+'px monospace'; ctx.textAlign='center';
   ctx.fillText(holoQuad?'피라미드 4분할 — 좌상단 버튼으로 전체화면 복귀':'투명 피라미드(컵)를 올리면 공중에 뜹니다 — 좌상단 버튼으로 4분할 전환', W*dpr/2, (H-16)*dpr);
 }
+let holoSkip=false;
 function holoDraw(){
   if(!holoOn)return;
+  holoSkip=!holoSkip;
+  if(holoSkip&&typeof PERF!=='undefined'&&PERF.tier>=1){ holoRAF=requestAnimationFrame(holoDraw); return; }
   try{
     const W=window.innerWidth, H=window.innerHeight;
-    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const dprCap=(typeof PERF!=='undefined'&&PERF.tier>=1)?1.25:2;
+    const dpr=Math.min(dprCap,window.devicePixelRatio||1);
     if(holoCv.width!==W*dpr||holoCv.height!==H*dpr){ holoCv.width=W*dpr; holoCv.height=H*dpr; }
     holoScene(Date.now()*0.001,W,H,dpr);
   }catch(e){}
@@ -3091,6 +3096,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     if(LLM.busy) throw new Error('이식이 이미 진행 중입니다');
     if(!('gpu' in navigator)) throw new Error('이 브라우저는 WebGPU 미지원 — 안드로이드 크롬 최신버전(121+)에서 시도하세요');
     LLM.busy=true;
+    try{ if(typeof PERF!=='undefined')PERF.forceLow(); }catch(e){}
     try{
       const st=document.getElementById('llmStat');
       const wl=await import('https://esm.run/@mlc-ai/web-llm');
@@ -3107,7 +3113,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
         const dt=(performance.now()-t0)/1000; tps='실측 약 '+Math.max(1,Math.round(24/dt))+' 토큰/초';
       }catch(e){}
       return LLM.SIZE[kind]+' 이식 완료 · '+tps;
-    } finally { LLM.busy=false; }
+    } finally { LLM.busy=false; try{ if(typeof PERF!=='undefined')PERF.release(); }catch(e){} }
   },
   async ask(t){
     if(!LLM.ready||LLM.busy) return null;
@@ -3123,6 +3129,29 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     return res.choices[0].message.content;
   }
 };
+/* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
+const PERF={ticks:0,fps:60,tier:0,nebFrac:1,low:0,high:0,forced:false,saved:0};
+PERF.apply=function(){ PERF.nebFrac=[1,0.55,0.32,0.18][PERF.tier]; };
+PERF.forceLow=function(){ if(!PERF.forced){ PERF.forced=true; PERF.saved=PERF.tier; }
+  if(PERF.tier<2){ PERF.tier=2; PERF.apply(); try{ toast('🧠 이식 중 — 절전 렌더 모드 전환 (발열·렉 방지)'); }catch(e){} } };
+PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.saved||0; PERF.apply(); } };
+(function(){
+  if(typeof requestAnimationFrame!=='function')return;
+  const cnt=function(){ PERF.ticks++; requestAnimationFrame(cnt); }; requestAnimationFrame(cnt);
+  setInterval(function(){
+    try{
+      if(document.hidden){ PERF.ticks=0; return; }
+      const f=PERF.ticks; PERF.ticks=0; if(f<5)return;
+      PERF.fps=f;
+      if(typeof LLM!=='undefined'&&LLM.busy){ PERF.forceLow(); PERF.low=0; PERF.high=0; return; }
+      if(f<32){ PERF.low++; PERF.high=0; }
+      else if(f>55){ PERF.high++; PERF.low=0; }
+      else { PERF.low=0; PERF.high=0; }
+      if(PERF.low>=2&&PERF.tier<3){ PERF.low=0; PERF.tier++; PERF.apply(); toast('⚡ 성능 모드 '+PERF.tier+' — 실측 '+f+'fps 저하, 렌더 자동 경량화'); }
+      else if(PERF.high>=4&&PERF.tier>0&&!PERF.forced){ PERF.high=0; PERF.tier--; PERF.apply(); toast('⚡ 성능 복귀 — 단계 '+PERF.tier+' (실측 '+f+'fps)'); }
+    }catch(e){}
+  },1000);
+})();
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
