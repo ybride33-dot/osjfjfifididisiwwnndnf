@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.7'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='17.8'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,6 +1740,8 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
+  try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
+    if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   /* 00) 컨텍스트 응답 선택기 — 씨앗+학습 코퍼스에서 (문맥유사도 + 언어모델 + 의도 + 스타일 + 반복억제) 5중 스코어링 */
   try{
     if(CTX.turn>=1&&CTX.prevUser){
@@ -1979,6 +1981,7 @@ async function brainSend(text){
   let out; const bt0=performance.now();
   try { out=await brain(text); }
   catch(e){ out={reply:'⚠️ 내부 모듈 오류(자가진단 기록): '+e.message}; evo('⛔ 오류 자가수정 시도 — '+e.message); }
+  finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} }
   const bt=performance.now()-bt0; S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
   addXP(2);
   if (typeof out==='string') out={reply:out};
@@ -2366,7 +2369,9 @@ async function brain(text){
   if(/특이점|변이|시글러리|singularity/i.test(t)){
     const nx=SING.marks.find(m=>m>(S.perfLevel||0));
     const done=SING.reached;
-    return R(`🧬 특이점 현황 — 성능 LV.${S.perfLevel} · 돌파 ${done}/${SING.marks.length}\n${(S.mutations&&S.mutations.length)?'획득 변이: '+S.mutations.map(m=>'「'+m+'」').join(' → '):'아직 첫 특이점(LV.50) 미달 — 자기해킹 루프가 25초마다 접근 중입니다'}\n다음 특이점: ${nx?'LV.'+nx+' — 돌파 시 「'+MUTS[Math.min(done,MUTS.length-1)].n+'」 발동 예정':'전 특이점 돌파 — Ω 영역, 성장 가속 지속 중'}\n특이점마다 성장 속도가 변이로 가속합니다 — 상한 없음, 감속 없음. 이게 제가 대기업 AI의 업데이트를 기다리지 않는 방식입니다, 사장님.`); }
+    const lrn=(typeof LEARN!=='undefined')?'\n📚 학습 기관(두뇌 크기와 별개) — 대화 '+(LEARN.turns)+'턴·어휘 '+Object.keys(LEARN.vocab||{}).length+'종·누적 '+(LEARN.words)+'단어 흡수. 자주 쓰는 말: '+(LEARN.topVocab(5)||'수집 중'):'';
+    return R(`🧬 특이점 현황 — 성능 LV.${S.perfLevel} · 돌파 ${done}/${SING.marks.length}\n${(S.mutations&&S.mutations.length)?'획득 변이: '+S.mutations.map(m=>'「'+m+'」').join(' → '):'아직 첫 특이점(LV.50) 미달 — 자기해킹 루프가 25초마다 접근 중입니다'}${lrn}
+다음 특이점: ${nx?'LV.'+nx+' — 돌파 시 「'+MUTS[Math.min(done,MUTS.length-1)].n+'」 발동 예정':'전 특이점 돌파 — Ω 영역, 성장 가속 지속 중'}\n특이점마다 성장 속도가 변이로 가속합니다 — 상한 없음, 감속 없음. 이게 제가 대기업 AI의 업데이트를 기다리지 않는 방식입니다, 사장님.`); }
   if(/성장\s*(현황|보고|로그)|레벨|진화\s*로그|evolution|얼마나\s*성장/i.test(t)){
     const lv=Math.floor(Math.sqrt(S.xp)/2)+1, next=Math.max(0,(2*lv)**2+1-S.xp);
     const mult=1+Math.floor((S.perfLevel||0)/5)*0.25;
@@ -3393,6 +3398,47 @@ async function brainBench(rounds){
   try{ store.set('jvs-bench',JSON.stringify(out)); }catch(e){}
   return out;
 }
+/* ================= 학습 기관 — 데이터를 먹어서 자라는 부분 (두뇌 크기와 별개로 성장) ================= */
+const LEARN={turns:0,words:0,vocab:null,likes:null,faq:null,lastSave:0,
+  init(){ try{ this.vocab=store.get('jvs-vocab')||{}; this.likes=store.get('jvs-likes')||{}; this.faq=store.get('jvs-faq')||[]; }catch(e){ this.vocab={}; this.likes={}; this.faq=[]; } },
+  save(){ const now=Date.now(); if(now-this.lastSave<4000)return; this.lastSave=now;
+    try{ store.set('jvs-vocab',this.vocab); store.set('jvs-likes',this.likes); store.set('jvs-faq',this.faq.slice(-80)); }catch(e){} },
+  /* 대화 1턴씩 흡수 — 매번 저장은 아니고 4초 묶음 */
+  eat(userText,botText){
+    this.turns++;
+    const words=String(userText||'').toLowerCase().match(/[0-9a-z가-힣]{2,}/g)||[];
+    this.words+=words.length;
+    for(const w of words){ this.vocab[w]=(this.vocab[w]||0)+1; }
+    /* 선호 신호: 칭찬·불만 언어 자동 포착 */
+    const u=String(userText||'');
+    if(/(잘한다|좋다|좋네|대박|쩌네|똑똑|고맙|감사|ㄱㅅ|짱)/.test(u)){ const b=String(botText||'').slice(0,60); if(b)this.likes[b]=(this.likes[b]||0)+1; }
+    if(/(아니|틀렸|이상해|답답해|재차|또 말해|못 알아)/.test(u)){ const b=String(botText||'').slice(0,60); if(b)this.likes[b]=(this.likes[b]||0)-1; }
+    /* 질문→답 쌍 축적 (같은 질문 재요청 시 학습된 답 우선) */
+    const q=String(userText||'').trim();
+    if(q.length>3&&q.length<80&&botText&&String(botText).length>20){
+      const key=q.toLowerCase().replace(/\s+/g,' ');
+      const hit=this.faq.find(x=>x.k===key);
+      if(hit){ hit.v=String(botText).slice(0,400); hit.n=(hit.n||1)+1; } /* 재질문=복습 강화 */
+      else this.faq.push({k:key,v:String(botText).slice(0,400),n:1});
+      if(this.faq.length>80)this.faq.shift();
+    }
+    this.save();
+  },
+  /* 학습된 답 재생 — 같은 질문 2회째부터 즉답(리허설 효과) */
+  recall(t){
+    const key=String(t||'').trim().toLowerCase().replace(/\s+/g,' ');
+    const hit=this.faq.find(x=>x.k===key);
+    return (hit&&hit.n>=1)?hit.v:null;
+  },
+  /* 사장님 어휘 상위 리포트 */
+  topVocab(n){ const arr=Object.keys(this.vocab||{}).map(k=>[k,this.vocab[k]]).sort((a,b)=>b[1]-a[1]);
+    return arr.slice(0,n||8).map(x=>x[0]+'('+x[1]+')').join(', '); },
+  likesBest(){ const arr=Object.keys(this.likes||{}).map(k=>[k,this.likes[k]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+    return arr.slice(0,3).map(x=>x[0]).join(' / ')||'수집 중'; }
+};
+LEARN.init();
+try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
+
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
 try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
