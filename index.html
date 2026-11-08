@@ -1391,7 +1391,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.6'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.7'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1850,7 +1850,24 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
-    if(LLM.ready&&!LLM.busy){ try{ const lr=await LLM.ask(t,rag); if(lr&&lr.trim().length>1) return R(lr.trim()); }catch(e){} }
+    if(LLM.ready&&!LLM.busy){ try{
+      if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
+        let bubble=null,acc='';
+        const lr=await LLM.ask(t,rag,function(partial){
+          acc=partial;
+          if(!bubble){ bubble=document.createElement('div'); bubble.className='m j';
+            bubble.innerHTML='<span class="w">J.A.R.V.I.S</span><span></span>';
+            const sp=bubble.lastChild; sp.textContent=partial;
+            chatDiv.appendChild(bubble);
+            try{ while(chatDiv.children.length>60)chatDiv.removeChild(chatDiv.firstChild); }catch(e){}
+            panelBody.scrollTop=panelBody.scrollHeight;
+          } else { bubble.lastChild.textContent=partial;
+            try{ panelBody.scrollTop=panelBody.scrollHeight; }catch(e){} }
+        });
+        if(lr&&lr.trim().length>1){ if(bubble){ bubble.remove(); } return R(lr.trim()); }
+        if(bubble)bubble.remove();
+      } else { const lr=await LLM.ask(t,rag); if(lr&&lr.trim().length>1) return R(lr.trim()); }
+    }catch(e){} }
     const c=chatter(t);
     if(c){ const bridge=topicBridge(t,c);
       return R(c.out+(bridge?'\n\n'+bridge:'')); }
@@ -1951,6 +1968,7 @@ speakOut(out.reply, out.lang);
   saveS();
 }
 const chatDiv=document.createElement('div');
+let streamLLM=null;
 function addChat(who,text,actions){
   const d=document.createElement('div'); d.className='m '+who;
   d.innerHTML='<span class="w">'+(who==='u'?'사장님':'J.A.R.V.I.S')+'</span>';
@@ -3105,7 +3123,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     try{ if(typeof PERF!=='undefined')PERF.forceLow(); }catch(e){}
     try{
       const st=document.getElementById('llmStat');
-      const wl=await import('https://esm.run/@mlc-ai/web-llm');
+      const wl=await import('https://esm.run/@mlc-ai/web-llm@0.2');
       if(st) st.textContent='모델 받는 중… (WiFi 권장 · 화면 켜둔 채 유지)';
       LLM.eng=await wl.CreateMLCEngine(LLM.MODELS[kind]||LLM.MODELS.std,{initProgressCallback:r=>{
         const el=document.getElementById('llmStat');
@@ -3113,15 +3131,21 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
       }});
       LLM.ready=true; LLM.kind=kind;
       try{ store.set('jvs-llm',kind); }catch(e){}
-      let tps='속도 실측 실패(기능은 정상)';
-      try{ const t0=performance.now();
-        await LLM.eng.chat.completions.create({messages:[{role:'user',content:'한 문장으로 인사해'}],max_tokens:24,temperature:0.6});
-        const dt=(performance.now()-t0)/1000; tps='실측 약 '+Math.max(1,Math.round(24/dt))+' 토큰/초';
-      }catch(e){}
+      let tps='';
+      try{
+        const mM=[{role:'user',content:'반갑다는 한마디'}];
+        await LLM.eng.chat.completions.create({messages:mM,max_tokens:16,temperature:0.6}); /* 워밍업 */
+        const t0=performance.now();
+        const r1=await LLM.eng.chat.completions.create({messages:mM,max_tokens:32,temperature:0.6});
+        const dt=(performance.now()-t0)/1000;
+        const u=r1&&r1.usage&&r1.usage.completion_tokens;
+        const n=(u&&u>0)?u:Math.min(32,String((r1.choices[0].message||{}).content||'').length/2);
+        tps='실측 약 '+Math.max(1,Math.round(n/dt))+' 토큰/초';
+      }catch(e){ tps='기능 정상 — 속도 계량은 이번 패스(다음 부팅에 재측정)'; }
       return LLM.SIZE[kind]+' 이식 완료 · '+tps;
     } finally { LLM.busy=false; try{ if(typeof PERF!=='undefined')PERF.release(); }catch(e){} }
   },
-  async ask(t,ref){
+  async ask(t,ref,onDelta){
     if(!LLM.ready||LLM.busy) return null;
     let mem='';
     try{ const h=(CTX&&CTX.hist)?CTX.hist.slice(-4):[];
@@ -3132,8 +3156,17 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     if(ref)msgs.push({role:'system',content:'내부 지식DB 참고자료 — 아래 내용을 소화해서 자연스럽게 답에 활용하되 그대로 복사하지 말 것:\n'+ref});
     if(mem)msgs.push({role:'user',content:'(지난 대화)\n'+mem});
     msgs.push({role:'user',content:t});
-    const res=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200});
-    return res.choices[0].message.content;
+    const chunks=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200,stream:true});
+    let out='';
+    try{
+      for await(const ch of chunks){
+        const d=(ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content)||'';
+        if(d){ out+=d; try{ if(onDelta)onDelta(out); }catch(e){} }
+      }
+    }catch(e){}
+    if(!out){ const res=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200});
+      out=res.choices[0].message.content; }
+    return out;
   }
 };
 /* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
