@@ -2147,19 +2147,20 @@ function holoDraw(){
   try{
     const cv=holoCv, ctx=cv.getContext('2d');
     const W=window.innerWidth, H=window.innerHeight;
-    if(cv.width!==W||cv.height!==H){ cv.width=W; cv.height=H; }
+    const _dpr=Math.min(2,window.devicePixelRatio||1);
+    if(cv.width!==W*_dpr||cv.height!==H*_dpr){ cv.width=W*_dpr; cv.height=H*_dpr; }
     ctx.setTransform(1,0,0,1,0,0);
-    ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,W*_dpr,H*_dpr);
     const a=Date.now()*0.001;
     const R=Math.min(W,H)*0.30;
     const quads=[[0.25,0.25,0],[0.75,0.25,Math.PI/2],[0.75,0.75,Math.PI],[0.25,0.75,Math.PI*1.5]];
     for(const q of quads){
       ctx.save(); ctx.setTransform(1,0,0,1,0,0);
-      ctx.translate(W*q[0],H*q[1]); ctx.rotate(q[2]); ctx.scale(R/120,R/120);
+      ctx.translate(W*q[0]*_dpr,H*q[1]*_dpr); ctx.rotate(q[2]); ctx.scale((R/120)*_dpr,(R/120)*_dpr);
       holoObj(ctx,a); ctx.restore(); }
     ctx.setTransform(1,0,0,1,0,0);
-    ctx.fillStyle='rgba(255,200,110,.5)'; ctx.font='11px monospace'; ctx.textAlign='center';
-    ctx.fillText('피라미드를 화면 중앙에 올리고 어두운 방에서 45도 각도로 보세요', W/2, H-14);
+    ctx.fillStyle='rgba(255,200,110,.6)'; ctx.font=(11*_dpr)+'px monospace'; ctx.textAlign='center';
+    ctx.fillText('피라미드를 화면 중앙에 올리고 어두운 방에서 45도 각도로 보세요', W*_dpr/2, (H-14)*_dpr);
   }catch(e){}
   holoRAF=requestAnimationFrame(holoDraw);
 }
