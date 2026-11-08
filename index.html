@@ -274,12 +274,13 @@ addEventListener('resize',resize); resize();
 const glowEl=document.getElementById('coreGlow'), stTxt=document.getElementById('stTxt');
 function frame(now){
   requestAnimationFrame(frame);
+  try{ if(typeof LLM!=='undefined'&&LLM.busy)return; }catch(e){} /* 두뇌 계산 중 GPU 양보 — 코어 정지, 완료 즉시 재개 */
   const time=now/1000; boost=Math.max(0,boost-0.012);
   if(!drag){ yaw+=vyaw; pitch+=vpitch; vyaw*=0.94; vpitch*=0.94; if(now-lastTouch>2600) yaw+=0.0032; }
   pitch=Math.max(-1.25,Math.min(1.25,pitch));
   if(gyroOn){ yaw+=gG*0.0009; pitch=Math.max(-1.25,Math.min(1.25,pitch+gB*0.0009)); }
   dist+=(distT-dist)*0.12;
-  const fp=boost>0.35?0.15:0.30;
+  const fp=1; /* 하얀 과노출 근본 수정 — 매 프레임 불투명 배경(기존 반투명 페이드는 fps 저하 시 잔상이 additive로 누적해 화면이 하얗게 탔음) */
   gl.useProgram(fprog); gl.uniform1f(fU,fp); gl.bindBuffer(gl.ARRAY_BUFFER,fbuf);
   gl.enableVertexAttribArray(fA); gl.vertexAttribPointer(fA,2,gl.FLOAT,false,0,0);
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.drawArrays(gl.TRIANGLES,0,6);
@@ -1391,7 +1392,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='16.7'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.8'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1850,6 +1851,7 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
+    if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
     if(LLM.ready&&!LLM.busy){ try{
       if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
         let bubble=null,acc='';
@@ -3116,6 +3118,19 @@ function tgLoop(){
 const LLM={eng:null,ready:false,busy:false,kind:null,
   MODELS:{lite:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',std:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',pro:'gemma-2-2b-it-q4f16_1-MLC'},
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
+  sleepT:null,
+  kick(){
+    try{ clearTimeout(LLM.sleepT); }catch(e){}
+    if(!LLM.ready)return;
+    LLM.sleepT=setTimeout(function(){
+      if(!LLM.ready||LLM.busy)return;
+      if(typeof (LLM.eng&&LLM.eng.unload)!=='function')return;
+      try{ LLM.eng.unload(); }catch(e){}
+      LLM.ready=false; LLM.eng=null;
+      try{ PERF.tier=0; PERF.forced=false; PERF.apply(); }catch(e){}
+      try{ toast('🌙 두뇌 수면 — GPU·메모리 반환, 코어 원래 화력 복귀. 다음 대화에 캐시에서 바로 깨어납니다'); }catch(e){}
+    },180000);
+  },
   async load(kind){
     if(LLM.busy) throw new Error('이식이 이미 진행 중입니다');
     if(!('gpu' in navigator)) throw new Error('이 브라우저는 WebGPU 미지원 — 안드로이드 크롬 최신버전(121+)에서 시도하세요');
@@ -3129,7 +3144,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
         const el=document.getElementById('llmStat');
         if(el) el.textContent='이식 중… '+Math.round((r.progress||0)*100)+'% — '+String(r.text||'').slice(0,90);
       }});
-      LLM.ready=true; LLM.kind=kind;
+      LLM.ready=true; LLM.kind=kind; try{ LLM.kick(); }catch(e){}
       try{ store.set('jvs-llm',kind); }catch(e){}
       let tps='';
       try{
@@ -3147,6 +3162,8 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
   },
   async ask(t,ref,onDelta){
     if(!LLM.ready||LLM.busy) return null;
+    LLM.busy=true;
+    try{
     let mem='';
     try{ const h=(CTX&&CTX.hist)?CTX.hist.slice(-4):[];
       mem=h.map(x=>((x.r==='u'||x.who==='u')?'사장님':'자비스')+': '+String(x.t||x.text||'')).filter(x=>x.length>3).join('\n');
@@ -3167,6 +3184,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     if(!out){ const res=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200});
       out=res.choices[0].message.content; }
     return out;
+    } finally { LLM.busy=false; try{ LLM.kick(); }catch(e){} }
   }
 };
 /* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
