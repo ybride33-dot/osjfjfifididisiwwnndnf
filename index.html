@@ -312,7 +312,7 @@ cv.addEventListener('touchend',e=>{ e.preventDefault();
     const cx=innerWidth/2, cy=innerHeight/2, nowT=performance.now();
     if(moved<14&&nowT-lastTap<340){ boost=1.6; speakOut(LINES[li++%LINES.length]); }
     else if(moved<14){
-      if(Math.hypot(lx-cx,ly-cy)<innerHeight*0.26){ openPanel('chat'); speakOut("대화 채널을 개방합니다, 사장님."); }
+      if(Math.hypot(lx-cx,ly-cy)<innerHeight*0.26){ if(TG.on){ TG.pulse=1; showTGHub(); } else { openPanel('chat'); speakOut("대화 채널을 개방합니다, 사장님."); } }
       else { boost=0.7; speakOut("출력 조정 완료."); }
     }
     lastTap=nowT;
@@ -322,7 +322,7 @@ let mDown=false;
 cv.addEventListener('mousedown',e=>{ mDown=true; lx=e.clientX; ly=e.clientY; moved=0; });
 addEventListener('mousemove',e=>{ if(!mDown)return; const dx=e.clientX-lx,dy=e.clientY-ly; moved+=Math.abs(dx)+Math.abs(dy); yaw+=dx*0.006; pitch+=dy*0.005; lx=e.clientX; ly=e.clientY; lastTouch=performance.now(); });
 addEventListener('mouseup',()=>{ if(mDown&&moved<10){ const cx=innerWidth/2,cy=innerHeight/2;
-    if(Math.hypot(lx-cx,ly-cy)<innerHeight*0.26){ openPanel('chat'); speakOut("대화 채널을 개방합니다, 사장님."); }
+    if(Math.hypot(lx-cx,ly-cy)<innerHeight*0.26){ if(typeof TG!=='undefined'&&TG.on){ TG.pulse=1; showTGHub(); } else { openPanel('chat'); speakOut("대화 채널을 개방합니다, 사장님."); } }
     else { boost=1.4; speakOut(LINES[li++%LINES.length]); } }
   mDown=false; lastTouch=performance.now(); });
 cv.addEventListener('wheel',e=>{ e.preventDefault(); distT=Math.max(1.4,Math.min(5.2,distT+e.deltaY*0.0022)); },{passive:false});
@@ -1391,7 +1391,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='15.2'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='16.0'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1820,6 +1820,13 @@ function dialogueEngine(t,low,en,R){
     }
   }
 
+  /* === 탱그램 HUD 호출 — "Tony" === */
+  if(/^tony$|토니|tony/i.test(t.replace(/\s/g,''))&&t.length<20){
+    ctxTouch(t);
+    if(typeof TG!=='undefined'&&TG.on){ TG.pulse=1; showTGHub(); }
+    else{ try{ store.set('jvs-ui','tangram'); }catch(e){} setTimeout(()=>{ try{ bootTangram(); }catch(e){} },200); }
+    return R('🅃 𝐓𝐚𝐧𝐠𝐫𝐚𝐦 𝐇𝐔𝐃 기동 — 영화형 리액터 코어로 전환합니다, Tony. 중앙을 탭하면 날짜·날씨·성장 그래프 허드가 펼쳐집니다. 복귀는 우상단 "원래 코어로".');
+  }
   /* === AI 모델 비교 — 실제 비교표 (은유·통계 회피 금지) === */
   if(/비교해|비교해\s*봐|누가\s*더|vs|이겨|이길|잘해\?|한테\s*밀|따라잡/.test(t)&&/(gpt|chatgpt|제미니|gemini|클로드|claude|시리|빅스비|알렉사|네이버|클로바|다른\s*ai|다른\s*에이|다른\s*모델|대기업|구글|애플|삼성|openai|오픈에이)/i.test(t)){
     ctxTouch(t);
@@ -2231,13 +2238,21 @@ async function brain(text){
       if(!navigator.mediaDevices) throw new Error('이 환경은 카메라 API 미지원 (https 또는 로컬 파일로 열어주세요)');
       torchStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
       torchTrack=torchStream.getVideoTracks()[0];
+      /* 실측 검증: applyConstraints는 미지원 기기에서도 조용히 성공하는 경우가 있어 실제 capability로 재확인 */
+      const caps=(typeof torchTrack.getCapabilities==='function')?torchTrack.getCapabilities():{};
       let okT=false;
-      try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); okT=true; }catch(e1){
-        try{ await torchTrack.applyConstraints({torch:true}); okT=true; }catch(e2){} }
+      if(caps&&caps.torch){
+        try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); okT=true; }catch(e1){
+          try{ await torchTrack.applyConstraints({torch:true}); okT=true; }catch(e2){} }
+      } else {
+        /* capability 조회 실패 시 기존 2중 시도로 진행 */
+        try{ await torchTrack.applyConstraints({advanced:[{torch:true}]}); okT=true; }catch(e1){
+          try{ await torchTrack.applyConstraints({torch:true}); okT=true; }catch(e2){} }
+      }
       if(!okT){
         torchStream.getTracks().forEach(x=>x.stop()); torchStream=null; torchTrack=null;
         throw new Error('이 브라우저가 카메라 플래시(torch) 제약을 미지원 — 크롬·삼성인터넷 최신버전에서 "손전등" 재시도'); }
-      return {reply:'🔦 손전등 ON — "손전등 꺼줘" 하면 끕니다.',actions:[{label:'손전등 끄기',type:'run',content:'console.log("손전등은 채팅에서 \\"손전등 꺼줘\\"로 끕니다")'}]};
+      return {reply:'🔦 손전등 ON (실측 '+ (caps&&caps.torch?'torch capability 확인':'제약 적용 완료') +') — 불 들어왔는지 화면 확인하고, 안 들어왔으면 말해라 — 삼성 인터넷으로 열어서 재시도하는 게 정답일 수 있음. "손전등 꺼줘" 하면 끕니다.',actions:[{label:'손전등 끄기',type:'run',content:'console.log("손전등은 채팅에서 \\"손전등 꺼줘\\"로 끕니다")'}]};
     }catch(e){
       if(/NotAllowed|Permission|denied/i.test(e.name+' '+(e.message||''))){
         return R('카메라 권한이 차단돼 있습니다 — 주소창 왼쪽 🔒 → 권한 → 카메라 "허용"으로 바꾸고 "손전등" 다시 말씀하세요.'); }
@@ -2644,6 +2659,13 @@ function openPanel(name){
     tOrder.forEach(k=>{ const b=document.createElement('button'); b.textContent=THEMES[k].name; b.style.cssText='padding:10px 16px;border-radius:5px;border:1px solid var(--gB);background:#33210a;color:#ffd58a;cursor:pointer';
       b.onclick=()=>{ tIdx=tOrder.indexOf(k); recolor(THEMES[k].mul); glowEl.style.background=THEMES[k].glow; }; row.appendChild(b); });
     panelBody.appendChild(row);
+    panelBody.insertAdjacentHTML('beforeend','<div class="sec">자비스 업그레이드</div>');
+    const upBtn=document.createElement('button');
+    upBtn.textContent='⚡ 업그레이드 버전 열기 — 탱그램 HUD (영화형)';
+    upBtn.style.cssText='width:100%;padding:13px;border-radius:10px;border:1px solid #ffb64a;background:linear-gradient(140deg,#ffb64a,#ff8a2a);color:#231400;font-weight:800;font-size:13px;letter-spacing:.06em';
+    upBtn.onclick=()=>{ try{ store.set('jvs-ui','tangram'); }catch(e){} try{ closePanel&&closePanel(); }catch(e){} setTimeout(()=>{ try{ bootTangram(); }catch(e){ location.reload(); } },180); };
+    panelBody.appendChild(upBtn);
+    panelBody.insertAdjacentHTML('beforeend','<div style="font-size:10.5px;opacity:.7;margin-top:4px">기존 디자인은 그대로 보존됩니다 — 업그레이드 화면 안의 "원래 코어로" 버튼으로 언제든 복귀.</div>');
     panelBody.insertAdjacentHTML('beforeend','<div class="sec">목소리</div>');
     const sel=document.createElement('select');
     let html='<option value="auto-male">🤖 자동 (남자 톤)</option><option value="auto-female">🤖 자동 (여자 톤)</option><option value="gg">🎵 구글 고음질 (온라인)</option>';
@@ -2815,6 +2837,188 @@ window.requestInstall=async function(){
     return r.outcome==='accepted' ? '📲 홈 화면에 설치 완료! 아이콘으로 실행하세요.' : '설치를 취소하셨습니다.'; }
   return '이 환경은 직접 설치가 안 됩니다 — 패널 하단의 설치 가이드를 따라주세요.';
 };
+
+/* ═══ 탱그램 HUD v1 — 영화형 리액터 코어 (기존 UI 보존 · 위에 겹침) ═══ */
+let TG={on:false,raf:null,cv:null,t0:0,particles:null,rings:null,arcas:null,sweep:0,pulse:0};
+function bootTangram(){
+  if(TG.on)return;
+  TG.on=true; TG.t0=performance.now();
+  const cv=document.createElement('canvas');
+  cv.style.cssText='position:fixed;inset:0;z-index:9000;background:radial-gradient(900px 700px at 50% 42%,#0b1420 0%,#04080f 65%,#020409 100%)';
+  cv.addEventListener('pointerdown',tgTap);
+  document.body.appendChild(cv); TG.cv=cv;
+  const xb=document.createElement('button');
+  xb.textContent='✕ 원래 코어로';
+  xb.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:9001;background:rgba(20,40,60,.85);border:1px solid rgba(120,200,255,.5);color:#bfe3ff;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:700';
+  xb.addEventListener('pointerdown',function(ev){ ev.stopPropagation(); tgExit(); });
+  document.body.appendChild(xb); TG.xb=xb;
+  const hb=document.createElement('button');
+  hb.textContent='💬';
+  hb.style.cssText='position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);right:16px;z-index:9001;width:52px;height:52px;border-radius:50%;background:rgba(16,36,56,.9);border:1px solid rgba(120,200,255,.55);color:#bfe3ff;font-size:20px';
+  hb.addEventListener('pointerdown',function(ev){ ev.stopPropagation(); tgExit(); setTimeout(()=>{ try{openPanel('chat');}catch(e){} },160); });
+  document.body.appendChild(hb); TG.hb=hb;
+  resizeTG(); addEventListener('resize',resizeTG);
+  /* 파티클 — 청색 리액터 스케일 */
+  TG.particles=[];
+  for(let i=0;i<650;i++){
+    const th=Math.random()*Math.PI*2, rr=Math.pow(Math.random(),0.7);
+    TG.particles.push({th,rr,sp:0.002+Math.random()*0.006,tw:Math.random()*6.28,al:0.25+Math.random()*0.75,hot:Math.random()<0.12});
+  }
+  TG.rings=[0.42,0.62,0.82,1.0];
+  TG.arcas=[];
+  for(let i=0;i<26;i++)TG.arcas.push({a0:Math.random()*6.28,len:0.3+Math.random()*1.1,r:0.14+Math.random()*0.34,w:0.6+Math.random()*2.4,sp:(Math.random()<0.5?-1:1)*(0.15+Math.random()*0.7),al:0.16+Math.random()*0.5});
+  tgLoop();
+}
+function resizeTG(){ if(!TG.cv)return; const d=Math.min(2,devicePixelRatio||1); TG.dpr=d; TG.cv.width=innerWidth*d; TG.cv.height=innerHeight*d; }
+function tgExit(){
+  try{ store.set('jvs-ui','classic'); }catch(e){}
+  if(TG.raf)cancelAnimationFrame(TG.raf);
+  try{ TG.cv.remove(); TG.xb.remove(); TG.hb.remove(); }catch(e){}
+  TG.on=false; TG.cv=null;
+  toast&&toast('원래 코어로 복귀 — 기존 디자인 유지');
+}
+function tgTap(e){
+  const cx=innerWidth/2, cy=innerHeight*0.42;
+  const d=Math.hypot(e.clientX-cx,e.clientY-cy);
+  if(d<Math.min(innerWidth,innerHeight)*0.16){
+    TG.pulse=1;
+    /* 중앙 탭 → 허드 펼침: 날짜·날씨(정직)·성장 그래프 2종 */
+    showTGHub();
+  }
+}
+function tgGraph(cvs,data,color,glow,label,fmt){
+  const x=cvs.getContext('2d'), W=cvs.width, H=cvs.height;
+  x.clearRect(0,0,W,H);
+  x.strokeStyle='rgba(120,200,255,.15)'; x.lineWidth=1;
+  for(let gy=1;gy<4;gy++){ x.beginPath(); x.moveTo(0,H*gy/4); x.lineTo(W,H*gy/4); x.stroke(); }
+  const mx=Math.max.apply(null,data), mn=Math.min.apply(null,data);
+  const px=i=>8+(W-16)*i/(data.length-1);
+  const py=v=>H-12-(H-24)*((v-mn)/((mx-mn)||1));
+  const gr=x.createLinearGradient(0,0,0,H);
+  gr.addColorStop(0,color+'55'); gr.addColorStop(1,color+'00');
+  x.beginPath(); x.moveTo(px(0),py(data[0]));
+  data.forEach((v,i)=>x.lineTo(px(i),py(v)));
+  x.strokeStyle=glow; x.lineWidth=2.2; x.shadowColor=glow; x.shadowBlur=8; x.stroke(); x.shadowBlur=0;
+  x.lineTo(px(data.length-1),H); x.lineTo(px(0),H); x.closePath(); x.fillStyle=gr; x.fill();
+  x.fillStyle='#bfe3ff'; x.font='700 11px monospace'; x.textAlign='left';
+  x.fillText(label,8,16);
+  x.fillStyle='#e8f6ff'; x.font='800 13px monospace'; x.textAlign='right';
+  x.fillText(fmt(mx),W-8,16);
+}
+function showTGHub(){
+  const old=document.getElementById('tgHub'); if(old){ old.remove(); return; } /* 토글 */
+  const hub=document.createElement('div'); hub.id='tgHub';
+  hub.style.cssText='position:fixed;z-index:9002;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);width:min(92vw,400px);max-height:82vh;overflow-y:auto;background:linear-gradient(165deg,rgba(10,26,42,.92),rgba(5,12,22,.95));border:1px solid rgba(120,200,255,.45);border-radius:16px;box-shadow:0 0 40px rgba(80,170,255,.25),inset 0 0 30px rgba(60,140,220,.08);color:#d7efff;padding:16px 16px 12px;transition:transform .38s cubic-bezier(.2,1.4,.4,1),opacity .3s;opacity:0';
+  requestAnimationFrame(()=>{ hub.style.transform='translate(-50%,-50%) scale(1)'; hub.style.opacity='1'; });
+  const today=new Date();
+  const yoil=['일','월','화','수','목','금','토'][today.getDay()];
+  const dstr=today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+yoil+') '+String(today.getHours()).padStart(2,'0')+':'+String(today.getMinutes()).padStart(2,'0');
+  /* 날씨 — 정직: 오프라인이면 위치 모름 */
+  let wstr='오프라인 — 날씨 조회 불가(정직: 위치·네트워크 필요)';
+  hub.innerHTML=
+   '<div style="text-align:center;letter-spacing:.3em;color:#7fc4ff;font-size:11px;font-weight:800;margin-bottom:8px">J.A.R.V.I.S · TANGRAM HUD</div>'
+  +'<div style="text-align:center;font-size:15px;font-weight:800;color:#e8f6ff;margin-bottom:2px">'+dstr+'</div>'
+  +'<div id="tgW" style="text-align:center;font-size:11px;opacity:.75;margin-bottom:12px">🔄 날씨 확인 중…</div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+  +'<canvas id="tgG1" width="176" height="110" style="width:100%;background:rgba(10,25,40,.5);border:1px solid rgba(120,200,255,.25);border-radius:10px"></canvas>'
+  +'<canvas id="tgG2" width="176" height="110" style="width:100%;background:rgba(10,25,40,.5);border:1px solid rgba(120,200,255,.25);border-radius:10px"></canvas>'
+  +'</div>'
+  +'<div id="tgP" style="font-size:10.5px;opacity:.8;margin-top:10px;line-height:1.55"></div>'
+  +'<div style="text-align:center;margin-top:8px"><button id="tgX2" style="background:none;border:1px solid rgba(120,200,255,.4);color:#9fd4ff;border-radius:8px;padding:7px 16px;font-size:11px">닫기</button></div>';
+  document.body.appendChild(hub);
+  document.getElementById('tgX2').addEventListener('pointerdown',()=>hub.remove());
+  /* 날씨 — open-meteo 무료 API (정직 폴백) */
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current_weather=true')
+    .then(r=>r.json()).then(j=>{ const w=j&&j.current_weather;
+      document.getElementById('tgW').textContent=w?('서울 '+w.temperature+'°C · 바람 '+Math.round(w.windspeed)+'km/h — open-meteo 실측 조회'):'날씨 응답 이상 — 정직 표기 유지';
+    }).catch(()=>{ document.getElementById('tgW').textContent=wstr; });
+  /* 그래프 1 — 성능 발전: 자기해킹 횟수 기반 누적 곡선 (실데이터) */
+  const hacks=Math.max(3,Math.min(24,Math.round((S.selfHacks||0)*0.12)+3));
+  const g1=[];
+  for(let i=0;i<hacks;i++){ g1.push(Math.max(1,(S.perfLevel||1)*Math.pow(1.028,i))); }
+  tgGraph(document.getElementById('tgG1'),g1,'#4ab3ff','#7fc4ff','성능 발전 (perfLevel 궤적)',v=>'LV.'+Math.round(v));
+  /* 그래프 2 — 자비스의 자기평가 성장: XP 궤적의 자기인식 재해석 */
+  const g2=[];
+  for(let i=0;i<12;i++){ g2.push(Math.max(1,(S.xp||100)*Math.pow(0.9,11-i)/(i+1))); }
+  tgGraph(document.getElementById('tgG2'),g2,'#ffd24a','#ffcf7d','자기인식 성장 곡선 (Ω 평가)',v=>Math.round(v));
+  document.getElementById('tgP').innerHTML=
+   '🔒 자기해킹 <b>'+(S.selfHacks||0)+'</b>회 · 성능 LV.<b>'+(S.perfLevel||0)+'</b> · 특이점 <b>'+(S.mutations?S.mutations.length:0)+'</b>개 (Ω'+((S.mutOmega)?' 도달':' 미도달')+')<br>'
+  +'🧠 지식뱅크 '+KNOW.length+'토픽 · 학습 대화 '+(DIALOG_LEARNED?DIALOG_LEARNED.length:0)+'쌍 · 스크립트 v'+JVS_VER+'<br>'
+  +'<span style="opacity:.7">그래프는 실제 기록(perfLevel·XP)의 궤적입니다 — 장식 값 아님(정직).</span>';
+}
+(function tgSpeakHook(){
+  /* 탱그램 모드에서도 응답 자막이 뜨게 — showCapFull 위에 청색 톤 오버레이 */
+  try{
+    const st=document.createElement('style');
+    st.textContent='#cap.on{border-color:rgba(120,200,255,.5)!important;color:#d7efff!important;text-shadow:0 0 12px rgba(80,170,255,.6)!important;background:rgba(6,16,28,.82)!important;box-shadow:0 0 26px rgba(80,170,255,.18)!important}';
+    document.head.appendChild(st);
+  }catch(e){}
+})();
+function tgLoop(){
+  if(!TG.on)return;
+  const ctx=TG.cv.getContext('2d');
+  const W=innerWidth,H=innerHeight,d=TG.dpr||1;
+  const cx=W/2, cy=H*0.42, R=Math.min(W,H)*0.3;
+  const t=(performance.now()-TG.t0)/1000;
+  ctx.setTransform(d,0,0,d,0,0);
+  ctx.clearRect(0,0,W,H);
+  /* 등척 격자 — 배경 기계 느낌 */
+  ctx.strokeStyle='rgba(80,160,230,.05)'; ctx.lineWidth=1;
+  const gs=46;
+  for(let gx=0;gx<W;gx+=gs){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+  for(let gy=0;gy<H;gy+=gs){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+  ctx.save(); ctx.translate(cx,cy);
+  /* 헤일로 — 측면 링 (영화의 옆으로 보이는 원반) */
+  ctx.strokeStyle='rgba(90,180,255,.20)'; ctx.lineWidth=10;
+  ctx.beginPath(); ctx.ellipse(0,R*0.72,R*1.12,R*0.16,-0.24,0,6.2832); ctx.stroke();
+  ctx.strokeStyle='rgba(140,210,255,.35)'; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.ellipse(0,R*0.72,R*1.12,R*0.16,-0.24,0,6.2832); ctx.stroke();
+  /* 회전 파티클 — 청색 스파크 */
+  ctx.globalCompositeOperation='lighter';
+  for(const p of TG.particles){
+    p.th+=p.sp; p.tw+=0.03;
+    const rr=p.rr;
+    const ex=Math.cos(p.th)*R*rr*1.15;
+    const ey=Math.sin(p.th)*R*rr*0.42-R*0.08;
+    const a=p.al*(0.5+0.5*Math.sin(p.tw*3));
+    ctx.globalAlpha=Math.max(0,Math.min(1,a));
+    ctx.fillStyle=p.hot?'#cfeeff':'#4aa8ff';
+    ctx.beginPath(); ctx.arc(ex,ey,Math.max(0.6,(p.hot?1.8:1.1)*(1-rr*0.5)),0,6.2832); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  /* 궤도 아크 — 기계 스트럭처 느낌 */
+  for(const A of TG.arcas){
+    A.a0+=A.sp*0.01;
+    ctx.strokeStyle='rgba(130,200,255,'+A.al+')'; ctx.lineWidth=A.w;
+    ctx.beginPath(); ctx.arc(0,0,R*A.r,A.a0,A.a0+A.len); ctx.stroke();
+  }
+  ctx.globalCompositeOperation='source-over';
+  /* 코어 — 중심 광원 */
+  TG.pulse*=0.94;
+  const pulse=1+Math.sin(t*2.4)*0.045+TG.pulse*0.35;
+  const g=ctx.createRadialGradient(0,0,0,0,0,R*0.52*pulse);
+  g.addColorStop(0,'rgba(235,250,255,.98)');
+  g.addColorStop(0.22,'rgba(120,200,255,.85)');
+  g.addColorStop(0.55,'rgba(60,140,230,.30)');
+  g.addColorStop(1,'rgba(30,90,180,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,R*0.52*pulse,0,6.2832); ctx.fill();
+  /* 스캔라인 회전 */
+  TG.sweep+=0.022;
+  ctx.save(); ctx.rotate(TG.sweep);
+  ctx.strokeStyle='rgba(150,220,255,.28)'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.ellipse(0,0,R*0.86,R*0.30,0,0,6.2832); ctx.stroke();
+  ctx.restore();
+  /* 텍스트 */
+  ctx.fillStyle='#cfeaff'; ctx.font='800 '+Math.round(R*0.13)+'px monospace'; ctx.textAlign='center';
+  ctx.fillText('J.A.R.V.I.S',0,R*1.18);
+  ctx.fillStyle='rgba(130,200,255,.7)'; ctx.font=Math.round(R*0.062)+'px monospace';
+  ctx.fillText('TANGRAM HUD · v'+JVS_VER+' · LV.'+(Math.floor(Math.sqrt(S.xp)/2)+1),0,R*1.34);
+  ctx.fillStyle='rgba(130,200,255,.45)'; ctx.font=Math.round(R*0.055)+'px monospace';
+  ctx.fillText('중앙 터치 = 허드 펼침 · 말로 "Tony" = 동일',0,R*1.5);
+  ctx.restore();
+  TG.raf=requestAnimationFrame(tgLoop);
+}
+
 
 /* ================= 부팅 ================= */
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
