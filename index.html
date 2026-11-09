@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.5'; /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.6'; /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,7 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
-  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
+  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -3632,9 +3632,24 @@ const K={cnt:0,sum:0,samp:0,hits:0,
     return '🥋 자가훈련장(도장) — 알파제로식 루프의 폰 버전 실측\n'
      +(onlyRep?'':'· 이번 배치 '+k+'판: 첫시도 해결 '+cl+' · 역인과 수정 후 해결 '+rt+' · 미해결 '+fl+' · 소요 '+ms+'ms\n')
      +'· 누적 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n'
-     +'· 루프 해부: 판=V:\\ 샌드박스 · 심판=목표 출력 일치(자동·완벽) · 반복=라운드 · 학습=수리 전략·궤적·실패양분 누적\n'
+     +(this.inf.on?'· 무한 연마: 가동 중 🔥 — 세션 '+this.inf.rounds+'판 자동 훈련 중\n':'')     +'· 루프 해부: 판=V:\\ 샌드박스 · 심판=목표 출력 일치(자동·완벽) · 반복=라운드 · 학습=수리 전략·궤적·실패양분 누적\n'
      +'· 정직 구분: 두뇌 가중치는 안 늘음(그건 ④,M1 몫) — 늘어나는 건 두뇌 둘레의 실력. 알파고도 신경망+탐색 결합이었으니 우리도 두뇌(M1)+도장(폰) 결합이 정답\n'
      +'· M1 도착 시: 도장이 코드모델의 스파링 파트너가 됨 — 무한 자가연마, 네트워크 0'; }catch(e){ return '도장 오류: '+e.message; } },
+  inf:{on:false,rounds:0,t0:0,ticks:0},
+  infTick(){ try{ if(!this.inf.on)return;
+    if(typeof document!=='undefined'&&document.hidden){ /* 화면 숨음 — 저전력 대기, 타이머만 유지 */ }
+    else{ for(let i=0;i<25;i++){ this.dojoRound(); } this.inf.rounds+=25; this.inf.ticks++;
+      if(this.inf.ticks%4===0){ try{ evo('🥋 무한 연마 — 세션 '+this.inf.rounds+'판 자동 훈련 완료'); }catch(e){} } }
+    const self=this; setTimeout(function(){ try{ self.infTick(); }catch(e){} },700); }catch(e){} },
+  infStart(){ try{ if(this.inf.on)return '이미 무한 연마 가동 중 — 현재 세션 '+this.inf.rounds+'판. "도장 정지"로 멈춥니다.';
+    this.inf={on:true,rounds:0,t0:Date.now(),ticks:0}; const self=this;
+    setTimeout(function(){ try{ self.infTick(); }catch(e){} },400);
+    try{ evo('🥋 무한 연마 모드 개시 — 알파제로 루프 상시 가동'); }catch(e){}
+    return '🥋 무한 연마 모드 개시 — 알파제로 루프가 이제 끊기지 않습니다.\n· 방식: 25판씩 묶어 0.7초 간격으로 영원히 (1틱당 수 ms — 폰 부하 최소, 화면 숨으면 저전력 대기)\n· 승패는 도장 누적에 자동 반영 · 중간 보고는 "도장 보고"\n· 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼입니다.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
+  infStop(){ try{ if(!this.inf.on)return '무한 연마 현재 대기 중 — "도장 무한 모드"로 개시합니다.';
+    const ms=Date.now()-this.inf.t0; this.inf.on=false; const d=this.dojoStat();
+    try{ evo('🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판'); }catch(e){}
+    return '🥋 무한 연마 종료 — 이번 세션 '+this.inf.rounds+'판 · '+Math.round(ms/1000)+'초 경과\n· 누적 총 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n· 두뇌는 쉬었지만 둘레 실력은 안 쉬었습니다 — 그게 도장의 설계입니다.'; }catch(e){ return '정지 오류: '+e.message; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
