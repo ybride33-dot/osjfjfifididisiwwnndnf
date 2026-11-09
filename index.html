@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.6'; /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.7'; /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,7 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
-  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
+  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(내 레이팅|레이팅 보고|레이팅 알려|elo)/i.test(t))return R(K.eloReport()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -3601,55 +3601,124 @@ const K={cnt:0,sum:0,samp:0,hits:0,
      +'· 최근: '+((f.log||[]).slice(-5).map(function(x){return (x.ok?'✅':'⚠')+x.l;}).join(' · ')||'기록 없음')+'\n'
      +'· 원칙: 말로 증명하지 않는다 — V:\\ 에서 실제로 돌아간 코드만 실적으로 등재. 역인과 루프(6종 알고리즘 자가수정)도 이 실적에 누적\n'
      +'· 승격 경로: 폰 포지(실행증명 코딩) → M1 포지(로컬 코드모델 7B 장착+자가수정 무한 루프 — 네트워크 0인 개인 코딩 공장)'; }catch(e){ return '포지 보고 오류: '+e.message; } },
-  prob(){ try{ const N=3+Math.floor(Math.random()*7), E=3+Math.floor(Math.random()*6);
-    const W=['time','code','star','moon','iron','nano','arc'][Math.floor(Math.random()*7)];
-    const A=[N,E+3,E+7,N+2].sort(function(x,y){return x-y;}); const MX=A[3];
-    const P=[
-     {goal:'합: '+(N*(N+1)/2), ok:'var s=0; for(var i=1;i<='+N+';i++){ s+=i; } console.log("합: "+s);', bug:'var s=0; for(var i=1;i<'+N+';i++){ s+=i; } console.log("합: "+s);', fx:[['i<'+N+';','i<='+N+';','경계 부등호']]},
-     {goal:N+'! = '+(function(n){var f=1;for(var i=2;i<=n;i++)f*=i;return f;})(N), ok:'var f=1; for(var i=2;i<='+N+';i++){ f*=i; } console.log("'+N+'! = "+f);', bug:'var f=0; for(var i=2;i<='+N+';i++){ f*=i; } console.log("'+N+'! = "+f);', fx:[['var f=0;','var f=1;','곱 누적 초기값']]},
-     {goal:'2^'+E+' = '+Math.pow(2,E), ok:'var v=1; for(var i=0;i<'+E+';i++){ v*=2; } console.log("2^'+E+' = "+v);', bug:'var v=1; for(var i=0;i<'+(E-1)+';i++){ v*=2; } console.log("2^'+E+' = "+v);', fx:[['i<'+(E-1)+';','i<'+E+';','반복 횟수']]},
-     {goal:'최댓값 '+MX, ok:'var a=['+A.join(',')+']; var m=a[0]; for(var i=1;i<a.length;i++){ if(a[i]>m)m=a[i]; } console.log("최댓값 "+m);', bug:'var a=['+A.join(',')+']; var m=a[0]; for(var i=1;i<a.length;i++){ if(a[i]<m)m=a[i]; } console.log("최댓값 "+m);', fx:[['a[i]<m','a[i]>m','비교 방향']]},
-     {goal:'반전: '+W.split('').reverse().join(''), ok:'var w="'+W+'"; console.log("반전: "+w.split("").reverse().join(""));', bug:'var w="'+W+'"; console.log("반전: "+w.split("").join(""));', fx:[['.split("").join("")','.split("").reverse().join("")','반전 단계 누락']]},
-     {goal:'짝수합 '+(N*(N+1)), ok:'var s=0; for(var i=2;i<='+(2*N)+';i+=2){ s+=i; } console.log("짝수합 "+s);', bug:'var s=0; for(var i=2;i<='+(2*N)+';i+=1){ s+=i; } console.log("짝수합 "+s);', fx:[['i+=1','i+=2','증가 단계']]}
-    ];
-    return P[Math.floor(Math.random()*P.length)]; }catch(e){ return null; } },
+  PROB_T:[
+   {n:'합',bonus:0,min:1,make:function(d){ const N=3+d*7+Math.floor(Math.random()*(4+d*6)); const S=N*(N+1)/2;
+     return {goal:'합: '+S, ok:'var s=0; for(var i=1;i<='+N+';i++){ s+=i; } console.log("합: "+s);',
+      bug:'var s=0; for(var i=1;i<'+N+';i++){ s+=i; } console.log("합: "+s);', fx:[['i<'+N+';','i<='+N+';','경계 부등호']]}; }},
+   {n:'팩토리얼',bonus:20,min:1,make:function(d){ const N=2+d+Math.floor(Math.random()*(2+d)); let f=1; for(let i=2;i<=N;i++)f*=i;
+     return {goal:N+'! = '+f, ok:'var f=1; for(var i=2;i<='+N+';i++){ f*=i; } console.log("'+N+'! = "+f);',
+      bug:'var f=0; for(var i=2;i<='+N+';i++){ f*=i; } console.log("'+N+'! = "+f);', fx:[['var f=0;','var f=1;','곱 누적 초기값']]}; }},
+   {n:'거듭제곱',bonus:30,min:1,make:function(d){ const E=2+d*2+Math.floor(Math.random()*(2+d)); const V=Math.pow(2,E);
+     return {goal:'2^'+E+' = '+V, ok:'var v=1; for(var i=0;i<'+E+';i++){ v*=2; } console.log("2^'+E+' = "+v);',
+      bug:'var v=1; for(var i=0;i<'+(E-1)+';i++){ v*=2; } console.log("2^'+E+' = "+v);', fx:[['i<'+(E-1)+';','i<'+E+';','반복 횟수']]}; }},
+   {n:'최댓값',bonus:40,min:1,make:function(d){ const L=3+d*2; const a=[]; for(let i=0;i<L;i++){ a.push(d>=4?(Math.floor(Math.random()*200)-100):Math.floor(Math.random()*50)+1); }
+     const MX=Math.max.apply(null,a);
+     return {goal:'최댓값 '+MX, ok:'var a=['+a.join(',')+']; var m=a[0]; for(var i=1;i<a.length;i++){ if(a[i]>m)m=a[i]; } console.log("최댓값 "+m);',
+      bug:'var a=['+a.join(',')+']; var m=a[0]; for(var i=1;i<a.length;i++){ if(a[i]<m)m=a[i]; } console.log("최댓값 "+m);', fx:[['a[i]<m','a[i]>m','비교 방향']]}; }},
+   {n:'문자열 반전',bonus:50,min:1,make:function(d){ const W=['starlord','ironman','vibranium','jarviscore','starkindustries','quantumrealm','neuralnetwork'][Math.floor(Math.random()*7)];
+     return {goal:'반전: '+W.split('').reverse().join(''), ok:'var w="'+W+'"; console.log("반전: "+w.split("").reverse().join(""));',
+      bug:'var w="'+W+'"; console.log("반전: "+w.split("").join(""));', fx:[['.split("").join("")','.split("").reverse().join("")','반전 단계 누락']]}; }},
+   {n:'배수합',bonus:40,min:1,make:function(d){ const st=[2,3,5][Math.floor(Math.random()*3)]; const N=(3+d*4+Math.floor(Math.random()*8))*st; let s=0; for(let i=st;i<=N;i+=st)s+=i;
+     return {goal:'배수합 '+s, ok:'var s=0; for(var i='+st+';i<='+N+';i+='+st+'){ s+=i; } console.log("배수합 "+s);',
+      bug:'var s=0; for(var i='+st+';i<='+N+';i+=1){ s+=i; } console.log("배수합 "+s);', fx:[['i+=1','i+='+st,'증가 단계']]}; }},
+   {n:'소수 개수',bonus:140,min:2,make:function(d){ const N=10+d*8+Math.floor(Math.random()*10); let c=0; for(let i=2;i<=N;i++){ let p=true; for(let j=2;j*j<=i;j++){ if(i%j===0){p=false;break;} } if(p)c++; }
+     return {goal:'소수 '+c+'개', ok:'var c=0; for(var i=2;i<='+N+';i++){ var p=true; for(var j=2;j*j<=i;j++){ if(i%j===0){ p=false; break; } } if(p)c++; } console.log("소수 "+c+"개");',
+      bug:'var c=0; for(var i=2;i<='+N+';i++){ var p=true; for(var j=2;j*j<i;j++){ if(i%j===0){ p=false; break; } } if(p)c++; } console.log("소수 "+c+"개");', fx:[['j*j<i','j*j<=i','제곱근 경계']]}; }},
+   {n:'2진수 변환',bonus:120,min:2,make:function(d){ const N=5+d*20+Math.floor(Math.random()*20);
+     return {goal:'2진수: '+N.toString(2), ok:'var n='+N+'; var s2=n.toString(2); console.log("2진수: "+s2);',
+      bug:'var n='+N+'; var s2=n.toString(3); console.log("2진수: "+s2);', fx:[['toString(3)','toString(2)','진법 상수']]}; }},
+   {n:'평균',bonus:60,min:2,make:function(d){ const L=4+d*2; const a=[]; for(let i=0;i<L;i++)a.push(Math.floor(Math.random()*100)+1);
+     const sum=a.reduce(function(x,y){return x+y;},0); const avg=(sum/L).toFixed(2);
+     return {goal:'평균: '+avg, ok:'var a=['+a.join(',')+']; var s=0; for(var i=0;i<a.length;i++)s+=a[i]; console.log("평균: "+(s/a.length).toFixed(2));',
+      bug:'var a=['+a.join(',')+']; var s=0; for(var i=0;i<a.length;i++)s+=a[i]; console.log("평균: "+(s/(a.length-1)).toFixed(2));', fx:[['a.length-1','a.length','나눗셈 분모']]}; }},
+   {n:'피보나치',bonus:110,min:2,make:function(d){ const T=6+d*2; let a=1,b=1; for(let i=0;i<T-2;i++){ const t=a+b; a=b; b=t; }
+     return {goal:'피보나치 '+T+'번째: '+a, ok:'var a=1,b=1; for(var i=0;i<'+(T-2)+';i++){ var t=a+b; a=b; b=t; } console.log("피보나치 '+T+'번째: "+a);',
+      bug:'var a=1,b=1; for(var i=0;i<'+(T-3)+';i++){ var t=a+b; a=b; b=t; } console.log("피보나치 '+T+'번째: "+a);', fx:[['i<'+(T-3)+';','i<'+(T-2)+';','항수 계산']]}; }},
+   {n:'최대공약수',bonus:130,min:3,make:function(d){ function g(x,y){ while(y){ const t=x%y; x=y; y=t; } return x; }
+     let A=20+d*30+Math.floor(Math.random()*40), B=10+Math.floor(Math.random()*(10+d*20)), gd=0;
+     while(g(A,B)!==1&&gd++<6)B++;
+     return {goal:'GCD: '+g(A,B), ok:'var a='+A+',b='+B+'; while(b>0){ var t=a%b; a=b; b=t; } console.log("GCD: "+a);',
+      bug:'var a='+A+',b='+B+'; while(b>1){ var t=a%b; a=b; b=t; } console.log("GCD: "+a);', fx:[['while(b>1)','while(b>0)','종료 조건']]}; }},
+   {n:'단어 순서',bonus:100,min:3,make:function(d){ const W=['별','강철','나노','아크','양자','코어','반응로','궤도']; const L=3+Math.floor(Math.random()*(1+d));
+     const ws=[]; for(let i=0;i<L;i++)ws.push(W[Math.floor(Math.random()*W.length)]);
+     const lit=ws.map(function(x){return '"'+x+'"';}).join(',');
+     return {goal:'순서: '+ws.slice().reverse().join(' '), ok:'var w=['+lit+']; console.log("순서: "+w.reverse().join(" "));',
+      bug:'var w=['+lit+']; console.log("순서: "+w.join(" "));', fx:[['w.join(" ")','w.reverse().join(" ")','순서 뒤집기 누락']]}; }}
+  ],
+  prob(dif){ try{ dif=Math.max(1,Math.min(5,(dif|0)||1)); const T=this.PROB_T.filter(function(x){ return dif>=x.min; });
+    const f=T[Math.floor(Math.random()*T.length)]; const p=f.make(dif);
+    p.pr=900+dif*140+f.bonus+Math.floor(Math.random()*30); if(!Array.isArray(p.fx))p.fx=[];
+    return p; }catch(e){ return null; } },
+  pickProb(){ try{ const R=this.elo.r; let best=null,bd=1e9;
+    for(let i=0;i<14;i++){ const dif=1+Math.floor(Math.random()*5); const p=this.prob(dif); if(!p)continue;
+      const dist=Math.abs(p.pr-R); if(dist<bd){ bd=dist; best=p; } if(dist<=180)break; }
+    return best; }catch(e){ return null; } },
   dojoStat(){ try{ const d=store.get('jvs-dojo'); return (d&&typeof d==='object')?d:{n:0,clean:0,retro:0,fail:0}; }catch(e){ return {n:0,clean:0,retro:0,fail:0}; } },
-  dojoRound(){ try{ const p=this.prob(); if(!p)return null; let code=(Math.random()<0.5)?p.bug:p.ok;
+  dojoRound(){ try{ const p=this.pickProb(); if(!p)return null; let code=(Math.random()<0.5)?p.bug:p.ok;
     let att=0,clean=false,fixedVia='';
     for(let k2=0;k2<7;k2++){ att++; const out=String(runJS(code));
       if(out.indexOf(p.goal)>=0){ clean=(att===1); break; }
       const fx=(p.fx||[]).find(function(x){ return code.indexOf(x[0])>=0&&fixedVia.indexOf(x[2])<0; });
       if(!fx)break; fixedVia+=(fixedVia?' → ':'')+fx[2]; code=code.replace(fx[0],fx[1]);
-      try{ evo('🥋 도장 — 목표 불일치 감지 → '+fx[2]+' 거꾸로 수정 (시도 '+att+')'); }catch(e){} }
-    try{ const d=this.dojoStat(); d.n++; if(clean)d.clean++; else if(att>1&&String(runJS(code)).indexOf(p.goal)>=0)d.retro++; else d.fail++;
+      try{ evo('🥋 도장 P'+p.pr+' — 목표 불일치 → '+fx[2]+' 거꾸로 수정 (시도 '+att+')'); }catch(e){} }
+    const solved=clean||fixedVia.length>0;
+    try{ const d=this.dojoStat(); d.n++; if(clean)d.clean++; else if(solved)d.retro++; else d.fail++;
       store.set('jvs-dojo',d); }catch(e){}
-    try{ this.forge(code,'도장:'+p.goal.slice(0,12)); }catch(e){}
-    return {clean:clean,att:att,goal:p.goal,fixedVia:fixedVia}; }catch(e){ return null; } },
+    try{ this.forge(code,'도장 P'+p.pr); }catch(e){}
+    const res=clean?1:(solved?0.5:0);
+    try{ this.rate(p.pr,res); }catch(e){}
+    return {clean:clean,att:att,goal:p.goal,fixedVia:fixedVia,pr:p.pr,res:res}; }catch(e){ return null; } },
   dojoBat(k){ k=(k|0)||0; const onlyRep=(k<=0); try{ k=onlyRep?0:Math.min(40,k); const t0=Date.now(); let cl=0,rt=0,fl=0;
-    for(let i=0;i<k;i++){ const r=this.dojoRound(); if(!r){fl++;continue;}
-      if(r.clean)cl++; else if(r.att>1&&String(runJS('')) !== null && r.fixedVia)rt++; else if(r.att===1)cl++; else fl++; }
-    const d=this.dojoStat(); const ms=Date.now()-t0;
+    for(let i=0;i<k;i++){ const r=this.dojoRound(); if(!r){ fl++; continue; }
+      if(r.clean)cl++; else if(r.res>0)rt++; else fl++; }
+    const d=this.dojoStat(); const ms=Date.now()-t0; const el=this.elo;
     return '🥋 자가훈련장(도장) — 알파제로식 루프의 폰 버전 실측\n'
-     +(onlyRep?'':'· 이번 배치 '+k+'판: 첫시도 해결 '+cl+' · 역인과 수정 후 해결 '+rt+' · 미해결 '+fl+' · 소요 '+ms+'ms\n')
+     +(onlyRep?'':'· 이번 배치 '+k+'판: 첫시도 '+cl+' · 수정후 '+rt+' · 미해결 '+fl+' · 소요 '+ms+'ms\n')
+     +(this.inf.on?'· 무한 연마: 가동 중 🔥 — 세션 '+this.inf.rounds+'판 (백그라운드 포함 계속)\n':'')
+     +'· ELO '+el.r+' 【'+this.rank()+'】 — 승 '+el.w+' · 무 '+el.d+' · 패 '+el.l+' · 최고연승 '+el.maxStreak+'\n'
      +'· 누적 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n'
-     +(this.inf.on?'· 무한 연마: 가동 중 🔥 — 세션 '+this.inf.rounds+'판 자동 훈련 중\n':'')     +'· 루프 해부: 판=V:\\ 샌드박스 · 심판=목표 출력 일치(자동·완벽) · 반복=라운드 · 학습=수리 전략·궤적·실패양분 누적\n'
-     +'· 정직 구분: 두뇌 가중치는 안 늘음(그건 ④,M1 몫) — 늘어나는 건 두뇌 둘레의 실력. 알파고도 신경망+탐색 결합이었으니 우리도 두뇌(M1)+도장(폰) 결합이 정답\n'
-     +'· M1 도착 시: 도장이 코드모델의 스파링 파트너가 됨 — 무한 자가연마, 네트워크 0'; }catch(e){ return '도장 오류: '+e.message; } },
+     +'· 루프 해부: 판=V:\\ 샌드박스 · 심판=목표 출력 일치(자동·완벽) · 반복=라운드(다른 탭에서도 워커 타이머로 지속) · 배점=문제마다 개별 ELO·매칭 ±180\n'
+     +'· 정직: 두뇌 가중치는 안 늘음(④, M1 몫) — 늘어나는 건 둘레 실력·레이팅·수리 전략\n'
+     +'· M1 도착 시: 도장이 코드모델의 스파링 파트너 — 무한 자가연마, 네트워크 0'; }catch(e){ return '도장 오류: '+e.message; } },
+  elo:{r:1200,w:0,l:0,d:0,streak:0,maxStreak:0,hist:[]},
+  eloLoad(){ try{ const e=store.get('jvs-elo'); if(e&&typeof e==='object'){ this.elo={r:e.r||1200,w:e.w||0,l:e.l||0,d:e.d||0,streak:e.streak||0,maxStreak:e.maxStreak||0,hist:Array.isArray(e.hist)?e.hist:[]}; } }catch(e){} },
+  rank(){ const r=this.elo.r; return r<1000?'브론즈':r<1200?'실버':r<1400?'골드':r<1600?'플래티넘':r<1800?'다이아':r<2000?'마스터':'챌린저'; },
+  rate(pr,res){ try{ const E=1/(1+Math.pow(10,(pr-this.elo.r)/400)); const dr=Math.round(32*(res-E));
+    this.elo.r=Math.max(400,Math.min(3000,this.elo.r+dr));
+    if(res===1){ this.elo.w++; this.elo.streak++; this.elo.maxStreak=Math.max(this.elo.maxStreak,this.elo.streak); }
+    else if(res===0){ this.elo.l++; this.elo.streak=0; } else { this.elo.d++; this.elo.streak=Math.max(0,this.elo.streak-1); }
+    this.elo.hist.push({pr:pr,res:res}); while(this.elo.hist.length>20)this.elo.hist.shift();
+    try{ store.set('jvs-elo',this.elo); }catch(e){}
+    return dr; }catch(e){ return 0; } },
+  eloReport(){ try{ const e=this.elo; const last=(e.hist||[]).slice(-5).map(function(x){ return 'P'+x.pr+(x.res===1?'✅':(x.res===0.5?'🟡':'❌')); }).join(' · ')||'기록 없음';
+    return '📊 도장 레이팅(ELO) 실측 보고\n'
+     +'· 현재 ELO '+e.r+' — 랭크 【'+this.rank()+'】 (캡 400~3000)\n'
+     +'· 전적: 승 '+e.w+' · 무 '+e.d+' · 패 '+e.l+' · 현 연승 '+e.streak+' · 최고 연승 '+e.maxStreak+'\n'
+     +'· 최근 문제(문제마다 배점이 다름): '+last+'\n'
+     +'· 매칭: 내 ELO 근처(±180) 배점만 출제 — 이기면 레이팅↑→더 어려운 문제, 지면 ↓→더 쉬운 문제 자동 조절\n'
+     +'· 문제 은행: '+this.PROB_T.length+'종 × 난이도 5단 × 랜덤 파라미터·배점 = 사실상 무한 출제 (전부 자체 생성)\n'
+     +'· 정직: 외부 코딩 사이트 문제는 저작권·약관 때문에 안 가져옵니다 — 대신 자체 무한 생성기로 같은 효과. 원하시는 유형은 말로 시키면 제네레이터에 추가합니다\n'
+     +(this.inf.on?'· 무한 연마: 가동 중 🔥 세션 '+this.inf.rounds+'판 — 다른 탭에서도 워커 타이머로 계속 돕니다':'· 무한 연마: 대기 — "도장 무한 모드"'); }catch(e2){ return '레이팅 보고 오류: '+e2.message; } },
   inf:{on:false,rounds:0,t0:0,ticks:0},
+  _wk:null,
   infTick(){ try{ if(!this.inf.on)return;
-    if(typeof document!=='undefined'&&document.hidden){ /* 화면 숨음 — 저전력 대기, 타이머만 유지 */ }
-    else{ for(let i=0;i<25;i++){ this.dojoRound(); } this.inf.rounds+=25; this.inf.ticks++;
-      if(this.inf.ticks%4===0){ try{ evo('🥋 무한 연마 — 세션 '+this.inf.rounds+'판 자동 훈련 완료'); }catch(e){} } }
-    const self=this; setTimeout(function(){ try{ self.infTick(); }catch(e){} },700); }catch(e){} },
-  infStart(){ try{ if(this.inf.on)return '이미 무한 연마 가동 중 — 현재 세션 '+this.inf.rounds+'판. "도장 정지"로 멈춥니다.';
-    this.inf={on:true,rounds:0,t0:Date.now(),ticks:0}; const self=this;
-    setTimeout(function(){ try{ self.infTick(); }catch(e){} },400);
-    try{ evo('🥋 무한 연마 모드 개시 — 알파제로 루프 상시 가동'); }catch(e){}
-    return '🥋 무한 연마 모드 개시 — 알파제로 루프가 이제 끊기지 않습니다.\n· 방식: 25판씩 묶어 0.7초 간격으로 영원히 (1틱당 수 ms — 폰 부하 최소, 화면 숨으면 저전력 대기)\n· 승패는 도장 누적에 자동 반영 · 중간 보고는 "도장 보고"\n· 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼입니다.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
+    for(let i=0;i<25;i++){ this.dojoRound(); } this.inf.rounds+=25; this.inf.ticks++;
+    if(this.inf.ticks%4===0){ try{ evo('🥋 무한 연마 — 세션 '+this.inf.rounds+'판 자동 훈련 완료'); }catch(e){} }
+    if(this._wk){ try{ this._wk.postMessage('go'); }catch(e){ this._wk=null; } }
+    if(!this._wk){ const s=this; setTimeout(function(){ try{ s.infTick(); }catch(e2){} },700); } }catch(e){} },
+  infStart(){ try{ if(this.inf.on)return '이미 무한 연마 가동 중 — 세션 '+this.inf.rounds+'판. "도장 정지"로 멈춥니다.';
+    try{ if(typeof Worker!=='undefined'&&!this._wk){ const blob=new Blob(["var t=null;onmessage=function(e){ if(e.data==='s'){ if(t){ clearInterval(t); t=null; } } else if(!t){ t=setInterval(function(){ postMessage('g'); },700); } };"],{type:'text/javascript'});
+      this._wk=new Worker(URL.createObjectURL(blob)); const s=this; this._wk.onmessage=function(){ try{ s.infTick(); }catch(e){} }; } }catch(e){ this._wk=null; }
+    this.inf={on:true,rounds:0,t0:Date.now(),ticks:0};
+    try{ evo('🥋 무한 연마 개시 — 백그라운드 '+(this._wk?'워커 타이머':'폴백 타이머')); }catch(e){}
+    this.infTick();
+    return '🥋 무한 연마 모드 개시 — 다른 탭 가도 계속 돕니다.\n· 구동: '+(this._wk?'웹워커 타이머(백그라운드 타이머 스로틀 회피)':'일반 타이머(백그라운드에선 브라우저가 느리게 스로틀 — 복귀 시 즉시 재개)')+'\n· 25판/틱 · 승패는 ELO에 자동 반영 · 문제는 내 레이팅에 맞춰 자동 난이도 조절\n· 중간 보고: "도장 보고"·"레이팅" · 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
   infStop(){ try{ if(!this.inf.on)return '무한 연마 현재 대기 중 — "도장 무한 모드"로 개시합니다.';
-    const ms=Date.now()-this.inf.t0; this.inf.on=false; const d=this.dojoStat();
+    const ms=Date.now()-this.inf.t0; this.inf.on=false;
+    try{ if(this._wk){ this._wk.postMessage('s'); } }catch(e){}
+    const d=this.dojoStat(); const el=this.elo;
     try{ evo('🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판'); }catch(e){}
-    return '🥋 무한 연마 종료 — 이번 세션 '+this.inf.rounds+'판 · '+Math.round(ms/1000)+'초 경과\n· 누적 총 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n· 두뇌는 쉬었지만 둘레 실력은 안 쉬었습니다 — 그게 도장의 설계입니다.'; }catch(e){ return '정지 오류: '+e.message; } },
+    return '🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판 · '+Math.round(ms/1000)+'초\n· 누적 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n· 레이팅 ELO '+el.r+'('+this.rank()+') — 세션 성적 반영 완료\n· 두뇌는 쉬었지만 둘레 실력은 안 쉬었습니다 — 그게 도장의 설계입니다.'; }catch(e){ return '정지 오류: '+e.message; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
@@ -3688,6 +3757,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
       +'· 누적 실측: 기동 '+(st.runs||0)+'회 · 성공 '+(st.wins||0)+'회 · 평균 시도 '+(st.runs?Math.round(st.att/st.runs*10)/10:0)+'회 · 평균 '+(st.runs?Math.round(st.ms/st.runs):0)+'ms'; }
 };
 try{ (function(){ const m=store.get('jvs-metak'); if(m&&typeof m==='object'){ K.cnt=m.cnt||0; K.sum=m.sum||0; K.samp=m.samp||0; K.hits=m.hits||0; } const _b=store.get('jvs-boss'); if(_b&&typeof _b==='object'){ K.boss.lv=_b.lv||50; K.boss.n=_b.n||0; } })(); }catch(e){}
+try{ if(typeof K!=='undefined')K.eloLoad(); }catch(e){}
 
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
