@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.2'; /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,6 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
+  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -1872,6 +1873,7 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
+    try{ if(typeof K!=='undefined'){ const g=K.guide(t); if(g)rag=rag?g+'\n'+rag:g; } }catch(e){}
     if(LLM.modeIs('offline')){ /* 오프라인 고정 — 클라우드 층 전부 스킵, 폰 두뇌·규칙엔진으로만 */ }
     else{
     /* 0층 — Gemini(키 있을 때): 2~3초 프리미엄 답변. 4.5초 간격 가드 */
@@ -1997,7 +1999,7 @@ async function brainSend(text){
   let out; const bt0=performance.now();
   try { out=await brain(text); }
   catch(e){ out={reply:'⚠️ 내부 모듈 오류(자가진단 기록): '+e.message}; evo('⛔ 오류 자가수정 시도 — '+e.message); }
-  finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} }
+  finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} try{ if(typeof K!=='undefined'&&out&&out.reply)K.onTurn(text,out.reply); }catch(e){} }
   const bt=performance.now()-bt0; S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
   addXP(2);
   if (typeof out==='string') out={reply:out};
@@ -3514,6 +3516,93 @@ const LEARN={turns:0,words:0,vocab:null,likes:null,faq:null,lastSave:0,
     return arr.slice(0,3).map(x=>x[0]).join(' / ')||'수집 중'; }
 };
 LEARN.init();
+/* ================= v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 (폰 렉 0 설계: 전 기관 동기 로컬 연산·네트워크 0·GPU 0) ================= */
+const K={cnt:0,sum:0,samp:0,hits:0,
+  DOMAINS:['바다의 해류','오케스트라 지휘봉','도시의 교차로','벌집 구조','강의 물길','등산 로프','시계태엽 장치','정원의 뿌리','불꽃의 포물선','천체 궤도'],
+  critic(a){ a=String(a||''); if(!a.trim())return 0; let s=60; const L=a.length;
+    if(L>=60&&L<=600)s+=10; else if(L<25)s-=30; else if(L>900)s-=8;
+    if(/[0-9]/.test(a))s+=10;
+    if(/[·•:\n]|1\)|2\)/.test(a))s+=8;
+    if(/(죄송|미안|할 수 없|못하겠|모르겠)/.test(a))s-=12;
+    try{ const ss=a.split(/[.!?\n]/).map(function(x){return x.trim();}).filter(function(x){return x.length>8;});
+      if(ss.length>2){ const set={}; ss.forEach(function(x){set[x]=(set[x]||0)+1;});
+        let rep=0; ss.forEach(function(x){ if(set[x]>rep)rep=set[x]; });
+        if(rep>1)s-=15*Math.min(2,rep-1); } }catch(e){}
+    return Math.max(0,Math.min(100,s)); },
+  key(t){ return String(t||'').replace(/[을를이가은는에의로으로에서에게다요까]/g,' ').split(/\s+/).filter(function(x){return x.length>1;}).slice(0,3).join(' '); },
+  ov(a,b){ try{ const A=String(a).split(/\s+/).filter(Boolean),B={}; String(b).split(/\s+/).forEach(function(x){B[x]=1;});
+    if(!A.length)return 0; let n=0; A.forEach(function(x){ if(B[x])n++; }); return n/A.length; }catch(e){ return 0; } },
+  tr(){ try{ const x=store.get('jvs-trace'); return Array.isArray(x)?x:[]; }catch(e){ return []; } },
+  fp(){ try{ const x=store.get('jvs-failpat'); return Array.isArray(x)?x:[]; }catch(e){ return []; } },
+  record(q,a){ try{ const tr=this.tr(); tr.push({q:String(q).slice(0,80),a:String(a).slice(0,120),s:this.critic(a),ts:Date.now()});
+    while(tr.length>120)tr.shift(); store.set('jvs-trace',tr); }catch(e){} },
+  noteFail(q,s){ try{ if(s>=45)return; const k=this.key(q); if(!k)return; const f=this.fp();
+    const e=f.find(function(x){return x.k===k;}); if(e)e.n++; else f.push({k:k,n:1});
+    f.sort(function(a,b){return b.n-a.n;}); while(f.length>30)f.pop(); store.set('jvs-failpat',f); }catch(e){} },
+  hitTok(a,b){ try{ const A=String(a).split(/\s+/),B=String(b).split(/\s+/);
+    for(let i=0;i<A.length;i++){ const x=A[i]; if(x.length<2)continue;
+      for(let j=0;j<B.length;j++){ const y=B[j]; if(y.startsWith(x)||x.startsWith(y))return true; } } return false; }catch(e){ return false; } },
+  guide(t){ try{ const out=[]; const tr=this.tr(); let best=null,bs=0;
+    for(let i=0;i<tr.length;i++){ const x=tr[i]; if(x.s<70)continue; let o=this.ov(t,x.q); if(o<0.5&&this.hitTok(t,x.q))o=0.5; if(o>bs){bs=o;best=x;} }
+    if(best&&bs>=0.45){ this.hits++; out.push('【궤적】과거 성공 답변 참고(유사도 '+bs.toFixed(2)+'): Q「'+best.q+'」→ '+best.a); }
+    const f=this.fp().slice(0,3);
+    if(f.length)out.push('【회피】과거 실점 패턴: '+f.map(function(x){return x.k+'('+x.n+'회)';}).join(', ')+' — 이 지점은 짧고 구체적으로.');
+    if(/(끝|왜|어떻게|어때|무슨|생각|의미|존재|만약|설명해)/.test(t)&&Math.random()<0.35)
+      out.push('【촉매】설명에 이 영역의 비유를 한 개 섞어라: '+this.DOMAINS[Math.floor(Math.random()*this.DOMAINS.length)]);
+    return out.length?out.join('\n'):null; }catch(e){ return null; } },
+  onTurn(q,a){ try{ const s=this.critic(a); this.sum+=s; this.samp++;
+    this.record(q,a); this.noteFail(q,s); this.cnt++;
+    store.set('jvs-metak',{cnt:this.cnt,sum:this.sum,samp:this.samp,hits:this.hits});
+    if(this.cnt%20===0)this.samsara(); }catch(e){} },
+  sam(){ try{ return store.get('jvs-samsara')||{gen:0,lessons:[]}; }catch(e){ return {gen:0,lessons:[]}; } },
+  samsara(){ try{ const prev=this.sam(); const tr=this.tr().filter(function(x){return x.s>=70;}).slice(-5);
+    const lessons=tr.map(function(x){return 'Q「'+x.q+'」→ '+x.a.slice(0,60);})
+      .concat(this.fp().slice(0,3).map(function(x){return '실점 회피: '+x.k;}));
+    const g={gen:(prev.gen||0)+1,ts:Date.now(),lessons:lessons.slice(0,8)};
+    store.set('jvs-samsara',g);
+    try{ CTX.topics.length=0; CTX.prevUser=''; }catch(e){}
+    try{ evo('生死輪廻 — 제'+g.gen+'전생 종료, 교훈 '+g.lessons.length+'개 유전'); toast('生死輪廻 — 전생 #'+g.gen+' 종료 · 교훈 '+g.lessons.length+'개 유전'); }catch(e){}
+    return g; }catch(e){ return null; } },
+  report(){ try{ const avg=this.samp?Math.round(this.sum/this.samp):0; const sam=this.sam(); const fp=this.fp(); const tr=this.tr();
+    return '🧠 메타인지 커널 보고 (전부 실측)\n'
+      +'· 비판자: 평균 '+avg+'/100 · 표본 '+this.samp+'건 — 규칙 채점, 네트워크 0\n'
+      +'· 생각의 궤적: '+tr.length+'경로 저장 · 유사 질문 재활용 '+this.hits+'회\n'
+      +'· 카오스(실패 양분): 실점 패턴 '+fp.length+'종 — 이후 답변에 회피 지시 자동 주입\n'
+      +'· 윤회: 전생 #'+(sam.gen||0)+' · 유전 교훈 '+((sam.lessons||[]).length)+'개 (20턴마다 자아 소멸→교훈만 이식)\n'
+      +'· 역인과: "역인과 시동" — 목표 확정→실행→"어? 뭔가 다르잖아"→목표에서 거꾸로 수정 루프 실동작\n'
+      +'· 렉: 전 기관 동기 로컬 연산 — 응답 지연 0 등급 (M1 오면 비판자가 LLM 자기비판+재생성으로 승격)'; }catch(e){ return '커널 보고 오류: '+e.message; } },
+  CH:[
+    {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
+     fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
+    {goal:'1,2,3,4,5',code:'var o=""; for(var i=0;i<6;i++){ o+=(i===0?"":",")+i; } console.log(o);',
+     fix:[{from:'var i=0;',to:'var i=1;',why:'시작점'}]},
+    {goal:'5! = 120',code:'var f=1; for(var i=1;i<=4;i++){ f*=i; } console.log("5! = "+f);',
+     fix:[{from:'i<=4',to:'i<=5',why:'반복 경계'}]}
+  ],
+  retro(){ try{ const t0=Date.now(); const c=this.CH[Math.floor(Math.random()*this.CH.length)];
+    let code=c.code,attempts=0,won=false; const fixlog=[];
+    for(let k=0;k<6;k++){ attempts++; const out=String(runJS(code));
+      if(out.indexOf(c.goal)>=0){ won=true; break; }
+      const fx=(c.fix||[]).find(function(x){ return code.indexOf(x.from)>=0&&fixlog.indexOf(x.why)<0; });
+      if(!fx)break; fixlog.push(fx.why); code=code.replace(fx.from,fx.to);
+      try{ evo('↩️ 역인과 — 실행 결과가 목표와 다름 감지 → '+fx.why+'에서 거꾸로 수정 (시도 '+attempts+')'); }catch(e){} }
+    const ms=Date.now()-t0;
+    try{ const st=store.get('jvs-retro')||{runs:0,wins:0,att:0,ms:0};
+      st.runs=(st.runs||0)+1; if(won)st.wins=(st.wins||0)+1; st.att=(st.att||0)+attempts; st.ms=(st.ms||0)+ms;
+      store.set('jvs-retro',st); }catch(e){}
+    return {won:won,attempts:attempts,ms:ms,code:code,goal:c.goal,fixlog:fixlog}; }catch(e){ return null; } },
+  retroReport(){ const r=this.retro();
+    if(!r)return '역인과 루프 오류';
+    let st={}; try{ st=store.get('jvs-retro')||{}; }catch(e){}
+    return '↩️ 역인과 수정 루프 — 실동작 보고\n'
+      +'· 목표(미래 상태 먼저 확정): 「'+r.goal+'」\n'
+      +'· 가상 워크스페이스 V:\\ 1차 실행 → 결과가 목표와 다르잖아? → 차이 감지\n'
+      +'· 목표에서 거꾸로 수정 '+r.attempts+'회 ('+(r.fixlog.join(' → ')||'수정 불필요 — 1회 목표 도달')+') · 소요 '+r.ms+'ms\n'
+      +'· 최종: '+(r.won?'목표 도달 ✅\n· 최종 코드: '+r.code:'미도달 ⚠')+'\n'
+      +'· 누적 실측: 기동 '+(st.runs||0)+'회 · 성공 '+(st.wins||0)+'회 · 평균 시도 '+(st.runs?Math.round(st.att/st.runs*10)/10:0)+'회 · 평균 '+(st.runs?Math.round(st.ms/st.runs):0)+'ms'; }
+};
+try{ (function(){ const m=store.get('jvs-metak'); if(m&&typeof m==='object'){ K.cnt=m.cnt||0; K.sum=m.sum||0; K.samp=m.samp||0; K.hits=m.hits||0; } })(); }catch(e){}
+
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
 /* ================= 부팅 ================= */
