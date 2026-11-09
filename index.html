@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.0'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.1'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1830,6 +1830,15 @@ async function dialogueEngine(t,low,en,R){
   }
 
   /* === 탱그램 HUD 호출 — "Tony" === */
+  /* 지식 먹이기 — "OO 먹여줘/배워줘/공부해" → 위키에서 영구 흡수 */
+  const feedM=t.match(/([가-힣a-zA-Z0-9\s]{2,20}?)\s*(먹여|배워|공부해|외워|흡수해|학습해|스터디)/);
+  if(feedM&&t.length<40){
+    ctxTouch(t);
+    const topic=feedM[1].trim();
+    const fed=(typeof ABS!=='undefined')?await ABS.feed(topic):null;
+    if(fed)return R('📚 흡수 완료 — 「'+fed.ti+'」를 제 지식DB에 영구 편입했습니다(요약 '+fed.b.length+'자). 이제 이 화제는 제 것이니 바로 물어보세요, 사장님. 추가로 "XX 먹여줘"면 계속 쌓습니다.');
+    return R('정직 보고 — 「'+topic+'」 위키 검색 실패(오프라인이거나 문서 없음). 온라인에서 다시 시도하거나 다른 표현으로 부탁합니다.');
+  }
   if(/^(tony|도니|토니|돈이|돈니|tony|dony|donnie)[!.,?~]*$/i.test(t.trim())||/tony|토니|돈이\s*(하|불러|켜|모드)/i.test(t)&&t.length<25){
     ctxTouch(t);
     try{ if(typeof TG!=='undefined'&&TG.on)tgExit(); }catch(e){}
@@ -1855,6 +1864,9 @@ async function dialogueEngine(t,low,en,R){
   if(bd<=vTh||(openQ&&bd<0.295)){
     /* 진짜 두뇌 우선 — DB 미적중 OR 열린 질문+약적중(실측 경계: 정확 화제 0.31~0.49, 엉뚱 화제 ~0.27)은 생성으로. 약관련 지식 2건 참고자료 주입(RAG) */
     let rag=null;
+    /* 자동 흡수 — DB에 없는 화제는 위키에서 먹여서 지식DB에 영구 편입(다음부턴 자기 지식으로 즉답). 45초 서버와 무관한 위키 자체 예절 */
+    try{ if(typeof ABS!=='undefined'&&Date.now()>(ABS._cool||0)){ ABS._cool=Date.now()+60000;
+      const fed=await ABS.feed(t); if(fed){ rag='【'+fed.ti+'】 '+fed.b.slice(0,380); } } }catch(e){}
     try{ const cand=[];
       for(let i=0;i<KNOW.length;i++){ const d=cosSim(v,KNOWV[i]); if(d>0.07)cand.push({i:i,d:d}); }
       cand.sort(function(a,b){ return b.d-a.d; });
@@ -3378,6 +3390,33 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
     }catch(e){}
   },1000);
 })();
+/* 지식 흡수 기관 — 위키 문서를 KNOW(자기 지식DB)로 영구 편입. 키 0·한도 0·재부팅 유지 */
+const ABS={fed:0,
+  async feed(topic){
+    try{
+      let w=await wikiLookup(topic);
+      if(!w)return null;
+      const entry={k:[w.title.toLowerCase(),w.title],ti:w.title,b:w.extract.slice(0,900),f:'【흡수】"'+w.title+'" 관련 더 물어보면 이어서 설명합니다.'};
+      const ex=KNOW.findIndex(e=>e.ti===w.title);
+      if(ex>=0)KNOW[ex]=entry; else KNOW.push(entry);
+      /* 벡터 인덱스 재계산 — 검색이 새 지식을 바로 본다 */
+      try{ KNOWV.push(vecOf(entry.k.join(' ')+' '+entry.ti)); }catch(e){}
+      this.fed++;
+      try{ store.set('jvs-knowx',(store.get('jvs-knowx')||[]).filter(x=>x.ti!==w.title).concat({k:entry.k,ti:entry.ti,b:entry.b,f:entry.f}).slice(-300)); }catch(e){}
+      return entry;
+    }catch(e){ return null; }
+  },
+  restore(){
+    try{ const xs=store.get('jvs-knowx')||[];
+      let added=0;
+      for(const x of xs){ if(KNOW.findIndex(e=>e.ti===x.ti)<0){ KNOW.push(x); try{ KNOWV.push(vecOf(x.k.join(' ')+' '+x.ti)); }catch(e){} added++; } }
+      if(added)setTimeout(function(){ try{ toast('📚 지난번 흡수 지식 '+added+'건 복원 — KNOW '+KNOW.length+'화제 체제'); }catch(e){} },6000);
+      return added;
+    }catch(e){ return 0; }
+  }
+};
+try{ setTimeout(function(){ try{ ABS.restore(); }catch(e){} },5000); }catch(e){}
+
 /* 위키백과 조회 — 검색 API(문서명 확정)→요약. 키 0·CORS 허용·브라우저 직결 */
 async function wikiLookup(t){
   try{
@@ -3478,7 +3517,8 @@ LEARN.init();
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
 /* ================= 부팅 ================= */
-try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
+try{ const lk=store.get('jvs-llm');
+if(false){} if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
 try{ setTimeout(async function(){ try{ if(LLM.modeIs('offline'))return; const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
 try{ setTimeout(function(){ if(LLM.hasGem())toast('🔑 Gemini 프리미엄 두뇌 감지 — 답변 2~3초 체제, 사장님'); },3200); }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
