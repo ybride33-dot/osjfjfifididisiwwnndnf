@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.8'; /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.9'; /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1888,7 +1888,16 @@ async function dialogueEngine(t,low,en,R){
       LLM.CLOUD.last=Date.now();
       let ref2=rag;
       try{ const w=await wikiLookup(t); if(w)ref2=(ref2?ref2+'\n':'')+'【위키백과:'+w.title+'】 '+w.extract.slice(0,600); }catch(e){}
-      const cr=await LLM.cloudAsk(t,ref2); if(cr&&cr.trim().length>1) return R(cr.trim());
+      let _cb=null;
+      const cr=await LLM.cloudAskS(t,ref2,function(pv){ try{
+        if(curPanel==='chat'){ if(!_cb){ _cb=document.createElement('div'); _cb.className='m j';
+          _cb.innerHTML='<span class="w">J.A.R.V.I.S</span><span></span>'; _cb.lastChild.textContent=pv;
+          chatDiv.appendChild(_cb);
+          try{ while(chatDiv.children.length>60)chatDiv.removeChild(chatDiv.firstChild); }catch(e){}
+          panelBody.scrollTop=panelBody.scrollHeight; }
+        else { _cb.lastChild.textContent=pv; try{ panelBody.scrollTop=panelBody.scrollHeight; }catch(e){} } } }catch(e){} });
+      if(_cb)_cb.remove();
+      if(cr&&cr.trim().length>1) return R(cr.trim());
     }catch(e){} }
     }
     if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
@@ -1999,7 +2008,7 @@ async function brainSend(text){
   let out; const bt0=performance.now();
   try { out=await brain(text); }
   catch(e){ out={reply:'⚠️ 내부 모듈 오류(자가진단 기록): '+e.message}; evo('⛔ 오류 자가수정 시도 — '+e.message); }
-  finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} try{ if(typeof K!=='undefined'&&out&&out.reply)K.onTurn(text,out.reply); }catch(e){} }
+  finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} try{ if(typeof K!=='undefined'&&out&&out.reply)K.onTurn(text,out.reply); }catch(e){} try{ if(typeof LLM!=='undefined'&&LLM.pushHist&&out&&out.reply)LLM.pushHist(text,out.reply); }catch(e){} }
   const bt=performance.now()-bt0; S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
   addXP(2);
   if (typeof out==='string') out={reply:out};
@@ -3251,7 +3260,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
       try{
         const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+LLM.GMODELS[mi]+':generateContent?key='+encodeURIComponent(k),{
           method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({contents:[{role:'user',parts:[{text:sys+'\n\n[사장님] '+t}]}],generationConfig:{maxOutputTokens:300,temperature:0.7}}),
+          body:JSON.stringify({contents:this.gemContents(t,ref),generationConfig:{maxOutputTokens:300,temperature:0.7}}),
           signal:AbortSignal.timeout(20000)});
         if(!res.ok){
           if(res.status===404)continue; /* 모델 은퇴 → 다음 모델 */
@@ -3266,6 +3275,35 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     }
     return null;
   },
+  hist:[],
+  pushHist(u,a){ try{ this.hist.push({u:String(u).slice(0,140),a:String(a).slice(0,180)}); while(this.hist.length>4)this.hist.shift(); }catch(e){} },
+  depthLine(){ try{ if(typeof K==='undefined'||!K.boss)return ''; return K.boss.lv>=85?'사장님은 전문가급 화법을 쓴다 — 기본 설명 금지, 원리·메커니즘 레벨로 깊게 기술하라.':(K.boss.lv>=65?'사장님 발화는 상위권 — 기본 설명보다 한 단계 깊게.':''); }catch(e){ return ''; } },
+  sysFor(ref){ try{ return '너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~5문장, 담백하고 자연스럽게. 모르면 지어내지 말고 정직하게. 어려운 말은 쉽게 풀어준다.'+this.depthLine()+(ref?'\n참고자료(소화해서 자연스럽게 활용, 복사 금지):\n'+String(ref).slice(0,1200):''); }catch(e){ return '너는 자비스 — 사장님 전용 비서. 한국어로.'; } },
+  msgsFor(t,ref){ const m=[{role:'system',content:this.sysFor(ref)}];
+    for(const h of (this.hist||[])){ m.push({role:'user',content:h.u}); m.push({role:'assistant',content:h.a}); }
+    m.push({role:'user',content:t}); return m; },
+  gemContents(t,ref){ const sys=this.sysFor(ref); const c=[];
+    for(const h of (this.hist||[])){ c.push({role:'user',parts:[{text:h.u}]}); c.push({role:'model',parts:[{text:h.a}]}); }
+    c.push({role:'user',parts:[{text:sys+'\n\n[사장님] '+t}]}); return c; },
+  sseParse(text,onD){ try{ String(text).split('\n').forEach(function(line){ let s=line.trim(); if(s.indexOf('data:')!==0)return; s=s.slice(5).trim(); if(!s||s==='[DONE]')return;
+    try{ const j=JSON.parse(s); const ch=j&&j.choices&&j.choices[0]; const d=(ch&&((ch.delta&&ch.delta.content)||(ch.message&&ch.message.content)))||''; if(d)onD(d); }catch(e){} }); }catch(e){} },
+  async cloudAskS(t,ref,onP){ const t0=Date.now();
+    try{ const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'openai',messages:this.msgsFor(t,ref),max_tokens:220,temperature:0.7,stream:true}),
+        signal:AbortSignal.timeout(35000)});
+      if(!res.ok){ if(res.status===402||res.status===429)LLM.CLOUD.cool=Date.now()+90000; return null; }
+      let ct=''; try{ ct=(res.headers&&res.headers.get&&res.headers.get('content-type'))||''; }catch(e){}
+      if(String(ct).indexOf('event-stream')<0||!res.body||typeof res.body.getReader!=='function'){
+        const j=await res.json(); const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+        LLM.CLOUD.lat=Date.now()-t0; return (c&&c.trim().length>1)?c.trim():null; }
+      const rd=res.body.getReader(); const dec=new TextDecoder(); let buf='',acc='';
+      while(true){ const _r=await rd.read(); if(_r.done)break; buf+=dec.decode(_r.value,{stream:true});
+        let ix; while((ix=buf.indexOf('\n'))>=0){ const line=buf.slice(0,ix); buf=buf.slice(ix+1);
+          let got=null; this.sseParse(line,function(d){ got=d; });
+          if(got){ acc+=got; try{ onP&&onP(acc); }catch(e){} } } }
+      LLM.CLOUD.lat=Date.now()-t0;
+      return (acc&&acc.trim().length>1)?acc.trim():null;
+    }catch(e){ return null; } },
   async cloudPing(){
     const t0=Date.now();
     try{ const r=await fetch('https://text.pollinations.ai/ping',{signal:AbortSignal.timeout(6000)});
@@ -3278,7 +3316,7 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
     try{
       const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 속 AI 비서. 한국어로 2~5문장, 담백하고 자연스럽게. 모르면 지어내지 말고 정직하게. 어려운 말은 쉽게 풀어준다.'+(ref?'\n참고자료(소화해서 자연스럽게 활용, 복사 금지): '+ref:'');
       const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'openai',messages:[{role:'system',content:sys},{role:'user',content:t}],max_tokens:220,temperature:0.7}),
+        body:JSON.stringify({model:'openai',messages:this.msgsFor(t,ref),max_tokens:220,temperature:0.7}),
         signal:AbortSignal.timeout(30000)});
       if(!res.ok){ if(res.status===402||res.status===429)LLM.CLOUD.cool=Date.now()+90000; return null; }
       const j=await res.json();
