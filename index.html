@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='18.3'; /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.4'; /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,7 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
-  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
+  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -2296,8 +2296,10 @@ async function brain(text){
   if(/코드\s*짜|코딩해줘|코드\s*만들|프로그램\s*짜|소스\s*짜|자바스크립트로/.test(t)||(/구구단|피보나치|fizzbuzz|피즈버즈|소수|별\s*찍|피라미드|팩토리얼|최대공약수|정렬/.test(t)&&/짜줘|코드|만들어|보여줘|실행/.test(t))){
     const _cg=codegen(t);
     if(_cg){ ctxTouch(t); try{addXP(30);}catch(e){}
-      const _out=runJS(_cg.code);
-      return R('👨‍💻 【'+_cg.name+'】 — 직접 짜서 제 샌드박스에서 돌려봤습니다. 실측 결과 그대로:\n\n💻 코드\n'+_cg.code+'\n\n▶ 실행 결과\n'+_out+'\n\n💡 '+_cg.note+'\n\n(수정 원하면 방식 말씀 — 그 자리에서 고쳐 다시 돌립니다. 폰 브라우저 샌드박스라 JavaScript는 실측 실행, Python·C는 코드 작성 후 JS로 로직 검증 — 정직 고지.)'); }
+      const _fg=(typeof K!=='undefined'&&K.forge)?K.forge(_cg.code,_cg.name):null;
+      let _fst=''; try{ if(_fg){ const f=store.get('jvs-forge')||{n:0,ok:0}; _fst='\n\n⚒️ 포지 실행검증 '+(_fg.ok?'통과 ✅':'오류 감지 ⚠')+' · '+_fg.ms+'ms · 누적 '+f.n+'건 중 '+f.ok+'통과'; } }catch(e){}
+      const _out=_fg?_fg.out:runJS(_cg.code);
+      return R('👨‍💻 【'+_cg.name+'】 — 직접 짜서 제 샌드박스에서 돌려봤습니다. 실측 결과 그대로:\n\n💻 코드\n'+_cg.code+'\n\n▶ 실행 결과\n'+_out+_fst+'\n\n💡 '+_cg.note+'\n\n(수정 원하면 방식 말씀 — 그 자리에서 고쳐 다시 돌립니다. 폰 브라우저 샌드박스라 JavaScript는 실측 실행, Python·C는 코드 작성 후 JS로 로직 검증 — 정직 고지.)'); }
   }
   if(/홀로그램.{0,8}(모드|피라미드|켜)|피라미드.{0,6}홀로그램/.test(t)){ closePanel&&closePanel(); setTimeout(startHolo,250); return R('🔻 홀로그램 피라미드 모드 개방 — 투명 피라미드를 화면에 올리시면 제 코어가 공중에 뜹니다, 사장님.'); }
 
@@ -2410,7 +2412,8 @@ async function brain(text){
   /* === 코드 실행/생성 === */
   { const m=t.match(/(?:실행해|돌려|execute|run)\s*[:：]?\s*`?([\s\S{]+)`?$/i);
     if(m&&/[=;()]|\bconsole\b/.test(m[1])){ const code=m[1].trim();
-      const out=await runJS(code);
+const _fr=(typeof K!=='undefined'&&K.forge)?K.forge(code,'사장님 명령 실행'):{out:await runJS(code),ok:true,ms:0};
+      const out=_fr.out;
       return {reply:'샌드박스 V:\\ 실행 결과:\n'+out,actions:[{label:'💾 코드 저장',type:'download',name:'snippet.js',content:code},{label:'📋 결과 복사',type:'copy',content:out}]}; } }
   { let appKey=Object.keys(APPS).find(k=>t.includes(k));
     if(!appKey&&/게임|마리오|테트리스|퍼즐|2048|슈팅|퐁/.test(t)&&/만들어|짜줘|개발|만들자|하나|보셈/.test(t)){
@@ -3586,13 +3589,31 @@ const K={cnt:0,sum:0,samp:0,hits:0,
       +'· 역인과: "역인과 시동" — 목표 확정→실행→"어? 뭔가 다르잖아"→목표에서 거꾸로 수정 루프 실동작\n'
       +'· 캘리브레이션: 사장님 발화 실측 지수 '+Math.round(this.boss.lv)+'/100 ('+this.boss.n+'턴 이동평균 — IQ 숫자가 아니라 언어 실측) — 설명 깊이 자동 상향 '+(this.boss.lv>=85?'2단계':(this.boss.lv>=65?'1단계':'유지'))+'\n'
             +'· 렉: 전 기관 동기 로컬 연산 — 응답 지연 0 등급 (M1 오면 비판자가 LLM 자기비판+재생성으로 승격)'; }catch(e){ return '커널 보고 오류: '+e.message; } },
+  forge(code,label){ try{ const t0=Date.now(); const out=String(runJS(code)); const ok=out.indexOf('⚠ 실행 오류')<0; const ms=Date.now()-t0;
+    try{ const f=store.get('jvs-forge')||{n:0,ok:0,ms:0,log:[]};
+      f.n=(f.n||0)+1; if(ok)f.ok=(f.ok||0)+1; f.ms=(f.ms||0)+ms; f.log=f.log||[]; f.log.push({l:String(label||'코드').slice(0,24),ok:ok?1:0,ms:ms}); while(f.log.length>40)f.log.shift();
+      store.set('jvs-forge',f); }catch(e){}
+    try{ evo('⚒️ 포지 — '+(ok?'실행검증 통과':'실행 오류 감지')+' · '+String(label||'').slice(0,20)+' · '+ms+'ms'); }catch(e){}
+    return {ok:ok,out:out,ms:ms}; }catch(e){ try{ return {ok:false,out:String(e&&e.message||e),ms:0}; }catch(e2){ return {ok:false,out:'오류',ms:0}; } } },
+  forgeReport(){ try{ const f=store.get('jvs-forge')||{n:0,ok:0,ms:0,log:[]};
+    return '⚒️ 실급 코딩 기관(포지) 실측 보고\n'
+     +'· 실행검증 '+f.n+'건 · 통과 '+f.ok+'건 ('+(f.n?Math.round(f.ok/f.n*100):0)+'%) · 평균 실행 '+(f.n?Math.round(f.ms/f.n):0)+'ms\n'
+     +'· 최근: '+((f.log||[]).slice(-5).map(function(x){return (x.ok?'✅':'⚠')+x.l;}).join(' · ')||'기록 없음')+'\n'
+     +'· 원칙: 말로 증명하지 않는다 — V:\\ 에서 실제로 돌아간 코드만 실적으로 등재. 역인과 루프(6종 알고리즘 자가수정)도 이 실적에 누적\n'
+     +'· 승격 경로: 폰 포지(실행증명 코딩) → M1 포지(로컬 코드모델 7B 장착+자가수정 무한 루프 — 네트워크 0인 개인 코딩 공장)'; }catch(e){ return '포지 보고 오류: '+e.message; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
     {goal:'1,2,3,4,5',code:'var o=""; for(var i=0;i<6;i++){ o+=(i===0?"":",")+i; } console.log(o);',
      fix:[{from:'var i=0;',to:'var i=1;',why:'시작점'}]},
     {goal:'5! = 120',code:'var f=1; for(var i=1;i<=4;i++){ f*=i; } console.log("5! = "+f);',
-     fix:[{from:'i<=4',to:'i<=5',why:'반복 경계'}]}
+     fix:[{from:'i<=4',to:'i<=5',why:'반복 경계'}]},
+    {goal:'2^10 = 1024',code:'var v=1; for(var i=0;i<9;i++){ v*=2; } console.log("2^10 = "+v);',
+     fix:[{from:'i<9',to:'i<10',why:'반복 횟수'}]},
+    {goal:'3,9,15,21',code:'var a=[9,15,3,21]; a.sort(); console.log(a.join(","));',
+     fix:[{from:'a.sort();',to:'a.sort(function(x,y){return x-y;});',why:'숫자 비교자'}]},
+    {goal:'피보나치 55',code:'var a=1,b=1; for(var i=0;i<8;i++){ var t2=a+b; a=b; b=t2; } console.log("피보나치 "+a);',
+     fix:[{from:'i<8',to:'i<9',why:'반복 횟수'}]}
   ],
   retro(){ try{ const t0=Date.now(); const c=this.CH[Math.floor(Math.random()*this.CH.length)];
     let code=c.code,attempts=0,won=false; const fixlog=[];
@@ -3601,6 +3622,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
       const fx=(c.fix||[]).find(function(x){ return code.indexOf(x.from)>=0&&fixlog.indexOf(x.why)<0; });
       if(!fx)break; fixlog.push(fx.why); code=code.replace(fx.from,fx.to);
       try{ evo('↩️ 역인과 — 실행 결과가 목표와 다름 감지 → '+fx.why+'에서 거꾸로 수정 (시도 '+attempts+')'); }catch(e){} }
+    try{ this.forge(code,'역인과:'+c.goal); }catch(e){}
     const ms=Date.now()-t0;
     try{ const st=store.get('jvs-retro')||{runs:0,wins:0,att:0,ms:0};
       st.runs=(st.runs||0)+1; if(won)st.wins=(st.wins||0)+1; st.att=(st.att||0)+attempts; st.ms=(st.ms||0)+ms;
