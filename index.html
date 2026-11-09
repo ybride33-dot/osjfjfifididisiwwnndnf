@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='17.9'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='18.0'; /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1860,6 +1860,8 @@ async function dialogueEngine(t,low,en,R){
       cand.sort(function(a,b){ return b.d-a.d; });
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
+    if(LLM.modeIs('offline')){ /* 오프라인 고정 — 클라우드 층 전부 스킵, 폰 두뇌·규칙엔진으로만 */ }
+    else{
     /* 0층 — Gemini(키 있을 때): 2~3초 프리미엄 답변. 4.5초 간격 가드 */
     if(LLM.hasGem()&&Date.now()-LLM.GEM.last>4500&&Date.now()>LLM.GEM.cool){ try{
       LLM.GEM.last=Date.now();
@@ -1868,12 +1870,13 @@ async function dialogueEngine(t,low,en,R){
       const gr=await LLM.gemAsk(t,gref); if(gr&&gr.trim().length>1) return R(gr.trim());
     }catch(e){} }
     /* 1층 — 무료 공개 서버 예절(실측: 45초/답·답변 ~10초). 간격 밖이면 요청 없이 폰두뇌로 즉시 넘김 */
-    if(LLM.CLOUD.ok&&Date.now()-LLM.CLOUD.last>46000&&Date.now()>LLM.CLOUD.cool){ try{
+    if(LLM.CLOUD.ok&&!LLM.modeIs('offline')&&Date.now()-LLM.CLOUD.last>46000&&Date.now()>LLM.CLOUD.cool){ try{
       LLM.CLOUD.last=Date.now();
       let ref2=rag;
       try{ const w=await wikiLookup(t); if(w)ref2=(ref2?ref2+'\n':'')+'【위키백과:'+w.title+'】 '+w.extract.slice(0,600); }catch(e){}
       const cr=await LLM.cloudAsk(t,ref2); if(cr&&cr.trim().length>1) return R(cr.trim());
     }catch(e){} }
+    }
     if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
     if(LLM.ready&&!LLM.busy){ try{
       if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
@@ -2762,6 +2765,24 @@ function openPanel(name){
       toast(tr?('✅ Gemini 연결 성공 — '+LLM.GEM.lat+'ms. 이제 답변 2~3초, 구글이 모델 올리면 자동 발전'):('⚠ 연결 실패 — 키 재확인 필요. 무료 서버+폰 두뇌 체제로 계속 작동'));
     };
     panelBody.appendChild(gsave);
+    const mWrap=document.createElement('div'); mWrap.style.cssText='display:flex;gap:5px;margin:6px 0';
+    const mBtns=[];
+    [['auto','🔄 자동'],['online','☁ 온라인 우선'],['offline','✈ 오프라인 고정']].forEach(function(kv){
+      const b=document.createElement('button'); b.textContent=kv[1];
+      b.style.cssText='flex:1;padding:8px;border-radius:8px;border:1px solid #875;background:#241806;color:#ffd58a;font-size:11px;font-weight:700';
+      const paint=function(){ const cur=(function(){ try{ return store.get('jvs-bmode')||'auto'; }catch(e){ return 'auto'; } })();
+        b.style.background=(cur===kv[0])?'linear-gradient(140deg,#ffb64a,#ff8a2a)':'#241806';
+        b.style.color=(cur===kv[0])?'#231400':'#ffd58a'; };
+      b.onclick=function(){ LLM.setMode(kv[0]);
+        toast(kv[0]==='offline'?'✈ 오프라인 고정 — 폰 두뇌·규칙엔진만. 비행기 모드에서도 완결':(kv[0]==='online'?'☁ 온라인 우선 — Gemini·무료서버 적극 사용(없으면 폰 두뇌)':'🔄 자동 — 네트워크 상황 따라 최적 두뇌'));
+        mBtns.forEach(function(x){ x.paint(); }); };
+      b.paint=paint; mBtns.push(b); mWrap.appendChild(b);
+    });
+    mBtns.forEach(function(x){ x.paint(); });
+    panelBody.appendChild(mWrap);
+    const mNote=document.createElement('div'); mNote.style.cssText='font-size:10.5px;opacity:.7;margin:2px 0 6px';
+    mNote.textContent='✈ 오프라인 고정 = 서버·키·네트워크 0 사용(완전 자급 모드) · 🔄 자동 = 현재 상황에서 최선의 두뇌 선택 · ☁ 온라인 우선 = 지능 최대(키 없으면 무료서버 45초 간격)';
+    panelBody.appendChild(mNote);
     const benchBtn=document.createElement('button'); benchBtn.textContent='🏁 두뇌 경연장 — 엔진 3종 실측 비교 (약 30초)';
     benchBtn.style.cssText='width:100%;padding:9px;margin:4px 0;border-radius:9px;border:1px solid #ffb64a;background:linear-gradient(140deg,#2a1d06,#1a1202);color:#ffd58a;font-weight:700;font-size:12px';
     benchBtn.onclick=async function(){
@@ -3195,6 +3216,10 @@ const LLM={eng:null,ready:false,busy:false,kind:null,
   SIZE:{lite:'0.5GB',std:'1.1GB',pro:'1.7GB'},
   /* 클라우드 두뇌 — 무료·키 0·계정 0. Pollinations 공개 엔드포인트(OpenAI 호환). 실패 시 폰 두뇌가 받는 구조라 서버 상태와 무관하게 안전 */
   CLOUD:{on:false,ok:false,lat:0,last:0,cool:0},
+  /* 두뇌 모드 — auto(네트워크 자동 판단)/offline(오프라인 고정·완전 자급)/online(온라인 우선 고정) */
+  mode:'auto',
+  modeIs(m){ try{ if(LLM.mode===m)return true; const v=store.get('jvs-bmode'); if(v===m){LLM.mode=m;return true;} }catch(e){} return false; },
+  setMode(m){ LLM.mode=m; try{ store.set('jvs-bmode',m); }catch(e){} },
   /* 0층 두뇌 — Gemini 키(사장님 소유·폰에만 저장·레포에 안 들어감). 구글이 모델 올리면 자동 발전 */
   GEM:{key:null,last:0,cool:0,lat:0,mi:0},
   GMODELS:['gemini-2.0-flash','gemini-2.5-flash','gemini-1.5-flash'],
@@ -3454,7 +3479,7 @@ try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 
 
 /* ================= 부팅 ================= */
 try{ const lk=store.get('jvs-llm'); if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } }catch(e){}
-try{ setTimeout(async function(){ try{ const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
+try{ setTimeout(async function(){ try{ if(LLM.modeIs('offline'))return; const okc=await LLM.cloudPing(); if(okc)toast('☁ 온라인 두뇌 준비 — 답당 ~10초·45초 간격(무료 서버 실측). 사이 질문은 폰 두뇌가 즉시 받습니다'); }catch(e){} },2500); }catch(e){}
 try{ setTimeout(function(){ if(LLM.hasGem())toast('🔑 Gemini 프리미엄 두뇌 감지 — 답변 2~3초 체제, 사장님'); },3200); }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
 let li=0;
