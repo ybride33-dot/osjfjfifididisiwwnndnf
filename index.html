@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='19.3'; /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='19.4'; /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,7 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
-  try{ if(typeof K!=='undefined'){ if(/두개골\s*채점/i.test(t))return R(K.skullScore(t.replace(/^[\s\S]*?두개골\s*채점\s*/,''))); if(/(두개골 복사|두개골 카피)/i.test(t))return R(K.skullCopy()); if(/(두개골 출제|두개골 문제|두개골 시험)/i.test(t))return R(K.skullNew()); if(/두개골/i.test(t))return R(K.skullReport()); if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(내 레이팅|레이팅 보고|레이팅 알려|elo)/i.test(t))return R(K.eloReport()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
+  try{ if(typeof K!=='undefined'){ if(/두개골\s*채점/i.test(t))return R(K.skullScore(t.replace(/^[\s\S]*?두개골\s*채점\s*/,''))); if(/(두개골 복사|두개골 카피)/i.test(t))return R(K.skullCopy()); if(/(두개골 출제|두개골 문제|두개골 시험)/i.test(t))return R(K.skullNew()); if(/두개골\s*토큰/i.test(t))return R(K.skullTokenSet(t)); if(/(두개골\s*원격\s*실행|원격\s*시험)/i.test(t))return R(K.skullRemoteRun()); if(/두개골\s*원격/i.test(t))return R(K.skullRemoteToggle()); if(/두개골/i.test(t))return R(K.skullReport()); if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(내 레이팅|레이팅 보고|레이팅 알려|elo)/i.test(t))return R(K.eloReport()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -3844,7 +3844,8 @@ const K={cnt:0,sum:0,samp:0,hits:0,
     try{ evo('🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판'); }catch(e){}
     return '🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판 · '+Math.round(ms/1000)+'초\n· 누적 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n· 레이팅 ELO '+el.r+'('+this.rank()+') — 세션 성적 반영 완료\n· 두뇌는 쉬었지만 둘레 실력은 안 쉬었습니다 — 그게 도장의 설계입니다.'; }catch(e){ return '정지 오류: '+e.message; } },
   /* ===== v49 두개골 릴레이 — 폰 베이스×도장 심판: RLVR 보상함수의 폰 리허설 (렉 0: 문자열·로컬 연산만) ===== */
-  skullElo:{r:1200,w:0,l:0,d:0,hist:[]},
+  skullElo:{r:1200,w:0,l:0,d:0,hist:[],},
+  skullRemote:{on:false,busy:false},
   skullLoad(){ try{ const e=store.get('jvs-skull-elo'); if(e&&typeof e==='object'){ this.skullElo={r:e.r||1200,w:e.w||0,l:e.l||0,d:e.d||0,hist:Array.isArray(e.hist)?e.hist:[]}; } }catch(e){} },
   skullRank(){ const r=this.skullElo.r; return r<1000?'브론즈 두개골':r<1200?'실버 두개골':r<1400?'골드 두개골':r<1600?'플래티넘 두개골':r<1800?'다이아 두개골':r<2000?'마스터 두개골':'챌린저 두개골'; },
   skullRate(pr,res){ try{ const E=1/(1+Math.pow(10,(pr-this.skullElo.r)/400)); const dr=Math.round(32*(res-E));
@@ -3876,11 +3877,22 @@ const K={cnt:0,sum:0,samp:0,hits:0,
      +'· 두개골 ELO '+e.r+' 【'+this.skullRank()+'】 — 승 '+e.w+' · 패 '+e.l+' · 무 '+e.d+'\n'
      +'· 누적 릴레이 '+st.n+'회 — 통과 '+(st.n?Math.round(st.ok/st.n*100):0)+'%\n'
      +(p?'· 대기 문제: 배점 P'+p.pr+' — "두개골 복사" → PocketPal → 답을 "두개골 채점" 뒤에':'· 대기 문제 없음 — "두개골 출제"')+'\n'
-     +'· 의미: 폰의 두개골(base)이 도장 심판을 통과하는가 — RLVR 보상함수의 폰 리허설. 이 심판 코드가 M1 이식선.\n'
+     +(function(){ try{ const _lr=store.get('jvs-skull-last'); return _lr?'· 마지막 원격 결과: '+_lr+'\n':''; }catch(e){ return ''; } })()+'· 의미: 폰의 두개골(base)이 도장 심판을 통과하는가 — RLVR 보상함수의 폰 리허설. 이 심판 코드가 M1 이식선.\n'
      +'· 정직: base판은 글 이어쓰기 애라 초반 승률 낮은 게 정상 — 낮은 점수는 "정렬 전 기준선"이라는 뜻입니다.'; }catch(e2){ return '두개골 보고 오류: '+e2.message; } },
   infSafeBoot(test){ try{ const go=function(){ try{ if(store.get('jvs-inf')==='on'&&!K.inf.on)K.infStart(true); }catch(e){} };
     if(test)return go(),'안전부팅(즉시 재개)';
     setTimeout(go,9000); return '안전부팅 예약 — 부팅 안정 후 9초 뒤 무한 연마 자동 재개(약폰은 배치 8로 경량)'; }catch(e){ return ''; } },
+  /* ===== v52 원격 두개골 — HF 라우터 base 자동 왕복. 토큰은 세션 메모리에만(평문 저장 금지 원칙 준수). ===== */
+  skullToken(){ try{ return sessionStorage.getItem('jvs-hft')||''; }catch(e){ return ''; } },
+  skullTokenSet(t){ try{ const m=String(t).match(/두개골\s*토큰\s+(hf_[A-Za-z0-9_\-]+)/)||String(t).match(/두개골\s*토큰\s+([A-Za-z0-9_\-]{20,})/); if(!m)return '토큰 형식 확인 — "두개골 토큰 hf_xxxx"로 말해라(HF 무료 계정 → Settings → Access Tokens → New token·Read권한). 세션에만 보관·기기 저장 0.'; try{ sessionStorage.setItem('jvs-hft',m[1]); }catch(e2){} return '💀 원격 두개골 토큰 등록 — 이 세션 동안만 유효(기기 저장 0). 이제 "두개골 원격 실행" 한 발이면 출제→전송→수령→채점 자동.'; }catch(e){ return '토큰 오류: '+e.message; } },
+  skullRemoteToggle(){ try{ this.skullRemote.on=!this.skullRemote.on; return '💀 원격 두개골 모드: '+(this.skullRemote.on?'ON — 실행 시 원격 base 호출':'OFF — 손 릴레이(PocketPal) 모드'); }catch(e){ return '오류'; } },
+  skullRemoteRun(){ try{ const tk=this.skullToken(); if(!tk)return '토큰 없음 — 먼저 "두개골 토큰 hf_..." 등록(HF 무료 계정 Access Token·Read). 세션에만 보관(저장 0).';
+    if(this.skullRemote.busy)return '원격 호출 진행 중 — 완료 토스트 기다려라';
+    if(!this.skullPend()){ this.skullNew(); if(!this.skullPend())return '문제 생성 실패 — 다시 시도'; }
+    const pr=this.skullPrompt(); const prp=this.skullPend(); const self=this; this.skullRemote.busy=true;
+    const done=function(rep,isErr){ try{ self.skullRemote.busy=false; try{ store.set('jvs-skull-last',(isErr?'⚠ ':'')+rep); }catch(e2){} try{ evo('💀 원격 두개골 '+(isErr?'호출 실패':'자동 채점 완료')+' — P'+(prp?prp.pr:'?')); }catch(e3){} try{ toast(isErr?'⚠ 원격 두개골 실패 — "두개골 보고"':'💀 원격 두개골 채점 완료 — "두개골 보고"'); }catch(e4){} }catch(e){} };
+    fetch('https://router.huggingface.co/v1/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({model:'Qwen/Qwen2.5-0.5B',prompt:pr,max_tokens:220,temperature:0})}).then(function(r){ if(!r.ok)throw new Error('HTTP '+r.status); return r.json(); }).then(function(j){ const tx=(j&&j.choices&&j.choices[0]&&(j.choices[0].text||''))||''; done(self.skullScore(String(tx)),false); }).catch(function(e1){ try{ fetch('https://router.huggingface.co/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({model:'Qwen/Qwen2.5-0.5B',messages:[{role:'user',content:pr}],max_tokens:220,temperature:0})}).then(function(r2){ if(!r2.ok)throw new Error('HTTP '+r2.status); return r2.json(); }).then(function(j2){ const tx2=(j2&&j2.choices&&j2.choices[0]&&j2.choices[0].message&&j2.choices[0].message.content)||''; done(self.skullScore(String(tx2)),false); }).catch(function(e2){ done('원격 호출 실패: '+(e2&&e2.message||e2)+' — 토큰 권한·모델 가용 확인(라우터가 raw base 미지원일 수도 — 정직 기록)',true); }); }catch(e3){ done('원격 호출 실패: '+(e1&&e1.message||e1),true); } });
+    return '💀 원격 두개골 가동 — P'+prp.pr+' 문제를 원격 base(Qwen2.5-0.5B)에 자동 전송(~10~30초)\n· 완료 시 자동 채점+토스트 — 결과는 "두개골 보고"\n· 정직: 원격도 남의 서버라 무료 한도 있음 — 한도 0 완성은 M1. 토큰은 탭 닫으면 만료(재등록 1발).'; }catch(e){ this.skullRemote.busy=false; return '원격 오류: '+e.message; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
