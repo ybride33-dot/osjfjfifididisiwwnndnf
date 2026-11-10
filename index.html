@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='19.0'; /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='19.1'; /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1740,7 +1740,7 @@ function presentTopic(e){
 }
 /* 메인: 대화 생성 */
 async function dialogueEngine(t,low,en,R){
-  try{ if(typeof K!=='undefined'){ if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(내 레이팅|레이팅 보고|레이팅 알려|elo)/i.test(t))return R(K.eloReport()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
+  try{ if(typeof K!=='undefined'){ if(/두개골\s*채점/i.test(t))return R(K.skullScore(t.replace(/^[\s\S]*?두개골\s*채점\s*/,''))); if(/(두개골 복사|두개골 카피)/i.test(t))return R(K.skullCopy()); if(/(두개골 출제|두개골 문제|두개골 시험)/i.test(t))return R(K.skullNew()); if(/두개골/i.test(t))return R(K.skullReport()); if(/(역인과|되돌림 루프|목표역방향)/i.test(t))return R(K.retroReport()); if(/(코딩 보고|포지 보고|코딩 실적|코딩 실력 보고)/i.test(t))return R(K.forgeReport()); if(/(도장 정지|연마 정지)/i.test(t))return R(K.infStop()); if(/(내 레이팅|레이팅 보고|레이팅 알려|elo)/i.test(t))return R(K.eloReport()); if(/(무한 도장|도장 무한|무한 반복|무한 연마|무한 모드)/i.test(t))return R(K.infStart()); if(/(도장 보고|훈련 보고)/i.test(t))return R(K.dojoBat(0)); if(/(도장|훈련 시작|자기훈련|무한 연마|스파링)/i.test(t)){ const m2=t.match(/(\d+)\s*판/); return R(K.dojoBat(m2?parseInt(m2[1]):20)); } if(/(메타인지|커널 보고|커널 상태|비판자 보고)/i.test(t))return R(K.report()); } }catch(e){}
   try{ if(typeof LEARN!=='undefined'){ const memo=LEARN.recall(t);
     if(memo)return R(memo+'\n(이전에 답한 기억 — 다르게 원하면 말해라)'); } }catch(e){}
   const learnT0=Date.now();
@@ -3842,6 +3842,41 @@ const K={cnt:0,sum:0,samp:0,hits:0,
     const d=this.dojoStat(); const el=this.elo;
     try{ evo('🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판'); }catch(e){}
     return '🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판 · '+Math.round(ms/1000)+'초\n· 누적 '+d.n+'판 — 첫시도 '+(d.n?Math.round(d.clean/d.n*100):0)+'% · 수정후 '+(d.n?Math.round(d.retro/d.n*100):0)+'% · 실패 '+(d.n?Math.round(d.fail/d.n*100):0)+'%\n· 레이팅 ELO '+el.r+'('+this.rank()+') — 세션 성적 반영 완료\n· 두뇌는 쉬었지만 둘레 실력은 안 쉬었습니다 — 그게 도장의 설계입니다.'; }catch(e){ return '정지 오류: '+e.message; } },
+  /* ===== v49 두개골 릴레이 — 폰 베이스×도장 심판: RLVR 보상함수의 폰 리허설 (렉 0: 문자열·로컬 연산만) ===== */
+  skullElo:{r:1200,w:0,l:0,d:0,hist:[]},
+  skullLoad(){ try{ const e=store.get('jvs-skull-elo'); if(e&&typeof e==='object'){ this.skullElo={r:e.r||1200,w:e.w||0,l:e.l||0,d:e.d||0,hist:Array.isArray(e.hist)?e.hist:[]}; } }catch(e){} },
+  skullRank(){ const r=this.skullElo.r; return r<1000?'브론즈 두개골':r<1200?'실버 두개골':r<1400?'골드 두개골':r<1600?'플래티넘 두개골':r<1800?'다이아 두개골':r<2000?'마스터 두개골':'챌린저 두개골'; },
+  skullRate(pr,res){ try{ const E=1/(1+Math.pow(10,(pr-this.skullElo.r)/400)); const dr=Math.round(32*(res-E));
+    this.skullElo.r=Math.max(400,Math.min(3000,this.skullElo.r+dr));
+    if(res===1)this.skullElo.w++; else if(res===0)this.skullElo.l++; else this.skullElo.d++;
+    this.skullElo.hist.push({pr:pr,res:res}); while(this.skullElo.hist.length>20)this.skullElo.hist.shift();
+    try{ store.set('jvs-skull-elo',this.skullElo); }catch(e){}
+    return dr; }catch(e){ return 0; } },
+  skullPend(){ try{ const p=store.get('jvs-skull-p'); return (p&&typeof p==='object')?p:null; }catch(e){ return null; } },
+  skullPrompt(){ try{ const p=this.skullPend(); if(!p)return '';
+    return '다음 자바스크립트 코드에는 버그가 하나 있다. 고친 코드 전체만 출력하라. 설명 금지.\n'+p.bug+'\n고친 코드:'; }catch(e){ return ''; } },
+  skullNew(){ try{ const p=this.pickProb(); if(!p)return '두개골 출제 실패 — 문제 은행 접근 오류';
+    try{ store.set('jvs-skull-p',{goal:p.goal,pr:p.pr,bug:p.bug,ok:p.ok,t0:Date.now()}); }catch(e){}
+    return '💀 두개골 릴레이 출제 — 배점 P'+p.pr+'\n· 문제: 버그난 자바스크립트 코드 1개 (도장 은행 '+this.PROB_T.length+'종 출제 — 채점관·배점 그대로)\n· 절차: ① "두개골 복사" → 프롬프트가 클립보드로 ② PocketPal(두개골)에 붙여넣고 답 받기 ③ 답을 복사해 "두개골 채점" 뒤에 붙여넣기\n· 심판: V:\\ 샌드박스 실행 → 목표 출력 「'+p.goal+'」 일치 판정 (자동·완벽 — 도장과 동일 채점관, M1 이식선)\n──── 프롬프트 미리보기 ────\n'+this.skullPrompt(); }catch(e){ return '두개골 오류: '+e.message; } },
+  skullCopy(){ try{ const s=this.skullPrompt(); if(!s)return '출제된 문제가 없습니다 — 먼저 "두개골 출제".';
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){ try{ toast('💀 프롬프트 복사 완료 — PocketPal에 붙여넣으세요'); }catch(e){} }).catch(function(){}); return '💀 프롬프트 클립보드 복사 완료 — PocketPal 채팅에 붙여넣고 답을 받으세요. 답을 받으면 그대로 복사해 "두개골 채점" 뒤에 붙여넣으세요.'; }
+    return '클립보드 불가 환경 — 아래를 직접 선택 복사하세요:\n'+s; }catch(e){ return '복사 오류: '+e.message; } },
+  skullScore(txt){ txt=String(txt||'').trim(); try{ const p=this.skullPend(); if(!p)return '채점할 문제가 없습니다 — "두개골 출제"로 먼저 내세요.';
+    let code=txt; const m=txt.match(/```(?:js|javascript)?\s*([\s\S]*?)```/); if(m)code=m[1];
+    code=code.replace(/─[\s\S]*$/,'').trim();
+    let out='',ran=false; try{ out=String(runJS(code)); ran=true; }catch(e){ out=''; }
+    const pass=ran&&out.indexOf(p.goal)>=0;
+    const dr=this.skullRate(p.pr,pass?1:0);
+    try{ const st=store.get('jvs-skull')||{n:0,ok:0}; st.n=(st.n||0)+1; if(pass)st.ok=(st.ok||0)+1; st.last=Date.now(); try{ store.set('jvs-skull',st); }catch(e2){} }catch(e){}
+    try{ store.set('jvs-skull-p',null); }catch(e){}
+    return '💀 두개골 채점 — 도장 심판(V:\\ 실행·목표 일치) 적용\n· 판정: '+(pass?'✅ 통과 — 목표 출력 「'+p.goal+'」 실측 확인':'❌ 미통과 — '+(ran?'실행됐으나 출력 불일치':'코드 추출·실행 실패'))+'\n· 배점 P'+p.pr+' → 두개골 ELO '+(dr>=0?'+':'')+dr+' → '+this.skullElo.r+' 【'+this.skullRank()+'】\n· 이게 두개골의 첫 실측 기준선 — M1에서 직접 정렬 후 같은 심판으로 재측정, 그 델타가 우리가 기른 성장입니다.'; }catch(e){ return '채점 오류: '+e.message; } },
+  skullReport(){ try{ const st=store.get('jvs-skull')||{n:0,ok:0}; const e=this.skullElo; const p=this.skullPend();
+    return '💀 두개골 릴레이 — 베이스×도장 심판 첫 실측 회로 (v49)\n'
+     +'· 두개골 ELO '+e.r+' 【'+this.skullRank()+'】 — 승 '+e.w+' · 패 '+e.l+' · 무 '+e.d+'\n'
+     +'· 누적 릴레이 '+st.n+'회 — 통과 '+(st.n?Math.round(st.ok/st.n*100):0)+'%\n'
+     +(p?'· 대기 문제: 배점 P'+p.pr+' — "두개골 복사" → PocketPal → 답을 "두개골 채점" 뒤에':'· 대기 문제 없음 — "두개골 출제"')+'\n'
+     +'· 의미: 폰의 두개골(base)이 도장 심판을 통과하는가 — RLVR 보상함수의 폰 리허설. 이 심판 코드가 M1 이식선.\n'
+     +'· 정직: base판은 글 이어쓰기 애라 초반 승률 낮은 게 정상 — 낮은 점수는 "정렬 전 기준선"이라는 뜻입니다.'; }catch(e2){ return '두개골 보고 오류: '+e2.message; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
@@ -3881,6 +3916,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
 };
 try{ (function(){ const m=store.get('jvs-metak'); if(m&&typeof m==='object'){ K.cnt=m.cnt||0; K.sum=m.sum||0; K.samp=m.samp||0; K.hits=m.hits||0; } const _b=store.get('jvs-boss'); if(_b&&typeof _b==='object'){ K.boss.lv=_b.lv||50; K.boss.n=_b.n||0; } })(); }catch(e){}
 try{ if(typeof K!=='undefined')K.eloLoad(); }catch(e){}
+try{ if(typeof K!=='undefined')K.skullLoad(); }catch(e){}
 try{ if(typeof K!=='undefined'&&store.get('jvs-inf')==='on'){ K.infStart(); } }catch(e){}
 
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
