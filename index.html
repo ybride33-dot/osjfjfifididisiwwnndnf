@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='19.1'; /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='19.2'; /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3821,21 +3821,21 @@ const K={cnt:0,sum:0,samp:0,hits:0,
      +'· 문제 은행: '+this.PROB_T.length+'종 × 난이도 5단 × 랜덤 파라미터·배점 = 사실상 무한 출제 (전부 자체 생성)\n'
      +'· 정직: 외부 코딩 사이트 문제는 저작권·약관 때문에 안 가져옵니다 — 대신 자체 무한 생성기로 같은 효과. 원하시는 유형은 말로 시키면 제네레이터에 추가합니다\n'
      +(this.inf.on?'· 무한 연마: 가동 중 🔥 세션 '+this.inf.rounds+'판 — 다른 탭에서도 워커 타이머로 계속 돕니다':'· 무한 연마: 대기 — "도장 무한 모드"'); }catch(e2){ return '레이팅 보고 오류: '+e2.message; } },
-  inf:{on:false,rounds:0,t0:0,ticks:0},
+  inf:{on:false,rounds:0,t0:0,ticks:0,weak:false},
   _wk:null,
   infTick(){ try{ if(!this.inf.on)return;
-    for(let i=0;i<25;i++){ this.dojoRound(); } this.inf.rounds+=25; this.inf.ticks++;
+    const bt=this.inf.weak?8:25; for(let i=0;i<bt;i++){ this.dojoRound(); } this.inf.rounds+=bt; this.inf.ticks++;
     if(this.inf.ticks%4===0){ try{ evo('🥋 무한 연마 — 세션 '+this.inf.rounds+'판 자동 훈련 완료'); }catch(e){} }
     if(this._wk){ try{ this._wk.postMessage('go'); }catch(e){ this._wk=null; } }
     if(!this._wk){ const s=this; setTimeout(function(){ try{ s.infTick(); }catch(e2){} },700); } }catch(e){} },
-  infStart(){ try{ if(this.inf.on)return '이미 무한 연마 가동 중 — 세션 '+this.inf.rounds+'판. "도장 정지"로 멈춥니다.';
+  infStart(auto){ try{ if(this.inf.on)return '이미 무한 연마 가동 중 — 세션 '+this.inf.rounds+'판. "도장 정지"로 멈춥니다.';
     try{ if(typeof Worker!=='undefined'&&!this._wk){ const blob=new Blob(["var t=null;onmessage=function(e){ if(e.data==='s'){ if(t){ clearInterval(t); t=null; } } else if(!t){ t=setInterval(function(){ postMessage('g'); },700); } };"],{type:'text/javascript'});
       this._wk=new Worker(URL.createObjectURL(blob)); const s=this; this._wk.onmessage=function(){ try{ s.infTick(); }catch(e){} }; } }catch(e){ this._wk=null; }
-    this.inf={on:true,rounds:0,t0:Date.now(),ticks:0};
+    this.inf={on:true,rounds:0,t0:Date.now(),ticks:0,weak:auto===true&&((navigator.deviceMemory&&navigator.deviceMemory<=4)||((navigator.hardwareConcurrency||8)<=4))};
     try{ store.set('jvs-inf','on'); }catch(e){}
     try{ evo('🥋 무한 연마 개시 — 백그라운드 '+(this._wk?'워커 타이머':'폴백 타이머')); }catch(e){}
     this.infTick();
-    return '🥋 무한 연마 모드 개시 — 다른 탭 가도 계속 돕니다.\n· 구동: '+(this._wk?'웹워커 타이머(백그라운드 타이머 스로틀 회피)':'일반 타이머(백그라운드에선 브라우저가 느리게 스로틀 — 복귀 시 즉시 재개)')+'\n· 25판/틱 · 승패는 ELO에 자동 반영 · 문제는 내 레이팅에 맞춰 자동 난이도 조절\n· 중간 보고: "도장 보고"·"레이팅" · 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
+    return '🥋 무한 연마 모드 개시 — 다른 탭 가도 계속 돕니다.\n· 구동: '+(this._wk?'웹워커 타이머(백그라운드 타이머 스로틀 회피)':'일반 타이머(백그라운드에선 브라우저가 느리게 스로틀 — 복귀 시 즉시 재개)')+'\n· '+(this.inf.weak?8:25)+'판/틱 · 승패는 ELO에 자동 반영 · 문제는 내 레이팅에 맞춰 자동 난이도 조절\n· 중간 보고: "도장 보고"·"레이팅" · 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
   infStop(){ try{ if(!this.inf.on)return '무한 연마 현재 대기 중 — "도장 무한 모드"로 개시합니다.';
     const ms=Date.now()-this.inf.t0; this.inf.on=false; try{ store.set('jvs-inf','off'); }catch(e){}
     try{ if(this._wk){ this._wk.postMessage('s'); } }catch(e){}
@@ -3877,6 +3877,9 @@ const K={cnt:0,sum:0,samp:0,hits:0,
      +(p?'· 대기 문제: 배점 P'+p.pr+' — "두개골 복사" → PocketPal → 답을 "두개골 채점" 뒤에':'· 대기 문제 없음 — "두개골 출제"')+'\n'
      +'· 의미: 폰의 두개골(base)이 도장 심판을 통과하는가 — RLVR 보상함수의 폰 리허설. 이 심판 코드가 M1 이식선.\n'
      +'· 정직: base판은 글 이어쓰기 애라 초반 승률 낮은 게 정상 — 낮은 점수는 "정렬 전 기준선"이라는 뜻입니다.'; }catch(e2){ return '두개골 보고 오류: '+e2.message; } },
+  infSafeBoot(test){ try{ const go=function(){ try{ if(store.get('jvs-inf')==='on'&&!K.inf.on)K.infStart(true); }catch(e){} };
+    if(test)return go(),'안전부팅(즉시 재개)';
+    setTimeout(go,9000); return '안전부팅 예약 — 부팅 안정 후 9초 뒤 무한 연마 자동 재개(약폰은 배치 8로 경량)'; }catch(e){ return ''; } },
   CH:[
     {goal:'합: 15',code:'var s=1; for(var i=1;i<=5;i++){ s+=i; } console.log("합: "+s);',
      fix:[{from:'var s=1;',to:'var s=0;',why:'초깃값'}]},
@@ -3917,7 +3920,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
 try{ (function(){ const m=store.get('jvs-metak'); if(m&&typeof m==='object'){ K.cnt=m.cnt||0; K.sum=m.sum||0; K.samp=m.samp||0; K.hits=m.hits||0; } const _b=store.get('jvs-boss'); if(_b&&typeof _b==='object'){ K.boss.lv=_b.lv||50; K.boss.n=_b.n||0; } })(); }catch(e){}
 try{ if(typeof K!=='undefined')K.eloLoad(); }catch(e){}
 try{ if(typeof K!=='undefined')K.skullLoad(); }catch(e){}
-try{ if(typeof K!=='undefined'&&store.get('jvs-inf')==='on'){ K.infStart(); } }catch(e){}
+try{ if(typeof K!=='undefined'&&store.get('jvs-inf')==='on'){ K.infSafeBoot(); } }catch(e){}
 
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
