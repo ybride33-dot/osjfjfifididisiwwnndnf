@@ -3677,19 +3677,36 @@ const K={cnt:0,sum:0,samp:0,hits:0,
      while(g(A,B)!==1&&gd++<6)B++;
      return {goal:'GCD: '+g(A,B), ok:'var a='+A+',b='+B+'; while(b>0){ var t=a%b; a=b; b=t; } console.log("GCD: "+a);',
       bug:'var a='+A+',b='+B+'; while(b>1){ var t=a%b; a=b; b=t; } console.log("GCD: "+a);', fx:[['while(b>1)','while(b>0)','종료 조건']]}; }},
+   {n:'소인수분해',bonus:220,min:6,make:function(d){ const P=[2,3,5,7,11,13,17,19,23]; const parts=[]; let v=1;
+     for(let i=0;i<2+d;i++){ const p=P[Math.floor(Math.random()*P.length)]; parts.push(p); v*=p; }
+     parts.sort(function(a,b){return a-b;});
+     return {goal:'분해: '+parts.join('×'), ok:'var v='+v+'; var s=""; var n=v; for(var p=2;p<=n;p++){ while(n%p===0){ s+=(s?"×":"")+p; n/=p; } } console.log("분해: "+s);',
+      bug:'var v='+v+'; var s=""; var n=v; for(var p=2;p<n;p++){ while(n%p===0){ s+=(s?"×":"")+p; n/=p; } } console.log("분해: "+s);', fx:[['for(var p=2;p<n;p++)','for(var p=2;p<=n;p++)','인수 루프 상한']]}; }},
+   {n:'제곱근',bonus:200,min:6,make:function(d){ const r=4+d+Math.floor(Math.random()*5); const v=r*r;
+     return {goal:'루트: '+r, ok:'var v='+v+'; var g=v/2; for(var i=0;i<25;i++){ g=(g+v/g)/2; } var r2=Math.round(g); console.log("루트: "+r2);',
+      bug:'var v='+v+'; var g=v/2; for(var i=0;i<2;i++){ g=(g+v/g)/2; } var r2=Math.round(g); console.log("루트: "+r2);', fx:[['i<2;','i<25;','뉴턴 반복 횟수']]}; }},
+   {n:'통계',bonus:180,min:6,make:function(d){ const L=5+d*2; const a=[]; for(let i=0;i<L;i++)a.push(Math.floor(Math.random()*100)+1);
+     const sorted=a.slice().sort(function(x,y){return x-y;}); const med=sorted[Math.floor(L/2)]; const mx=Math.max.apply(null,a), mn=Math.min.apply(null,a);
+     return {goal:'중앙값 '+med+' 범위 '+(mx-mn), ok:'var a=['+a.join(',')+']; a.sort(function(x,y){return x-y;}); var med=a[Math.floor(a.length/2)]; var mx=a[a.length-1],mn=a[0]; console.log("중앙값 "+med+" 범위 "+(mx-mn));',
+      bug:'var a=['+a.join(',')+']; var med=a[Math.floor(a.length/2)]; var mx=a[a.length-1],mn=a[0]; console.log("중앙값 "+med+" 범위 "+(mx-mn));', fx:[['var med=a[','a.sort(function(x,y){return x-y;}); var med=a[','정렬 누락']]}; }},
+   {n:'거듭제곱합',bonus:160,min:6,make:function(d){ const B=2+Math.floor(Math.random()*3); const N=5+d*2; let s=0; for(let i=1;i<=N;i++)s+=Math.pow(B,i);
+     return {goal:'거듭합 '+s, ok:'var s=0; for(var i=1;i<='+N+';i++){ s+=Math.pow('+B+',i); } console.log("거듭합 "+s);',
+      bug:'var s=0; for(var i=0;i<='+N+';i++){ s+=Math.pow('+B+',i); } console.log("거듭합 "+s);', fx:[['var i=0;','var i=1;','시작 지수']]}; }},
    {n:'단어 순서',bonus:100,min:3,make:function(d){ const W=['별','강철','나노','아크','양자','코어','반응로','궤도']; const L=3+Math.floor(Math.random()*(1+d));
      const ws=[]; for(let i=0;i<L;i++)ws.push(W[Math.floor(Math.random()*W.length)]);
      const lit=ws.map(function(x){return '"'+x+'"';}).join(',');
      return {goal:'순서: '+ws.slice().reverse().join(' '), ok:'var w=['+lit+']; console.log("순서: "+w.reverse().join(" "));',
       bug:'var w=['+lit+']; console.log("순서: "+w.join(" "));', fx:[['w.join(" ")','w.reverse().join(" ")','순서 뒤집기 누락']]}; }}
   ],
-  prob(dif){ try{ dif=Math.max(1,Math.min(5,(dif|0)||1)); const T=this.PROB_T.filter(function(x){ return dif>=x.min; });
+  prob(dif){ try{ dif=Math.max(1,Math.min(7,(dif|0)||1)); const T=this.PROB_T.filter(function(x){ return dif>=x.min; });
     const f=T[Math.floor(Math.random()*T.length)]; const p=f.make(dif);
-    p.pr=900+dif*140+f.bonus+Math.floor(Math.random()*30); if(!Array.isArray(p.fx))p.fx=[];
+    p.pr=900+dif*140+Math.min(300,f.bonus)+Math.floor(Math.random()*30); if(!Array.isArray(p.fx))p.fx=[]; /* v48: dif 7·보너스300 → 상한 2320 */
     return p; }catch(e){ return null; } },
   pickProb(){ try{ const R=this.elo.r; let best=null,bd=1e9;
-    for(let i=0;i<14;i++){ const dif=1+Math.floor(Math.random()*5); const p=this.prob(dif); if(!p)continue;
+    const dmax=(R>=1750)?7:5; /* v48: 1750+면 고난도 6~7단 개봉 — 천장 철거 */
+    for(let i=0;i<14;i++){ const dif=1+Math.floor(Math.random()*dmax); const p=this.prob(dif); if(!p)continue;
       const dist=Math.abs(p.pr-R); if(dist<bd){ bd=dist; best=p; } if(dist<=180)break; }
+    if(R>=1750){ const hi=this.prob(7); if(hi&&Math.abs(hi.pr-R)<=420&&(!best||Math.abs(best.pr-R)<Math.abs(hi.pr-R)))best=hi; } /* v48 상향 매칭 선호 */
     return best; }catch(e){ return null; } },
   dojoStat(){ try{ const d=store.get('jvs-dojo'); return (d&&typeof d==='object')?d:{n:0,clean:0,retro:0,fail:0}; }catch(e){ return {n:0,clean:0,retro:0,fail:0}; } },
   normSig(c){ try{ return String(c).replace(/\d+/g,'#').slice(0,80); }catch(e){ return ''; } },
@@ -3781,13 +3798,20 @@ const K={cnt:0,sum:0,samp:0,hits:0,
   elo:{r:1200,w:0,l:0,d:0,streak:0,maxStreak:0,hist:[]},
   eloLoad(){ try{ const e=store.get('jvs-elo'); if(e&&typeof e==='object'){ this.elo={r:e.r||1200,w:e.w||0,l:e.l||0,d:e.d||0,streak:e.streak||0,maxStreak:e.maxStreak||0,hist:Array.isArray(e.hist)?e.hist:[]}; } }catch(e){} },
   rank(){ const r=this.elo.r; return r<1000?'브론즈':r<1200?'실버':r<1400?'골드':r<1600?'플래티넘':r<1800?'다이아':r<2000?'마스터':'챌린저'; },
-  rate(pr,res){ try{ const E=1/(1+Math.pow(10,(pr-this.elo.r)/400)); const dr=Math.round(32*(res-E));
+  rate(pr,res){ try{ const E=1/(1+Math.pow(10,(pr-this.elo.r)/400)); const dr=Math.round(32*(res-E)*(res===1&&pr-this.elo.r>=150?1.5:1)); /* v48 알파킬: 150+ 상대 승리 ×1.5 */
     this.elo.r=Math.max(400,Math.min(3000,this.elo.r+dr));
     if(res===1){ this.elo.w++; this.elo.streak++; this.elo.maxStreak=Math.max(this.elo.maxStreak,this.elo.streak); }
     else if(res===0){ this.elo.l++; this.elo.streak=0; } else { this.elo.d++; this.elo.streak=Math.max(0,this.elo.streak-1); }
     this.elo.hist.push({pr:pr,res:res}); while(this.elo.hist.length>20)this.elo.hist.shift();
     try{ store.set('jvs-elo',this.elo); }catch(e){}
     return dr; }catch(e){ return 0; } },
+  wallReport(){ try{ const e=this.elo; const topPr=900+7*140+300+30; const dmax=(e.r>=1750)?7:5;
+    const bank=this.PROB_T.length; const hi=this.PROB_T.filter(function(x){return x.min>=6;}).length;
+    return '🧱 레이팅 벽 진단 (실측)\n'
+     +'· 현재 ELO '+e.r+' — 출제 상한 '+(dmax===7?'2320(7단 개봉됨)':'1770(은행 한계·v48로 개봉)')+'\n'
+     +'· 문제 은행: '+bank+'종(고난도 '+hi+'종) — 이기면 레이팅↑, 은행 상한보다 레이팅이 높아지면 기대값 음수 → 정체\n'
+     +'· 전략: 알파킬(150+ 상대 승리 ×1.5)로 2000 챌린저 돌파 → 은행 상한 2320이 다음 벽 → 그때 진짜 해법은 M1(코드모델 스파링)\n'
+     +'· 정직: 이 벽은 애 실력이 아니라 은행 크기가 만든 벽 — v48에서 철거됨'; }catch(e2){ return '벽 진단 오류: '+e2.message; } },
   eloReport(){ try{ const e=this.elo; const last=(e.hist||[]).slice(-5).map(function(x){ return 'P'+x.pr+(x.res===1?'✅':(x.res===0.5?'🟡':'❌')); }).join(' · ')||'기록 없음';
     return '📊 도장 레이팅(ELO) 실측 보고\n'
      +'· 현재 ELO '+e.r+' — 랭크 【'+this.rank()+'】 (캡 400~3000)\n'
