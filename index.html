@@ -3832,11 +3832,12 @@ const K={cnt:0,sum:0,samp:0,hits:0,
     try{ if(typeof Worker!=='undefined'&&!this._wk){ const blob=new Blob(["var t=null;onmessage=function(e){ if(e.data==='s'){ if(t){ clearInterval(t); t=null; } } else if(!t){ t=setInterval(function(){ postMessage('g'); },700); } };"],{type:'text/javascript'});
       this._wk=new Worker(URL.createObjectURL(blob)); const s=this; this._wk.onmessage=function(){ try{ s.infTick(); }catch(e){} }; } }catch(e){ this._wk=null; }
     this.inf={on:true,rounds:0,t0:Date.now(),ticks:0};
+    try{ store.set('jvs-inf','on'); }catch(e){}
     try{ evo('🥋 무한 연마 개시 — 백그라운드 '+(this._wk?'워커 타이머':'폴백 타이머')); }catch(e){}
     this.infTick();
     return '🥋 무한 연마 모드 개시 — 다른 탭 가도 계속 돕니다.\n· 구동: '+(this._wk?'웹워커 타이머(백그라운드 타이머 스로틀 회피)':'일반 타이머(백그라운드에선 브라우저가 느리게 스로틀 — 복귀 시 즉시 재개)')+'\n· 25판/틱 · 승패는 ELO에 자동 반영 · 문제는 내 레이팅에 맞춰 자동 난이도 조절\n· 중간 보고: "도장 보고"·"레이팅" · 정지: "도장 정지" — 사장님 말이 유일한 정지 버튼.'; }catch(e){ return '무한 모드 오류: '+e.message; } },
   infStop(){ try{ if(!this.inf.on)return '무한 연마 현재 대기 중 — "도장 무한 모드"로 개시합니다.';
-    const ms=Date.now()-this.inf.t0; this.inf.on=false;
+    const ms=Date.now()-this.inf.t0; this.inf.on=false; try{ store.set('jvs-inf','off'); }catch(e){}
     try{ if(this._wk){ this._wk.postMessage('s'); } }catch(e){}
     const d=this.dojoStat(); const el=this.elo;
     try{ evo('🥋 무한 연마 종료 — 세션 '+this.inf.rounds+'판'); }catch(e){}
@@ -3880,6 +3881,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
 };
 try{ (function(){ const m=store.get('jvs-metak'); if(m&&typeof m==='object'){ K.cnt=m.cnt||0; K.sum=m.sum||0; K.samp=m.samp||0; K.hits=m.hits||0; } const _b=store.get('jvs-boss'); if(_b&&typeof _b==='object'){ K.boss.lv=_b.lv||50; K.boss.n=_b.n||0; } })(); }catch(e){}
 try{ if(typeof K!=='undefined')K.eloLoad(); }catch(e){}
+try{ if(typeof K!=='undefined'&&store.get('jvs-inf')==='on'){ K.infStart(); } }catch(e){}
 
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
