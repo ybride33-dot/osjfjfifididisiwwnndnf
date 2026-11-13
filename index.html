@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='20.4'; /* v62 접속 코드 게이트 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='20.5'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3994,18 +3994,16 @@ const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형
 <script src="games.js"></script>
 <script>
 (function(){
-  /* 사설 자물쇠 — 해시 대조(소스에 비번 평문 없음) · 해제 30일 유지 */
+  /* 개인용 화면 잠금 — 브라우저 내 확인(강한 서버 인증은 아님) · 해제 30일 유지 */
   var LOCK_SHA='f8f2cd7c5a9da039683185c38a119993aa086f171aa7a56d85e2c395d0393ef8';
-  var LOCK_FB='F12d333bf';
   var KEY='jvs-unlock';
   var box=document.getElementById('jvs-lock');
   if(!box)return;
   function hex(buf){ var v=new Uint8Array(buf),o=''; for(var i=0;i<v.length;i++){ var x=v[i].toString(16); if(x.length<2)x='0'+x; o+=x; } return o; }
-  function fallback(pw){ var h=5381,i,b=unescape(encodeURIComponent(pw)); for(i=0;i<b.length;i++){ h=((h<<5)+h+b.charCodeAt(i))|0; } return 'F'+(h>>>0).toString(16); }
   function hash(pw){
     try{ if(window.crypto&&crypto.subtle&&crypto.subtle.digest){
-      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw)).then(hex).catch(function(){ return fallback(pw); }); } }catch(e){}
-    return Promise.resolve(fallback(pw));
+      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw)).then(hex); } }catch(e){}
+    return Promise.reject(new Error('보안 해시를 지원하는 HTTPS 브라우저가 필요합니다.'));
   }
   function ok(){ try{ localStorage.setItem(KEY,JSON.stringify({t:Date.now()})); }catch(e){}
     box.style.transition='opacity .5s'; box.style.opacity='0';
@@ -4015,7 +4013,7 @@ const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형
   function fail(){ var m=document.getElementById('jvs-msg'); if(m)m.textContent='접속 실패 — 사장님만 아는 비밀번호를 입력하세요.';
     var inp=document.getElementById('jvs-pw'); if(inp){ inp.value=''; inp.style.borderColor='#ff6a4a'; setTimeout(function(){ inp.style.borderColor='rgba(255,182,74,.5)'; },900); } }
   function tryPw(){ var inp=document.getElementById('jvs-pw'); if(!inp)return; var v=inp.value; if(!v)return;
-    hash(v).then(function(hh){ if(hh===LOCK_SHA||hh===LOCK_FB||v==='JARVIS-0507')ok(); else fail(); }); }
+    hash(v).then(function(hh){ if(hh===LOCK_SHA)ok(); else fail(); }).catch(fail); }
   try{ if(!stale()){ ok(); return; } }catch(e){}
   var b=document.getElementById('jvs-go'); if(b)b.addEventListener('click',tryPw);
   var i2=document.getElementById('jvs-pw'); if(i2)i2.addEventListener('keydown',function(ev){ if(ev.key==='Enter')tryPw(); });
@@ -4031,7 +4029,7 @@ try{
   _l.href='data:application/manifest+json,'+encodeURIComponent(JSON.stringify(_mf));
   document.head.appendChild(_l);
 }catch(e){}
-if('serviceWorker' in navigator){ addEventListener('load',function(){ try{ navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(reg){ try{ reg.addEventListener('updatefound',function(){ const nw=reg.installing; if(nw)nw.addEventListener('statechange',function(){ if(nw.state==='activated'){ try{ location.reload(); }catch(e){} } }); }catch(e){} }); setTimeout(function(){ try{ reg.update(); }catch(e){} },3000); }).catch(function(){}); }catch(e){} });
+if('serviceWorker' in navigator){ addEventListener('load',function(){ try{ navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(reg){ try{ reg.addEventListener('updatefound',function(){ const nw=reg.installing; if(nw)nw.addEventListener('statechange',function(){ if(nw.state==='activated'){ try{ location.reload(); }catch(e){} } }); }); }catch(e){} setTimeout(function(){ try{ reg.update(); }catch(e){} },3000); }).catch(function(){}); }catch(e){} });
 addEventListener('focus',function(){ try{ navigator.serviceWorker.getRegistration().then(function(r){ if(r&&r.update)r.update(); }); }catch(e){} }); }
 </script>
 </body>
