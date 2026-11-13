@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='20.5'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='20.6'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -3601,7 +3601,7 @@ const K={cnt:0,sum:0,samp:0,hits:0,
   hitTok(a,b){ try{ const A=String(a).split(/\s+/),B=String(b).split(/\s+/);
     for(let i=0;i<A.length;i++){ const x=A[i]; if(x.length<2)continue;
       for(let j=0;j<B.length;j++){ const y=B[j]; if(y.startsWith(x)||x.startsWith(y))return true; } } return false; }catch(e){ return false; } },
-  guide(t){ try{ const out=[]; const tr=this.tr(); let best=null,bs=0;
+  guide(t){ try{ const out=[]; const inherited=(this.sam().lessons||[]).slice(0,3).map(function(x){return String(x||'').slice(0,140);}).filter(Boolean); if(inherited.length)out.push('【윤회 유전 교훈】'+inherited.join(' · ')); const tr=this.tr(); let best=null,bs=0;
     for(let i=0;i<tr.length;i++){ const x=tr[i]; if(x.s<70)continue; let o=this.ov(t,x.q); if(o<0.5&&this.hitTok(t,x.q))o=0.5; if(o>bs){bs=o;best=x;} }
     if(best&&bs>=0.45){ this.hits++; out.push('【궤적】과거 성공 답변 참고(유사도 '+bs.toFixed(2)+'): Q「'+best.q+'」→ '+best.a); }
     const f=this.fp().slice(0,3);
@@ -3958,11 +3958,12 @@ const K={cnt:0,sum:0,samp:0,hits:0,
     const ms=Date.now()-t0;
     try{ const st=store.get('jvs-retro')||{runs:0,wins:0,att:0,ms:0};
       st.runs=(st.runs||0)+1; if(won)st.wins=(st.wins||0)+1; st.att=(st.att||0)+attempts; st.ms=(st.ms||0)+ms;
+      st.last={won:won,attempts:attempts,ms:ms,code:code,goal:c.goal,fixlog:fixlog,ts:Date.now()};
       store.set('jvs-retro',st); }catch(e){}
     return {won:won,attempts:attempts,ms:ms,code:code,goal:c.goal,fixlog:fixlog}; }catch(e){ return null; } },
-  retroReport(){ const r=this.retro();
-    if(!r)return '역인과 루프 오류';
+  retroReport(){
     let st={}; try{ st=store.get('jvs-retro')||{}; }catch(e){}
+    const r=st.last; if(!r)return '↩️ 역인과 보고 — 아직 실행 기록이 없습니다. "역인과 시동"으로 먼저 실행하세요.';
     return '↩️ 역인과 수정 루프 — 실동작 보고\n'
       +'· 목표(미래 상태 먼저 확정): 「'+r.goal+'」\n'
       +'· 가상 워크스페이스 V:\\ 1차 실행 → 결과가 목표와 다르잖아? → 차이 감지\n'
