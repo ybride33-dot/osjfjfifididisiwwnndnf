@@ -1,0 +1,37 @@
+const assert=require('node:assert/strict');
+const school=require('../code-school.js');
+let map=new Map();
+const store={get:k=>map.get(k),set:(k,v)=>map.set(k,JSON.parse(JSON.stringify(v)))};
+assert.equal(school.exam(store).passed,0,'without lesson there are no learned rules');
+const trained=school.teach(store);assert.equal(trained.count,2);
+assert.equal(school.exam(store).passed,4);
+assert.equal(school.exam(store).total,4);
+assert.equal(school.teach(store).count,2,'repeated training does not duplicate rules');
+assert.equal(school.parse('console.log(1); process.exit()'),null);
+assert.equal(school.run('globalThis.hack=true',3),null);
+const b='function f(n){let sum=0;for(let i=0;i<n;i++){sum+=i;}return sum;}';
+assert.equal(school.run(b,3),3);
+assert.equal(school.run(school.replaceOp(b,'<='),3),6);
+assert.equal(school.run(b,101),null);
+assert.equal(school.derive(b,b),null);
+let saved=JSON.stringify([...map]);map=new Map(JSON.parse(saved));
+assert.equal(school.exam(store).passed,4,'learned rules survive serialization');
+map.set('jvs-code-school',{rules:[{from:'<',to:'evil'}]});
+assert.equal(school.exam(store).passed,0,'invalid stored rules are rejected');
+console.log('PASS code school: before/after, held-out inputs, persistence, restrictions');
+// Verify the real brain() command routing, without loading UI, network or models.
+(async()=>{
+ const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+ const start=html.indexOf('async function brain(text){');
+ const end=html.indexOf('  /* 학습된 커스텀 스킬 최우선 */',start);
+ assert.ok(start>=0&&end>start);
+ let db=new Map();
+ const freshStore={get:k=>db.get(k),set:(k,v)=>db.set(k,v)};
+ const ctx=vm.createContext({typoFix:x=>x,detectLang:()=> 'ko', JVSCodeSchool:school,store:freshStore});
+ vm.runInContext(html.slice(start,end)+'return {reply:"unhandled"}; }',ctx);
+ assert.match((await ctx.brain('자비스 코딩 시험')).reply,/0\/4/);
+ assert.match((await ctx.brain('자비스 코딩 수업')).reply,/규칙 2개/);
+ assert.match((await ctx.brain('자비스 코딩 시험')).reply,/4\/4/);
+ console.log('PASS actual brain command routing');
+})().catch(e=>{console.error(e);process.exitCode=1});
