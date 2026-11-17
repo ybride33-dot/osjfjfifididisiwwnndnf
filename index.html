@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='20.13'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='20.14'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -2071,7 +2071,7 @@ function mFact(n){ if(n<0||n%1!==0||n>170)return NaN; let r=1; for(let k=2;k<=n;
 function mFn(f,x){ switch(f){case 'sin':return Math.sin(x);case 'cos':return Math.cos(x);case 'tan':return Math.tan(x);case 'sqrt':return Math.sqrt(x);case 'ln':return Math.log(x);case 'log':return Math.log(x)/Math.LN10;case 'abs':return Math.abs(x);case 'round':return Math.round(x);case 'floor':return Math.floor(x);case 'ceil':return Math.ceil(x);} return NaN; }
 function mTok(s){ const out=[]; let i=0; s=String(s).replace(/\s+/g,''); const FN={sin:1,cos:1,tan:1,sqrt:1,log:1,ln:1,abs:1,round:1,floor:1,ceil:1};
   while(i<s.length){ const c=s[i];
-    if(/[0-9.]/.test(c)){ let j=i; while(j<s.length&&/[0-9.]/.test(s[j]))j++; const n=parseFloat(s.slice(i,j)); if(!isFinite(n))return null; out.push({t:'n',v:n}); i=j; continue; }
+    if(/[0-9.]/.test(c)){ let j=i; while(j<s.length&&/[0-9.]/.test(s[j]))j++; const raw=s.slice(i,j); if(!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw))return null; const n=Number(raw); if(!isFinite(n))return null; out.push({t:'n',v:n}); i=j; continue; }
     if(/[a-z]/i.test(c)){ let j=i; while(j<s.length&&/[a-z]/i.test(s[j]))j++; const w=s.slice(i,j).toLowerCase();
       if(w==='pi')out.push({t:'n',v:Math.PI}); else if(w==='e')out.push({t:'n',v:Math.E});
       else if(FN[w])out.push({t:'f',v:w}); else return null; i=j; continue; }
@@ -2081,15 +2081,14 @@ function mTok(s){ const out=[]; let i=0; s=String(s).replace(/\s+/g,''); const F
 function mEval(T){ try{ let i=0; const peek=()=>T[i], eat=()=>T[i++];
   function prim(){ const t=eat(); if(!t)return NaN;
     if(t.t==='n')return t.v;
-    if(t.t==='o'&&t.v==='('){ const v=expr(); if(peek()&&peek().t==='o'&&peek().v===')')eat(); return v; }
-    if(t.t==='o'&&t.v==='-')return -prim();
-    if(t.t==='o'&&t.v==='+')return prim();
-    if(t.t==='f')return mFn(t.v,prim());
+    if(t.t==='o'&&t.v==='('){ const v=expr(); if(!(peek()&&peek().t==='o'&&peek().v===')'))return NaN; eat(); return v; }
+    if(t.t==='f'){ let sign=1; while(peek()&&peek().t==='o'&&(peek().v==='+'||peek().v==='-')){ if(eat().v==='-')sign=-sign; } return mFn(t.v,sign*prim()); }
     return NaN; }
   function post(){ let v=prim(); while(peek()&&peek().t==='o'&&peek().v==='!'){ eat(); v=mFact(v); } return v; }
-  function pw(){ let v=post(); if(peek()&&peek().t==='o'&&peek().v==='^'){ eat(); return Math.pow(v,pw()); } return v; }
-  function term(){ let v=pw(); for(;;){ const p=peek(); if(!p)break;
-    if(p.t==='o'&&(p.v==='*'||p.v==='/'||p.v==='%')){ const o=eat().v, r=pw(); v=o==='*'?v*r:o==='/'?v/r:v%r; }
+  function pw(){ let v=post(); if(peek()&&peek().t==='o'&&peek().v==='^'){ eat(); return Math.pow(v,unary()); } return v; }
+  function unary(){ if(peek()&&peek().t==='o'&&(peek().v==='+'||peek().v==='-')){ const op=eat().v, v=unary(); return op==='-'?-v:v; } return pw(); }
+  function term(){ let v=unary(); for(;;){ const p=peek(); if(!p)break;
+    if(p.t==='o'&&(p.v==='*'||p.v==='/'||p.v==='%')){ const o=eat().v, r=unary(); v=o==='*'?v*r:o==='/'?v/r:v%r; }
     else if(p.t==='f'||(p.t==='o'&&p.v==='(')){ const r=pw(); v*=r; }
     else break; } return v; }
   function expr(){ let v=term(); while(peek()&&peek().t==='o'&&('+'===peek().v||'-'===peek().v)){ const o=eat().v, r=term(); v=o==='+'?v+r:v-r; } return v; }
