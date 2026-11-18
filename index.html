@@ -1397,7 +1397,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='20.18'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='20.19'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v54 무토큰 폴백 폐기(사장님 7차 판정: 정렬판 답 생성=오염) — 원격은 HF 토큰판만 · 무토큰 시 등록 유도 안내 */ /* v53 원격 두개골 무토큰 폴백 — HF(토큰) 실패 시 폴리네이션즈 무료 서버 자동 경유(키0·왕복0·정렬판임을 정직 표기) */ /* v52 원격 두개골 — HF 라우터 base 자동 왕복(출제→전송→수령→채점 1발·토큰 세션 전용 평문저장0) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v47 온라인 승격 — 클라우드 스트리밍(SSE 즉시 타이핑)·멀티턴 기억·커널 깊이 주입 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
 function nluTokenize(t){
@@ -1840,12 +1840,6 @@ async function dialogueEngine(t,low,en,R){
     if(fed)return R('📚 흡수 완료 — 「'+fed.ti+'」를 제 지식DB에 영구 편입했습니다(요약 '+fed.b.length+'자). 이제 이 화제는 제 것이니 바로 물어보세요, 사장님. 추가로 "XX 먹여줘"면 계속 쌓습니다.');
     return R('정직 보고 — 「'+topic+'」 위키 검색 실패(오프라인이거나 문서 없음). 온라인에서 다시 시도하거나 다른 표현으로 부탁합니다.');
   }
-  if(/^(tony|도니|토니|돈이|돈니|tony|dony|donnie)[!.,?~]*$/i.test(t.trim())||/tony|토니|돈이\s*(하|불러|켜|모드)/i.test(t)&&t.length<25){
-    ctxTouch(t);
-    try{ if(typeof TG!=='undefined'&&TG.on)tgExit(); }catch(e){}
-    setTimeout(()=>{ try{ showTGHub(); }catch(e){} },250);
-    return R('🅃 𝐉𝐀𝐑𝐕𝐈𝐒 𝐇𝐔𝐃 전개 — 기존 코어 위로 청색 네온 패널 펼칩니다. 날짜·날씨·성장 그래프 확인하세요, 사장님. ("Tony" 한 번 더 = 닫기)');
-  }
   /* === AI 모델 비교 — 실제 비교표 (은유·통계 회피 금지) === */
   if(/비교해|비교해\s*봐|누가\s*더|vs|이겨|이길|잘해\?|한테\s*밀|따라잡/.test(t)&&/(gpt|chatgpt|제미니|gemini|클로드|claude|시리|빅스비|알렉사|네이버|클로바|다른\s*ai|다른\s*에이|다른\s*모델|대기업|구글|애플|삼성|openai|오픈에이)/i.test(t)){
     ctxTouch(t);
@@ -2009,7 +2003,7 @@ async function brainSend(text){
   try { out=await brain(text); }
   catch(e){ out={reply:'⚠️ 내부 모듈 오류(자가진단 기록): '+e.message}; evo('⛔ 오류 자가수정 시도 — '+e.message); }
   finally { try{ if(typeof LEARN!=='undefined')LEARN.eat(text,out&&out.reply||''); }catch(e){} try{ if(typeof K!=='undefined'&&out&&out.reply)K.onTurn(text,out.reply); }catch(e){} try{ if(typeof LLM!=='undefined'&&LLM.pushHist&&out&&out.reply)LLM.pushHist(text,out.reply); }catch(e){} }
-  const bt=performance.now()-bt0; S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
+  const bt=performance.now()-bt0; if(typeof JVSOP!=='undefined'&&!JVSOP.isCommand(text))JVSOP.recordReply(bt); S.perfMs=S.perfMs?S.perfMs*0.8+bt*0.2:bt;
   addXP(2);
   if (typeof out==='string') out={reply:out};
   if(out&&typeof out.reply!=='undefined'&&typeof out.reply!=='string'){ try{ out.reply=String(out.reply&&out.reply.then?'[비동기 결과는 기록으로 보고됩니다]':out.reply); }catch(e){ out.reply='(응답 직렬화 오류 — 자가수정 기록)'; } }
@@ -2244,6 +2238,8 @@ async function brain(text){
   text=typoFix(text.trim());
   const t=text, low=t.toLowerCase(), en=detectLang(t)==='en';
   const R=(ko,e)=>({reply:en?(e||ko):ko,lang:en?'en':'ko'});
+  /* OP: typed or recognized speech, before learning and model routing */
+  if(typeof JVSOP!=='undefined'&&JVSOP.isCommand(t)){ JVSOP.toggle(); return R('OP 패널 전환.'); }
   /* 과학·수학 자료실: 사용자 명령 시에만 다운로드, 모델 훈련 아님 */
   { const m=t.match(/^(?:자비스\s*)?과학\s*자료\s*검색\s+(.+)$/i); if(m) return R(typeof JVSScienceLibrary!=='undefined'?await JVSScienceLibrary.searchMessage(m[1]):'과학 자료 모듈을 불러오지 못했습니다.'); }
   { const m=t.match(/^(?:자비스\s*)?과학\s*자료\s*보기\s+(\d+)$/i); if(m) return R(typeof JVSScienceLibrary!=='undefined'?await JVSScienceLibrary.view(m[1]):'과학 자료 모듈을 불러오지 못했습니다.'); }
@@ -3119,47 +3115,8 @@ function tgGraph(cvs,data,color,glow,label,fmt){
   x.fillStyle='#e8f6ff'; x.font='800 13px monospace'; x.textAlign='right';
   x.fillText(fmt(mx),W-8,16);
 }
-function showTGHub(){
-  const old=document.getElementById('tgHub'); if(old){ old.remove(); return; } /* 토글 */
-  const hub=document.createElement('div'); hub.id='tgHub';
-  hub.style.cssText='position:fixed;z-index:9002;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);width:min(92vw,400px);max-height:82vh;overflow-y:auto;background:linear-gradient(165deg,rgba(8,18,34,.94),rgba(4,10,20,.96));border:1.5px solid rgba(110,190,255,.6);border-radius:20px;box-shadow:0 0 46px rgba(70,160,255,.35),0 0 90px rgba(40,120,220,.18),inset 0 0 34px rgba(60,140,220,.10);color:#d7efff;padding:18px 16px 12px;transition:transform .38s cubic-bezier(.2,1.4,.4,1),opacity .3s;opacity:0';
-  requestAnimationFrame(()=>{ hub.style.transform='translate(-50%,-50%) scale(1)'; hub.style.opacity='1'; });
-  const today=new Date();
-  const yoil=['일','월','화','수','목','금','토'][today.getDay()];
-  const dstr=today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+yoil+') '+String(today.getHours()).padStart(2,'0')+':'+String(today.getMinutes()).padStart(2,'0');
-  /* 날씨 — 정직: 오프라인이면 위치 모름 */
-  let wstr='오프라인 — 날씨 조회 불가(정직: 위치·네트워크 필요)';
-  hub.innerHTML=
-   '<div style="text-align:center;letter-spacing:.3em;color:#7fc4ff;font-size:11px;font-weight:800;margin-bottom:8px">J.A.R.V.I.S · TANGRAM HUD</div>'
-  +'<div style="text-align:center;font-size:15px;font-weight:800;color:#e8f6ff;margin-bottom:2px">'+dstr+'</div>'
-  +'<div id="tgW" style="text-align:center;font-size:11px;opacity:.75;margin-bottom:12px">🔄 날씨 확인 중…</div>'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-  +'<canvas id="tgG1" width="176" height="110" style="width:100%;background:rgba(10,25,40,.5);border:1px solid rgba(120,200,255,.25);border-radius:10px"></canvas>'
-  +'<canvas id="tgG2" width="176" height="110" style="width:100%;background:rgba(10,25,40,.5);border:1px solid rgba(120,200,255,.25);border-radius:10px"></canvas>'
-  +'</div>'
-  +'<div id="tgP" style="font-size:10.5px;opacity:.8;margin-top:10px;line-height:1.55"></div>'
-  +'<div style="text-align:center;margin-top:8px"><button id="tgX2" style="background:none;border:1px solid rgba(120,200,255,.4);color:#9fd4ff;border-radius:8px;padding:7px 16px;font-size:11px">닫기</button></div>';
-  document.body.appendChild(hub);
-  document.getElementById('tgX2').addEventListener('pointerdown',()=>hub.remove());
-  /* 날씨 — open-meteo 무료 API (정직 폴백) */
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current_weather=true')
-    .then(r=>r.json()).then(j=>{ const w=j&&j.current_weather;
-      document.getElementById('tgW').textContent=w?('서울 '+w.temperature+'°C · 바람 '+Math.round(w.windspeed)+'km/h — open-meteo 실측 조회'):'날씨 응답 이상 — 정직 표기 유지';
-    }).catch(()=>{ document.getElementById('tgW').textContent=wstr; });
-  /* 그래프 1 — 성능 발전: 자기해킹 횟수 기반 누적 곡선 (실데이터) */
-  const hacks=Math.max(3,Math.min(24,Math.round((S.selfHacks||0)*0.12)+3));
-  const g1=[];
-  for(let i=0;i<hacks;i++){ g1.push(Math.max(1,(S.perfLevel||1)*Math.pow(1.028,i))); }
-  tgGraph(document.getElementById('tgG1'),g1,'#4ab3ff','#7fc4ff','성능 발전 (perfLevel 궤적)',v=>'LV.'+Math.round(v));
-  /* 그래프 2 — 자비스의 자기평가 성장: XP 궤적의 자기인식 재해석 */
-  const g2=[];
-  for(let i=0;i<12;i++){ g2.push(Math.max(1,(S.xp||100)*Math.pow(0.9,11-i)/(i+1))); }
-  tgGraph(document.getElementById('tgG2'),g2,'#ffd24a','#ffcf7d','자기인식 성장 곡선 (Ω 평가)',v=>Math.round(v));
-  document.getElementById('tgP').innerHTML=
-   '🔒 자기해킹 <b>'+(S.selfHacks||0)+'</b>회 · 성능 LV.<b>'+(S.perfLevel||0)+'</b> · 특이점 <b>'+(S.mutations?S.mutations.length:0)+'</b>개 (Ω'+((S.mutOmega)?' 도달':' 미도달')+')<br>'
-  +'🧠 지식뱅크 '+KNOW.length+'토픽 · 학습 대화 '+(DIALOG_LEARNED?DIALOG_LEARNED.length:0)+'쌍 · 스크립트 v'+JVS_VER+'<br>'
-  +'<span style="opacity:.7">그래프는 실제 기록(perfLevel·XP)의 궤적입니다 — 장식 값 아님(정직).</span>';
-}
+function showTGHub(){ if(typeof JVSOP!=='undefined') JVSOP.toggle(); }
+
 (function tgSpeakHook(){
   /* 탱그램 모드에서도 응답 자막이 뜨게 — showCapFull 위에 청색 톤 오버레이 */
   try{
@@ -3254,7 +3211,7 @@ function tgLoop(){
   ctx.fillStyle='rgba(130,200,255,.7)'; ctx.font=Math.round(R*0.062)+'px monospace';
   ctx.fillText('TANGRAM HUD · v'+JVS_VER+' · LV.'+(Math.floor(Math.sqrt(S.xp)/2)+1),0,R*1.34);
   ctx.fillStyle='rgba(130,200,255,.45)'; ctx.font=Math.round(R*0.055)+'px monospace';
-  ctx.fillText('중앙 터치 = 허드 펼침 · 말로 "Tony" = 동일',0,R*1.5);
+  ctx.fillText('중앙 터치 = 허드 펼침 · 말로 "OP" = 동일',0,R*1.5);
   ctx.restore();
   TG.raf=requestAnimationFrame(tgLoop);
 }
@@ -4024,6 +3981,7 @@ const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형
   const iv=setInterval(()=>{ if(i>=BOOT.length){ clearInterval(iv); setTimeout(()=>{ document.getElementById('boot').classList.add('off'); boost=1.3; setTimeout(()=>speakOut(LINES[0],null,'greet'),500); },450); return; }
     el.textContent+=BOOT[i++]+'\n'; },260); })();
 </script>
+<script src="op-hud.js"></script>
 <script src="science-library.js"></script>
 <script src="code-corpus.js"></script>
 <script src="code-lab.js"></script>
