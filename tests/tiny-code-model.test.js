@@ -1,0 +1,13 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm'),M=require('../tiny-code-model.js');
+const raw=JSON.parse(fs.readFileSync('coding-weights.json','utf8'));assert.ok(M.validate(raw));const model=M.prepare(raw);
+assert.equal(model.meta.parameter_count,38381);assert.equal(model.meta.test_after.windows,16000);
+const expected='this.reta callbacks.\n    complexidated({ array.\n               ';
+assert.equal(M.generate(model,'function sum(a, b) {\n  return ',64),expected);
+assert.throws(()=>M.generate(model,'한글',64),/영문/);assert.throws(()=>M.generate(model,'a'.repeat(401),64),/400/);
+const bad=JSON.parse(JSON.stringify(raw));bad.weights.W1.data.pop();assert.equal(M.validate(bad),false);
+assert.match(fs.readFileSync('sw.js','utf8'),/tiny-code-model\.js/);assert.ok(!fs.readFileSync('sw.js','utf8').includes('coding-weights.json'),'weights are lazy-loaded');
+const html=fs.readFileSync('index.html','utf8'),start=html.indexOf('async function brain(text){'),end=html.indexOf('  /* 학습된 커스텀 스킬 최우선 */',start);let calls=0;const fetcher=async()=>{calls++;return {ok:true,json:async()=>raw}};
+(async()=>{assert.match(await M.report(fetcher),/가중치 학습/);assert.match(await M.completeMessage('return',fetcher),/자동완성/);assert.equal(calls,1);
+const ctx=vm.createContext({typoFix:x=>x,detectLang:()=> 'ko',JVS_VER:'test',JVSTinyCodeModel:M});vm.runInContext(html.slice(start,end)+'return {reply:"unhandled"}; }',ctx);
+assert.match((await ctx.brain('자비스 코딩 모델 보고')).reply,/파라미터/);assert.match((await ctx.brain('자비스 코드 자동완성 function add(a,b){return')).reply,/자동완성/);
+console.log('PASS local-only neural inference, model validation, exact numeric sample, lazy loading and chat routing');})().catch(e=>{console.error(e);process.exitCode=1});

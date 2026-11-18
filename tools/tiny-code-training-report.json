@@ -1,0 +1,1883 @@
+{
+  "metadata": {
+    "model": "jarvis-tiny-code-mlp-v1",
+    "training": "from scratch; CPU NumPy backprop and Adam; next character prediction",
+    "context": 16,
+    "embedding_dim": 12,
+    "hidden_dim": 128,
+    "parameter_count": 38381,
+    "steps": 12000,
+    "batch": 128,
+    "seed": 442021,
+    "source": "https://github.com/trekhleb/javascript-algorithms",
+    "revision": "85293e3e2b88f4d2ce330d956b139cf628aa1e82",
+    "license": "MIT",
+    "license_file": "third-party/javascript-algorithms-LICENSE.txt",
+    "split_method": "sha256 algorithm-directory group; no identical full files in more than one split",
+    "split_stats": {
+      "train": {
+        "files": 297,
+        "groups": 91,
+        "windows": 602682
+      },
+      "val": {
+        "files": 22,
+        "groups": 9,
+        "windows": 53450
+      },
+      "test": {
+        "files": 41,
+        "groups": 13,
+        "windows": 73245
+      }
+    },
+    "duplicate_files_excluded": 0,
+    "validation_before": {
+      "loss_nats": 4.584485,
+      "perplexity": 97.9528,
+      "next_char_accuracy": 0.00925,
+      "non_whitespace_accuracy": 0.009791,
+      "non_whitespace_windows": 9601,
+      "windows": 12000
+    },
+    "validation_after": {
+      "loss_nats": 1.464493,
+      "perplexity": 4.3254,
+      "next_char_accuracy": 0.643917,
+      "non_whitespace_accuracy": 0.584939,
+      "non_whitespace_windows": 9601,
+      "windows": 12000
+    },
+    "test_before": {
+      "loss_nats": 4.582896,
+      "perplexity": 97.7972,
+      "next_char_accuracy": 0.008563,
+      "non_whitespace_accuracy": 0.00903,
+      "non_whitespace_windows": 12624,
+      "windows": 16000
+    },
+    "test_after": {
+      "loss_nats": 1.704231,
+      "perplexity": 5.4972,
+      "next_char_accuracy": 0.57675,
+      "non_whitespace_accuracy": 0.500634,
+      "non_whitespace_windows": 12624,
+      "windows": 16000
+    },
+    "test_baselines": {
+      "majority_character": " ",
+      "majority_accuracy": 0.176875,
+      "one_previous_character_accuracy": 0.306312
+    },
+    "limits": "97-character alphabet, previous 16 characters only; code completion, not general coding or guaranteed executable code"
+  },
+  "files": {
+    "train": [
+      {
+        "path": "src/algorithms/cryptography/caesar-cipher/__test__/caesarCipher.test.js",
+        "group": "src/algorithms/cryptography/caesar-cipher",
+        "sha256": "aab0d4134293ca6c1bdfd8564300f47f7da15e3fcb85f1e354a4acb628d686c7"
+      },
+      {
+        "path": "src/algorithms/cryptography/caesar-cipher/caesarCipher.js",
+        "group": "src/algorithms/cryptography/caesar-cipher",
+        "sha256": "c66cf6a18bdff35169a00527b926e1919c947b24384fb6334b16dd12b112400c"
+      },
+      {
+        "path": "src/algorithms/cryptography/hill-cipher/_test_/hillCipher.test.js",
+        "group": "src/algorithms/cryptography/hill-cipher",
+        "sha256": "e2c6790dc190983b333d767bf4bd0aa26dea9534233c2cb23daf82c7efb4d18d"
+      },
+      {
+        "path": "src/algorithms/cryptography/hill-cipher/hillCipher.js",
+        "group": "src/algorithms/cryptography/hill-cipher",
+        "sha256": "3e59f915dddbe68a6626c792f409d2e5ac39336e57bd5dacf175c211791733fc"
+      },
+      {
+        "path": "src/algorithms/cryptography/polynomial-hash/PolynomialHash.js",
+        "group": "src/algorithms/cryptography/polynomial-hash",
+        "sha256": "dfc11e86bbea8d6945be5c1049939e0d002b5f6bbe80b9c1ea4b14c34f5123cb"
+      },
+      {
+        "path": "src/algorithms/cryptography/polynomial-hash/SimplePolynomialHash.js",
+        "group": "src/algorithms/cryptography/polynomial-hash",
+        "sha256": "718589fac0264fdf35726ba55492ea5832e45249dd40ed9c3890b6ee708f8edd"
+      },
+      {
+        "path": "src/algorithms/cryptography/polynomial-hash/__test__/PolynomialHash.test.js",
+        "group": "src/algorithms/cryptography/polynomial-hash",
+        "sha256": "53f0d85ed346bbafdb4e75d2574e36a2a79ac85255b6d0cfe2bc6ae5ec4e1dc2"
+      },
+      {
+        "path": "src/algorithms/cryptography/polynomial-hash/__test__/SimplePolynomialHash.test.js",
+        "group": "src/algorithms/cryptography/polynomial-hash",
+        "sha256": "b6c15c46d5b56381bac90dc4df7fcee7501e4d6a5fe1ab5098d0a498ff028130"
+      },
+      {
+        "path": "src/algorithms/graph/bellman-ford/__test__/bellmanFord.test.js",
+        "group": "src/algorithms/graph/bellman-ford",
+        "sha256": "3194d3f29be0607f4627225b3b153f118fccdca49c40045995c5c500256cdf86"
+      },
+      {
+        "path": "src/algorithms/graph/bellman-ford/bellmanFord.js",
+        "group": "src/algorithms/graph/bellman-ford",
+        "sha256": "cada31506a33935969ec842de3a144294e57297d435d216a50a4da662e238b20"
+      },
+      {
+        "path": "src/algorithms/graph/breadth-first-search/__test__/breadthFirstSearch.test.js",
+        "group": "src/algorithms/graph/breadth-first-search",
+        "sha256": "b0c182a8c0f1da78a4638299032df44a21c88e4fea1052a9fdd110126edfd8b1"
+      },
+      {
+        "path": "src/algorithms/graph/breadth-first-search/breadthFirstSearch.js",
+        "group": "src/algorithms/graph/breadth-first-search",
+        "sha256": "a76a0ae8ca663857f1c06e896c950535148059e05742eca3b333374cd00dfd2a"
+      },
+      {
+        "path": "src/algorithms/graph/bridges/__test__/graphBridges.test.js",
+        "group": "src/algorithms/graph/bridges",
+        "sha256": "b057e0241592a26c111594627559701d221faa2e06a8b7cdc51ddb28c2b57814"
+      },
+      {
+        "path": "src/algorithms/graph/bridges/graphBridges.js",
+        "group": "src/algorithms/graph/bridges",
+        "sha256": "b2482c06e111d23dfdf0766ecdfc9c2820f172b4dd851e7b7281625991af6739"
+      },
+      {
+        "path": "src/algorithms/graph/depth-first-search/__test__/depthFirstSearch.test.js",
+        "group": "src/algorithms/graph/depth-first-search",
+        "sha256": "ff561fa197910511259fc38b0c798f5881f2bd9571c5e071558547fe4485f1d0"
+      },
+      {
+        "path": "src/algorithms/graph/depth-first-search/depthFirstSearch.js",
+        "group": "src/algorithms/graph/depth-first-search",
+        "sha256": "cf0df45844a3489e364ec1af7cf7c7e1dbc49da89246e70e5cd69c18b395eac9"
+      },
+      {
+        "path": "src/algorithms/graph/dijkstra/__test__/dijkstra.test.js",
+        "group": "src/algorithms/graph/dijkstra",
+        "sha256": "f8365ef2fc74894e4ea1d67caaaf20c784d2baee7abe63a843d0f5fb4b9c9e63"
+      },
+      {
+        "path": "src/algorithms/graph/dijkstra/dijkstra.js",
+        "group": "src/algorithms/graph/dijkstra",
+        "sha256": "3bd01aca24f51a681b9e59cd0ef4c2ee0b691c26a41049751449066ac8f0b7c2"
+      },
+      {
+        "path": "src/algorithms/graph/eulerian-path/__test__/eulerianPath.test.js",
+        "group": "src/algorithms/graph/eulerian-path",
+        "sha256": "38a569ccbc58e0c9bcc9201da3bd5901064dff1d9dd40b83d020d923eb8999fb"
+      },
+      {
+        "path": "src/algorithms/graph/eulerian-path/eulerianPath.js",
+        "group": "src/algorithms/graph/eulerian-path",
+        "sha256": "17583cd375210abad266e46f29c72047f89b1a16bc61b6ba622ca58883229c84"
+      },
+      {
+        "path": "src/algorithms/graph/floyd-warshall/__test__/floydWarshall.test.js",
+        "group": "src/algorithms/graph/floyd-warshall",
+        "sha256": "4b26add0586eb3a165d8309a66ccd93a32bd8af9b9dc301fb89e7b7de19f2d61"
+      },
+      {
+        "path": "src/algorithms/graph/floyd-warshall/floydWarshall.js",
+        "group": "src/algorithms/graph/floyd-warshall",
+        "sha256": "a7b2458babd46cb3a707d29f5581cf5a07af8a0f8cbe44dd4c36c850ae32dcc7"
+      },
+      {
+        "path": "src/algorithms/graph/hamiltonian-cycle/__test__/hamiltonianCycle.test.js",
+        "group": "src/algorithms/graph/hamiltonian-cycle",
+        "sha256": "21f90e0a231e2735e64b15969494eed96336777de2db0119461747f1a41f2c8b"
+      },
+      {
+        "path": "src/algorithms/graph/hamiltonian-cycle/hamiltonianCycle.js",
+        "group": "src/algorithms/graph/hamiltonian-cycle",
+        "sha256": "a75c73eb5d1bb23006c5532b14b6e8b292c57d8d802959d7255103a1030ce701"
+      },
+      {
+        "path": "src/algorithms/graph/kruskal/__test__/kruskal.test.js",
+        "group": "src/algorithms/graph/kruskal",
+        "sha256": "f52e50c3043202f6a85c9b22ee301e8b3e73239423463c324da7837ebfd124b1"
+      },
+      {
+        "path": "src/algorithms/graph/kruskal/kruskal.js",
+        "group": "src/algorithms/graph/kruskal",
+        "sha256": "6d0b67f9ae598185d159cc944ee839db74849f8bd6a2a1bcd2ff925f133c580d"
+      },
+      {
+        "path": "src/algorithms/graph/topological-sorting/__test__/topologicalSort.test.js",
+        "group": "src/algorithms/graph/topological-sorting",
+        "sha256": "89e16de87387711f8023512f81a843e580ebe69f80d1d02530567ef5efb15dbf"
+      },
+      {
+        "path": "src/algorithms/graph/topological-sorting/topologicalSort.js",
+        "group": "src/algorithms/graph/topological-sorting",
+        "sha256": "34fd0c253a9f49bed076d9dd4e7465b9baaea607d5a37499867580ede175f018"
+      },
+      {
+        "path": "src/algorithms/graph/travelling-salesman/__test__/bfTravellingSalesman.test.js",
+        "group": "src/algorithms/graph/travelling-salesman",
+        "sha256": "5fd534318d12f343fd328e0fa83e1eb529678b63cd6d54019e4d4834dedf7881"
+      },
+      {
+        "path": "src/algorithms/graph/travelling-salesman/bfTravellingSalesman.js",
+        "group": "src/algorithms/graph/travelling-salesman",
+        "sha256": "2bd81b3a308aa15ddf86e09855d55bf6d07ee35d8efc77f3de830e1dc9197560"
+      },
+      {
+        "path": "src/algorithms/image-processing/seam-carving/__tests__/resizeImageWidth.node.js",
+        "group": "src/algorithms/image-processing/seam-carving",
+        "sha256": "562d0e1846b71cf15b6669ff67fd955f1e551604ac5ef6e51c15e3bc1029ff12"
+      },
+      {
+        "path": "src/algorithms/image-processing/seam-carving/resizeImageWidth.js",
+        "group": "src/algorithms/image-processing/seam-carving",
+        "sha256": "fbf1f7544023a6a23eaf288ebaee2b6b7e4dd4c831cd73731b91c539ce02938a"
+      },
+      {
+        "path": "src/algorithms/linked-list/reverse-traversal/__test__/reverseTraversal.test.js",
+        "group": "src/algorithms/linked-list/reverse-traversal",
+        "sha256": "c643c91323c5ed0d7c723bbf2e1162742bf6bf38e757d21c1edabc43de8614bf"
+      },
+      {
+        "path": "src/algorithms/linked-list/reverse-traversal/reverseTraversal.js",
+        "group": "src/algorithms/linked-list/reverse-traversal",
+        "sha256": "43d74210adee988eef2edaf94e8f712882d2a29fc271a5879f193a4cca60731c"
+      },
+      {
+        "path": "src/algorithms/linked-list/traversal/__test__/traversal.test.js",
+        "group": "src/algorithms/linked-list/traversal",
+        "sha256": "68c3e585b786d383eb322e3f33ad262ce32f998d20195c95863682b0656510a3"
+      },
+      {
+        "path": "src/algorithms/linked-list/traversal/traversal.js",
+        "group": "src/algorithms/linked-list/traversal",
+        "sha256": "439fc5430ab42da1bff8a48401d0371ca2f1543a0b5a91ce1ba91aa251283d8e"
+      },
+      {
+        "path": "src/algorithms/math/binary-floating-point/__tests__/bitsToFloat.test.js",
+        "group": "src/algorithms/math/binary-floating-point",
+        "sha256": "811e0e0d10e9fb5a076c647ff4d490bab56ddf16e7af4738f3bfcc5da0e84115"
+      },
+      {
+        "path": "src/algorithms/math/binary-floating-point/__tests__/floatAsBinaryString.test.js",
+        "group": "src/algorithms/math/binary-floating-point",
+        "sha256": "b4af467ae189b2a7f47e24c5a6052973d4647a867417249abb8e2c0deb6fb886"
+      },
+      {
+        "path": "src/algorithms/math/binary-floating-point/bitsToFloat.js",
+        "group": "src/algorithms/math/binary-floating-point",
+        "sha256": "5d54512f097ed03c5aeaecfaccda47e2942e76d38b3ea452f0af00267afc2057"
+      },
+      {
+        "path": "src/algorithms/math/binary-floating-point/floatAsBinaryString.js",
+        "group": "src/algorithms/math/binary-floating-point",
+        "sha256": "ecf3dbc79569a78eea9fb2c53a24ab9f07df6526817efe5e542f866370a2b6da"
+      },
+      {
+        "path": "src/algorithms/math/binary-floating-point/testCases.js",
+        "group": "src/algorithms/math/binary-floating-point",
+        "sha256": "3ed7e4a1bab7a94142f33b5ea0ac4fd44c28200f45cdf481a2fe3d0dd7e4cce8"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/bitLength.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "8f387787c93ee5cc9763eb2566454744d84a19405df94effe6b2b86b6c004d04"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/bitsDiff.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "8922b80baffdd7d09a3d60f6641f3b0f6cad18555f3f8470da854945eeffcb6e"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/clearBit.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "07a261d7292c31445d062f90fce317d176b310a6ccdb4b194d445e220d602ed4"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/countSetBits.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "1ce92cdbfcafb09886773fbbaa98fdc3c0e45b2729842ad5d8013a4ea75aec1b"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/divideByTwo.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "31315d1a5719a2155439af5fedefbcd371cd010f58a7d2097c2a116857a29d3b"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/fullAdder.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "789e166305ae0b9b939abef35284b1dc9ea926b60ab62e2ae2065ce392ca8444"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/getBit.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "06b1e2745512af22b7ad981b8cd1a97e600a82a1e2fe7ba9588b9cc50e6913fb"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/isEven.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "4cdd27c35d866f41e3989614ef0dcd3ea413094c23354bd5c1ef639fbfb1e5b7"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/isPositive.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "6f2381ff98a5933eee86132c1e6318ebb90250c92684a380c13549e741193391"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/isPowerOfTwo.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "f680bb6b216552ea5a5284716f29266d12435b0f8082f22760326d69943819d6"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/multiply.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "1053f9936b55ff7328f16d08154b7def83c6c5021a48d22592e78acf0192c1b9"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/multiplyByTwo.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "fd77821738b3b6b182d6e89cbf64d9a9280312610e0c2791def2a67850d40360"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/multiplyUnsigned.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "865ce6e523824054956b77ae5baabd3c874346935e48e50042cbc13e7efb77c7"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/setBit.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "08bc3502eeecc1bbf8812af14584dcecb89eff7796962511ab3a717c73506fa3"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/switchSign.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "2085b09b4c26f225e3a813a8b0ae624b45615dce0b3a335fc5a49d24c33818b2"
+      },
+      {
+        "path": "src/algorithms/math/bits/__test__/updateBit.test.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "c3ee9723d3c46429aa01e81412a4289f001def97a11a42887abe44191d12e7e1"
+      },
+      {
+        "path": "src/algorithms/math/bits/bitLength.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "467e8001765c5df01f96e5ec9d9723e04cce77552061c9d3a19806ff29c63c6e"
+      },
+      {
+        "path": "src/algorithms/math/bits/bitsDiff.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "461e443f0de0c9e2ad6722e0924bdec408dfb92012ca70f4b45b65e4e4c339b1"
+      },
+      {
+        "path": "src/algorithms/math/bits/clearBit.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "c32c533e3856d7fbfd0ffdccaf972d8c11ec5c24a04b285937521390338e27bc"
+      },
+      {
+        "path": "src/algorithms/math/bits/countSetBits.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "2c676dfe1e73828994e64865c7735d8456545351a0f05b89d2e16906a7df94ac"
+      },
+      {
+        "path": "src/algorithms/math/bits/divideByTwo.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "df0ca8b72ecff2a1f33c6ac07b4bc0957c8d08d970afa39a4f7bc2439ac09f18"
+      },
+      {
+        "path": "src/algorithms/math/bits/fullAdder.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "de844028b35b67f70bf324744debe22d4ddcd55627f91a796894887c6051cc66"
+      },
+      {
+        "path": "src/algorithms/math/bits/getBit.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "4e14b32061ef327419b0c5c93eab016b2e9229028eb19856480914827e4cefcd"
+      },
+      {
+        "path": "src/algorithms/math/bits/isEven.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "ffd5ce948f87b67a7e1b459584e9f7631824a22f21b93734ddf2cf2e49d89eae"
+      },
+      {
+        "path": "src/algorithms/math/bits/isPositive.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "5ba46a46c940e3e108b390d2e0c357dc55ea578375c9dedcdc1030cb56f421c9"
+      },
+      {
+        "path": "src/algorithms/math/bits/isPowerOfTwo.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "9fbabf1c363e50911cfbde15768337e4ff0c457e543af3338b03127cc5596d60"
+      },
+      {
+        "path": "src/algorithms/math/bits/multiply.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "394373e6fd4fdad6c9d1b29f95158e6cb3bd5f76f0d1d156144d55c3c2f3958e"
+      },
+      {
+        "path": "src/algorithms/math/bits/multiplyByTwo.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "7388d5b6aa72e34bf9aaed4451f90230a2b8b6032cfc78718971184d37c405f2"
+      },
+      {
+        "path": "src/algorithms/math/bits/multiplyUnsigned.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "ed8cc5c191cfd855811f678f9da0a24e2486e6c4b9a652c82a1c0383cba9bfe1"
+      },
+      {
+        "path": "src/algorithms/math/bits/setBit.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "7ae439626e66aab0b7869270cc3930d9d7b3c3db94db8966357831061b2bb46f"
+      },
+      {
+        "path": "src/algorithms/math/bits/switchSign.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "184f889e7761adde0af0be4bbfaeaa627ce554e1f22ce307b2ed7f082012ccad"
+      },
+      {
+        "path": "src/algorithms/math/bits/updateBit.js",
+        "group": "src/algorithms/math/bits",
+        "sha256": "03d041f1c5f0bf212b8466d2dc107af2f83d0cbc7504c6497bca859e0f70aa53"
+      },
+      {
+        "path": "src/algorithms/math/complex-number/ComplexNumber.js",
+        "group": "src/algorithms/math/complex-number",
+        "sha256": "73142c172cc3881cac7bf19beb7e06bf8c46b7d3971169145b26cee52dbe2d8e"
+      },
+      {
+        "path": "src/algorithms/math/complex-number/__test__/ComplexNumber.test.js",
+        "group": "src/algorithms/math/complex-number",
+        "sha256": "b3cb88c8f105d35166ca98103b230bf28f1a21182b5bedc95c654186335388cd"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-algorithm/__test__/euclideanAlgorithm.test.js",
+        "group": "src/algorithms/math/euclidean-algorithm",
+        "sha256": "0e66f70e570af02f49d04f0100160fcc1b3d8cb3499a3514c14029635dee6a64"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-algorithm/__test__/euclideanAlgorithmIterative.test.js",
+        "group": "src/algorithms/math/euclidean-algorithm",
+        "sha256": "8dc5f89a1ec9266cd732ac127f08b222241ca422fa6af835d23ffbae61b7fa70"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-algorithm/euclideanAlgorithm.js",
+        "group": "src/algorithms/math/euclidean-algorithm",
+        "sha256": "143e6d091c9dec4a3121bf103752e4c8e61b01269bf75b7d7bfce02e4af4f28c"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-algorithm/euclideanAlgorithmIterative.js",
+        "group": "src/algorithms/math/euclidean-algorithm",
+        "sha256": "5ec793d794ad1fb503b6579736514bea246ec89fe91ca2b9f4a4f52292300d80"
+      },
+      {
+        "path": "src/algorithms/math/factorial/__test__/factorial.test.js",
+        "group": "src/algorithms/math/factorial",
+        "sha256": "beb5ce331ceff831744b30a47e011a15c665d37e6c03fef62fa0fcc93fb78b6a"
+      },
+      {
+        "path": "src/algorithms/math/factorial/__test__/factorialRecursive.test.js",
+        "group": "src/algorithms/math/factorial",
+        "sha256": "cdb500f07e5b262d0e5d982472f5dded12d35580eef91a87ba3955549f5467e5"
+      },
+      {
+        "path": "src/algorithms/math/factorial/factorial.js",
+        "group": "src/algorithms/math/factorial",
+        "sha256": "aa3412967768366fb5d9d767a95e753b35495eaf147fb01b1885406963c97a95"
+      },
+      {
+        "path": "src/algorithms/math/factorial/factorialRecursive.js",
+        "group": "src/algorithms/math/factorial",
+        "sha256": "4dc73db4a28f01f0908de41f2f128030f3ee2e86d92b201964d4d023550dec55"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/__test__/fibonacci.test.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "09595d7777d6be073f64e2ff3f2f91b1dba5910732193c5eb9fa798cdec3d7ec"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/__test__/fibonacciNth.test.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "413371857ed52347ce96c57d49f16f1e6eb1b40fe5cdd2e94ff62baa0462c9c4"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/__test__/fibonacciNthClosedForm.test.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "420b5d32908c48653b5cb2b2a54579a2eb0b65ddb64b1a09e5081076572cefbf"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/fibonacci.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "d709b61274b33d6cb1f5ab2e571fd6a44568038be4c54d28aacd2244982d8207"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/fibonacciNth.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "b17bfc83f6569cfcea8e0bdf4c9626eab22f81a661cd2623c7e64c11d3ef78f9"
+      },
+      {
+        "path": "src/algorithms/math/fibonacci/fibonacciNthClosedForm.js",
+        "group": "src/algorithms/math/fibonacci",
+        "sha256": "0b673cc06ca58e76ca431d5a338680fa27fde6675074fe44709bebbf0dcff25a"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/__test__/FourierTester.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "cc29534ba38269873ed75ad8666bfbe57cc7f72d70da045d38e4dcc518f8a50a"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/__test__/discreteFourierTransform.test.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "9a95720dbb738bfb6677b558dceb4b7627de8eefa687676f07062bd4c6bbd5c6"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/__test__/fastFourierTransform.test.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "a40be5f2fbab665b8ecee0e1fecd8003afff3a9c89e52baa697885fb40f73274"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/__test__/inverseDiscreteFourierTransform.test.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "0a279b4f212d6abcf98a183a37a293b73e3e71a4e8c2f07779552d465573039b"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/discreteFourierTransform.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "68265d761337e09045a6964f0cc00cd9b14c6fa9932415d581a25a756d228beb"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/fastFourierTransform.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "3e7526039e35323a4211e51c53edb055611235aa62925335fe1a82902931eb7f"
+      },
+      {
+        "path": "src/algorithms/math/fourier-transform/inverseDiscreteFourierTransform.js",
+        "group": "src/algorithms/math/fourier-transform",
+        "sha256": "61eb908b4cde5d7addefdb27caad5d3ff5516d0648d0dc137db9036730a4041a"
+      },
+      {
+        "path": "src/algorithms/math/horner-method/__test__/classicPolynome.test.js",
+        "group": "src/algorithms/math/horner-method",
+        "sha256": "18867554b871b487e07fd54b4d87267d8067ea8fbfda87fbc4a5f55b3bad356f"
+      },
+      {
+        "path": "src/algorithms/math/horner-method/__test__/hornerMethod.test.js",
+        "group": "src/algorithms/math/horner-method",
+        "sha256": "45348808e0f1fe7ae1660134dc7674666839f9ffa0868ee022a2410899655d1e"
+      },
+      {
+        "path": "src/algorithms/math/horner-method/classicPolynome.js",
+        "group": "src/algorithms/math/horner-method",
+        "sha256": "9f548736b5977b5ee15763594ab59b7419b1c590be50693355f4d6fd25d28c89"
+      },
+      {
+        "path": "src/algorithms/math/horner-method/hornerMethod.js",
+        "group": "src/algorithms/math/horner-method",
+        "sha256": "bc69b5bdb8b044f6ba96025bc0b07dd77cf6dc7eccba827926eb6adbc5a5940d"
+      },
+      {
+        "path": "src/algorithms/math/is-power-of-two/__test__/isPowerOfTwo.test.js",
+        "group": "src/algorithms/math/is-power-of-two",
+        "sha256": "fb6e3ca2dff0646c5e5c1d04a8e3d64dfe8648bc6549536d30893f8916d6d8d9"
+      },
+      {
+        "path": "src/algorithms/math/is-power-of-two/__test__/isPowerOfTwoBitwise.test.js",
+        "group": "src/algorithms/math/is-power-of-two",
+        "sha256": "3ad8f0a08f76f604684db2a368da499621360aa9a195f447fdf1bcbc1b4b228f"
+      },
+      {
+        "path": "src/algorithms/math/is-power-of-two/isPowerOfTwo.js",
+        "group": "src/algorithms/math/is-power-of-two",
+        "sha256": "3d3ed3495d4fd10b4dba7b0148cbf99f6830dff73926e349589a0ed866e2bd1a"
+      },
+      {
+        "path": "src/algorithms/math/is-power-of-two/isPowerOfTwoBitwise.js",
+        "group": "src/algorithms/math/is-power-of-two",
+        "sha256": "20f728dcfa7e85dbbe5b45fef276c4534895095a18c374de1cd991c25fc5b1a6"
+      },
+      {
+        "path": "src/algorithms/math/liu-hui/__test__/liuHui.test.js",
+        "group": "src/algorithms/math/liu-hui",
+        "sha256": "b0c33acf201c167dba75095c9918de582640ff6918ffa833769b23b5cb785336"
+      },
+      {
+        "path": "src/algorithms/math/liu-hui/liuHui.js",
+        "group": "src/algorithms/math/liu-hui",
+        "sha256": "a425f68a450e170ba7e3c69075e82ac4bff24fc52d13aa69b5bf0d8a50623ba0"
+      },
+      {
+        "path": "src/algorithms/math/matrix/Matrix.js",
+        "group": "src/algorithms/math/matrix",
+        "sha256": "7e1a4b01c86ac448da736e763724760830ee43c907cef779cb626ca2eff455c0"
+      },
+      {
+        "path": "src/algorithms/math/matrix/__tests__/Matrix.test.js",
+        "group": "src/algorithms/math/matrix",
+        "sha256": "af3c8d0d2c38e091eb55e306d67572e2725d85d71592add266e7383f534c57e4"
+      },
+      {
+        "path": "src/algorithms/math/pascal-triangle/__test__/pascalTriangle.test.js",
+        "group": "src/algorithms/math/pascal-triangle",
+        "sha256": "f7c1d1ea12b78a6791ac96e772651fd887edd12b5bd50fc59113910728e11b81"
+      },
+      {
+        "path": "src/algorithms/math/pascal-triangle/__test__/pascalTriangleRecursive.test.js",
+        "group": "src/algorithms/math/pascal-triangle",
+        "sha256": "d97e52689a61e6c53faac56e3b8fbc927428dcf4aeab28e7ec75d285fba2af53"
+      },
+      {
+        "path": "src/algorithms/math/pascal-triangle/pascalTriangle.js",
+        "group": "src/algorithms/math/pascal-triangle",
+        "sha256": "dcde32625345238407d962488d9aa47f33b121edbc56e42c3435985ff30f0ad7"
+      },
+      {
+        "path": "src/algorithms/math/pascal-triangle/pascalTriangleRecursive.js",
+        "group": "src/algorithms/math/pascal-triangle",
+        "sha256": "790168a7a2aed9a517489a63a3c8cb2f2d6758bd44b5f172246fc8bfe8ccbf98"
+      },
+      {
+        "path": "src/algorithms/math/prime-factors/__test__/primeFactors.test.js",
+        "group": "src/algorithms/math/prime-factors",
+        "sha256": "f116d619f3d3d0b2be807462516fb0fab657d764e58768f83ad096f6f3471f4f"
+      },
+      {
+        "path": "src/algorithms/math/prime-factors/primeFactors.js",
+        "group": "src/algorithms/math/prime-factors",
+        "sha256": "62d62a34f5466b5260c40dfd00cd4a81c9369f904101b67745039d1325e148b2"
+      },
+      {
+        "path": "src/algorithms/math/radian/__test__/degreeToRadian.test.js",
+        "group": "src/algorithms/math/radian",
+        "sha256": "b255b56c829303a434a2e0d1158a08d29d0be8a94a2a800f9ac5cef0bcaaf627"
+      },
+      {
+        "path": "src/algorithms/math/radian/__test__/radianToDegree.test.js",
+        "group": "src/algorithms/math/radian",
+        "sha256": "cbb579abc01277e4a9243eeb90d7676e39d096949b5680aabe9937021643ebaa"
+      },
+      {
+        "path": "src/algorithms/math/radian/degreeToRadian.js",
+        "group": "src/algorithms/math/radian",
+        "sha256": "46c5f7c75a4063f76361877c32761af97f4a05ca4eea27c61ab82a93ab4f2c25"
+      },
+      {
+        "path": "src/algorithms/math/radian/radianToDegree.js",
+        "group": "src/algorithms/math/radian",
+        "sha256": "42eb37496e6b9447ee3bc1a1fe3552abe21e6b66d56bf94958e05b5da2cbbddb"
+      },
+      {
+        "path": "src/algorithms/math/sieve-of-eratosthenes/__test__/sieveOfEratosthenes.test.js",
+        "group": "src/algorithms/math/sieve-of-eratosthenes",
+        "sha256": "ee5042671f4b04c3dc3b9f12b849df1160cb36ee59fa04437c0814ada521b127"
+      },
+      {
+        "path": "src/algorithms/math/sieve-of-eratosthenes/sieveOfEratosthenes.js",
+        "group": "src/algorithms/math/sieve-of-eratosthenes",
+        "sha256": "71453644392640a23e392bbdd2782b93ae1a0bc345267da4515235f65ac168c4"
+      },
+      {
+        "path": "src/algorithms/math/square-root/__test__/squareRoot.test.js",
+        "group": "src/algorithms/math/square-root",
+        "sha256": "d79a941c966b50404db70d92011405f54d4baa029c9c43b56bbdf0b8dca700ca"
+      },
+      {
+        "path": "src/algorithms/math/square-root/squareRoot.js",
+        "group": "src/algorithms/math/square-root",
+        "sha256": "be8a58cad04097fc131522ea20cdf65218aa3889a1b9e2d5c568a69255faafa7"
+      },
+      {
+        "path": "src/algorithms/ml/knn/__test__/knn.test.js",
+        "group": "src/algorithms/ml/knn",
+        "sha256": "f99eb456a6e93351792747fde95e8229b741157ea6de07925391c21078e8b3e3"
+      },
+      {
+        "path": "src/algorithms/ml/knn/kNN.js",
+        "group": "src/algorithms/ml/knn",
+        "sha256": "c22acb7cc797e9b8d8b7e4cbfde48127f7231a4d8d86e512ce4b72c193f78276"
+      },
+      {
+        "path": "src/algorithms/search/binary-search/__test__/binarySearch.test.js",
+        "group": "src/algorithms/search/binary-search",
+        "sha256": "78f1b9f1d1c2cf40f227350de32971c8a5b5a12f12ed6b5b9cfa367a68597f56"
+      },
+      {
+        "path": "src/algorithms/search/binary-search/binarySearch.js",
+        "group": "src/algorithms/search/binary-search",
+        "sha256": "2b5e8d0e7610baf9ad8d96d9a3dc64b10b89922ef59ef63ba20f93c91556732c"
+      },
+      {
+        "path": "src/algorithms/search/interpolation-search/__test__/interpolationSearch.test.js",
+        "group": "src/algorithms/search/interpolation-search",
+        "sha256": "1a78cccd708a0cd9dd0e6ffa831a5faf83c9cebe5f6d7b53d04718f737a19cc4"
+      },
+      {
+        "path": "src/algorithms/search/interpolation-search/interpolationSearch.js",
+        "group": "src/algorithms/search/interpolation-search",
+        "sha256": "8f82fb1a510f3b9d4db5278d744fdaa2a3374360c29ed7071e3aca0341c8ae0c"
+      },
+      {
+        "path": "src/algorithms/search/jump-search/__test__/jumpSearch.test.js",
+        "group": "src/algorithms/search/jump-search",
+        "sha256": "54d292323312f842ece11bceadb38da683508f3a57a765a4a5242148fa416a34"
+      },
+      {
+        "path": "src/algorithms/search/jump-search/jumpSearch.js",
+        "group": "src/algorithms/search/jump-search",
+        "sha256": "201dce622baa245f9b44aeaf9cc0fbd6abab36f31520f9ced0efefea5524c666"
+      },
+      {
+        "path": "src/algorithms/search/linear-search/__test__/linearSearch.test.js",
+        "group": "src/algorithms/search/linear-search",
+        "sha256": "be6a2784defc1dce14251ac57ada0a3de18c786615933bf971ebb44ea7031607"
+      },
+      {
+        "path": "src/algorithms/search/linear-search/linearSearch.js",
+        "group": "src/algorithms/search/linear-search",
+        "sha256": "d5bc89653d004619adffe47552d277dd91060f0df0393b35f29e519175df40f6"
+      },
+      {
+        "path": "src/algorithms/sets/cartesian-product/__test__/cartesianProduct.test.js",
+        "group": "src/algorithms/sets/cartesian-product",
+        "sha256": "bd11eef45cd39f71651bea4a2fcd7acb6f1c59fc7283ee0d5bca5a140471d8da"
+      },
+      {
+        "path": "src/algorithms/sets/cartesian-product/cartesianProduct.js",
+        "group": "src/algorithms/sets/cartesian-product",
+        "sha256": "22e73badeae135829ec2807a390aa2cd060807b3c672489e6229681be72911cc"
+      },
+      {
+        "path": "src/algorithms/sets/combination-sum/__test__/combinationSum.test.js",
+        "group": "src/algorithms/sets/combination-sum",
+        "sha256": "ec11b1367a7e519d1bcbf7c6865d3fecd6d84a3e06a81978d959bd225f489de3"
+      },
+      {
+        "path": "src/algorithms/sets/combination-sum/combinationSum.js",
+        "group": "src/algorithms/sets/combination-sum",
+        "sha256": "25abcdcbb73f53d13e29b4fbd3df6b14aede776e323bfb8d4c4dd59b5c449cf3"
+      },
+      {
+        "path": "src/algorithms/sets/combinations/__test__/combineWithRepetitions.test.js",
+        "group": "src/algorithms/sets/combinations",
+        "sha256": "747ba99f530e9a8388279ed5930f15997920a264f5a88da50cd24c6c688f7c92"
+      },
+      {
+        "path": "src/algorithms/sets/combinations/__test__/combineWithoutRepetitions.test.js",
+        "group": "src/algorithms/sets/combinations",
+        "sha256": "d4c9ca3fabb6365836d93676d495e1e6ce5f2a1e01ba78bad6e8310c6794fda0"
+      },
+      {
+        "path": "src/algorithms/sets/combinations/combineWithRepetitions.js",
+        "group": "src/algorithms/sets/combinations",
+        "sha256": "6e8a11a989ccf35dc5dd9e956187fd00f57852009f83c6d45dcf566417876bea"
+      },
+      {
+        "path": "src/algorithms/sets/combinations/combineWithoutRepetitions.js",
+        "group": "src/algorithms/sets/combinations",
+        "sha256": "d21cdde12962e14ac833480c6c8020747fe984e2b5301debdbecb6760a437c73"
+      },
+      {
+        "path": "src/algorithms/sets/fisher-yates/__test__/fisherYates.test.js",
+        "group": "src/algorithms/sets/fisher-yates",
+        "sha256": "3d040b54ed56c6a088500074073ba205e87e5675290de2efe1d6c40d6511bf6f"
+      },
+      {
+        "path": "src/algorithms/sets/fisher-yates/fisherYates.js",
+        "group": "src/algorithms/sets/fisher-yates",
+        "sha256": "f8276d4c42a034d3039b29c910e3f81a72424b9b568a662561c3636ed009800d"
+      },
+      {
+        "path": "src/algorithms/sets/knapsack-problem/Knapsack.js",
+        "group": "src/algorithms/sets/knapsack-problem",
+        "sha256": "bbcd788179c320dca46524ed8290ae0f2241c388322cb796bb111e6ed5b1eba6"
+      },
+      {
+        "path": "src/algorithms/sets/knapsack-problem/KnapsackItem.js",
+        "group": "src/algorithms/sets/knapsack-problem",
+        "sha256": "d7f10a793f599c4e45c06d417d50609dfb0a27f5bd7511051fa656a0a7e31d66"
+      },
+      {
+        "path": "src/algorithms/sets/knapsack-problem/__test__/Knapsack.test.js",
+        "group": "src/algorithms/sets/knapsack-problem",
+        "sha256": "2b3a267dcefff79368932219011b8c7331dc8ee9e4fba6286c96f2ed95b53d0b"
+      },
+      {
+        "path": "src/algorithms/sets/knapsack-problem/__test__/KnapsackItem.test.js",
+        "group": "src/algorithms/sets/knapsack-problem",
+        "sha256": "310be11bbf9859604a5d36a8e9e06e2582fbdb9514946a6b10057712b2b087d8"
+      },
+      {
+        "path": "src/algorithms/sets/longest-common-subsequence/__test__/longestCommonSubsequence.test.js",
+        "group": "src/algorithms/sets/longest-common-subsequence",
+        "sha256": "eaa2442ab04f57839896cac905a83c458dfc04e9ab041916c6e713422189d4e6"
+      },
+      {
+        "path": "src/algorithms/sets/longest-common-subsequence/__test__/longestCommonSubsequenceRecursive.test.js",
+        "group": "src/algorithms/sets/longest-common-subsequence",
+        "sha256": "0f4cabc03b3ed1d4732334e2e7979427debfecc3d2f727b7afc96953dc08b3b6"
+      },
+      {
+        "path": "src/algorithms/sets/longest-common-subsequence/longestCommonSubsequence.js",
+        "group": "src/algorithms/sets/longest-common-subsequence",
+        "sha256": "3e6b5e15c7a9d4798ccbbb3086c29fbdcb7ea91c320ef9e77e4d4b6994a4b969"
+      },
+      {
+        "path": "src/algorithms/sets/longest-common-subsequence/longestCommonSubsequenceRecursive.js",
+        "group": "src/algorithms/sets/longest-common-subsequence",
+        "sha256": "2c067d5247e7f54080d35ee36f24e553466b8f5a3e3d3b4c5846cf2cd16e6491"
+      },
+      {
+        "path": "src/algorithms/sets/longest-increasing-subsequence/__test__/dpLongestIncreasingSubsequence.test.js",
+        "group": "src/algorithms/sets/longest-increasing-subsequence",
+        "sha256": "7a4a7bfcf032d58aff904bd5edf91e8de997dcceaf65b16f579837b993b38524"
+      },
+      {
+        "path": "src/algorithms/sets/longest-increasing-subsequence/dpLongestIncreasingSubsequence.js",
+        "group": "src/algorithms/sets/longest-increasing-subsequence",
+        "sha256": "2c85a3adadcaa57d06519f60abc0b8cb5bdeb34e3138c4cf574e67344dc318a1"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/__test__/bfMaximumSubarray.test.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "df838076e6ce9b7e6821a67290e90c3a6650b8ae5c5de7ef1cc3df2bce00d07c"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/__test__/dcMaximumSubarraySum.test.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "53d6f23753af4837be9e506802c3b48fc1cdda99b5518c8580e7d776fd3c4c03"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/__test__/dpMaximumSubarray.test.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "5d683bb0f570df2ef437446b8956e94350ba8b5aa586a676c2a6a655f991a96b"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/bfMaximumSubarray.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "727e2490fe28ace2f6a9857c62fbb380d48e110722aed05da6302e4700dc964c"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/dcMaximumSubarraySum.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "c27527cc97dc16b5550481a64b4d48d9c9728b4162b94cd535bfc4d52bbe37b4"
+      },
+      {
+        "path": "src/algorithms/sets/maximum-subarray/dpMaximumSubarray.js",
+        "group": "src/algorithms/sets/maximum-subarray",
+        "sha256": "30f61a58c71ce3b96ae7891ec4112ec4205a8b2e762cacdea8f4f22ace0fc345"
+      },
+      {
+        "path": "src/algorithms/sets/permutations/__test__/permutateWithRepetitions.test.js",
+        "group": "src/algorithms/sets/permutations",
+        "sha256": "1ee698f59462e1b0cc9bbd45f6145d9e6463018d8472ce1a8d43ede6b6e82447"
+      },
+      {
+        "path": "src/algorithms/sets/permutations/__test__/permutateWithoutRepetitions.test.js",
+        "group": "src/algorithms/sets/permutations",
+        "sha256": "e2ffb82dfdad2fa7e795c2a0968fc3df245a516b23992353b842741b0da4109c"
+      },
+      {
+        "path": "src/algorithms/sets/permutations/permutateWithRepetitions.js",
+        "group": "src/algorithms/sets/permutations",
+        "sha256": "f94b12013c838a176fdbdfdb46e1ebe672518b03f7b4693290d244231b50158a"
+      },
+      {
+        "path": "src/algorithms/sets/permutations/permutateWithoutRepetitions.js",
+        "group": "src/algorithms/sets/permutations",
+        "sha256": "7fb5947c6a6bfee7d9b58e70daeb01521310d260905b7e601cc7854d6c27bfff"
+      },
+      {
+        "path": "src/algorithms/sets/shortest-common-supersequence/__test__/shortestCommonSupersequence.test.js",
+        "group": "src/algorithms/sets/shortest-common-supersequence",
+        "sha256": "3f1ee50ffb0a13d7578f007a0c3d636ac927bcb672334de03ca625ea8fa81f5b"
+      },
+      {
+        "path": "src/algorithms/sets/shortest-common-supersequence/shortestCommonSupersequence.js",
+        "group": "src/algorithms/sets/shortest-common-supersequence",
+        "sha256": "41fee1224ea9ec9ef85835af9c8a3550b374f3a8300336374ed572d74e668f34"
+      },
+      {
+        "path": "src/algorithms/sorting/SortTester.js",
+        "group": "src/algorithms/sorting/SortTester.js",
+        "sha256": "98a1ab12259463f525c82c41f40ed97158faf55dd010f66b05d0a5513c39d512"
+      },
+      {
+        "path": "src/algorithms/sorting/__test__/Sort.test.js",
+        "group": "src/algorithms/sorting/__test__",
+        "sha256": "9780d7f3228c6dc04c9eaa059bb3e243711167fed60b7912d29be069d86494e7"
+      },
+      {
+        "path": "src/algorithms/sorting/bubble-sort/BubbleSort.js",
+        "group": "src/algorithms/sorting/bubble-sort",
+        "sha256": "6caa6179deed40ae4e45d0a416f3b6f6a1ac164768e38998ca0739e4b3a00548"
+      },
+      {
+        "path": "src/algorithms/sorting/bubble-sort/__test__/BubbleSort.test.js",
+        "group": "src/algorithms/sorting/bubble-sort",
+        "sha256": "2a477f1baa07bead49707ebb6359f87dcdceec9355537c921d5f0395d04a7839"
+      },
+      {
+        "path": "src/algorithms/sorting/bucket-sort/BucketSort.js",
+        "group": "src/algorithms/sorting/bucket-sort",
+        "sha256": "865757961401b9b7d4e5ce341b5ec9227d8c82c87db2cabc449516a6e04088ba"
+      },
+      {
+        "path": "src/algorithms/sorting/bucket-sort/__test__/BucketSort.test.js",
+        "group": "src/algorithms/sorting/bucket-sort",
+        "sha256": "6aaebb4bfd0489e2b527f64159db535f2f6258c8c90d365c67c4c1a041efb0c3"
+      },
+      {
+        "path": "src/algorithms/sorting/counting-sort/CountingSort.js",
+        "group": "src/algorithms/sorting/counting-sort",
+        "sha256": "0dfdda0cd6d415008f4bcd539a89970c0184e09112836ca3f6748a016c1223f9"
+      },
+      {
+        "path": "src/algorithms/sorting/counting-sort/__test__/CountingSort.test.js",
+        "group": "src/algorithms/sorting/counting-sort",
+        "sha256": "8560588d60acd8af8b5f3c0610b20d448e2f6cfcddaebad4739daa5c5a2e6387"
+      },
+      {
+        "path": "src/algorithms/sorting/heap-sort/HeapSort.js",
+        "group": "src/algorithms/sorting/heap-sort",
+        "sha256": "6f0c72dda210ba954311f4bc53e0770502406436647c4b98507f523b1aee00b5"
+      },
+      {
+        "path": "src/algorithms/sorting/heap-sort/__test__/HeapSort.test.js",
+        "group": "src/algorithms/sorting/heap-sort",
+        "sha256": "fc8b37385fec4a2b677b33287b297d1bbfe283ebf50b6040ddde3cd93cb5fdba"
+      },
+      {
+        "path": "src/algorithms/sorting/insertion-sort/InsertionSort.js",
+        "group": "src/algorithms/sorting/insertion-sort",
+        "sha256": "21920585eb6da5e299ec187e8725dd1fc93626e0341018c4d3afdc178ec1ba5d"
+      },
+      {
+        "path": "src/algorithms/sorting/insertion-sort/__test__/InsertionSort.test.js",
+        "group": "src/algorithms/sorting/insertion-sort",
+        "sha256": "87883674b6f818664f7a87455b8cd72a33f1d66a96a7f06160361864d712a2ba"
+      },
+      {
+        "path": "src/algorithms/sorting/merge-sort/MergeSort.js",
+        "group": "src/algorithms/sorting/merge-sort",
+        "sha256": "0c71fe707c14be7dff3ffecd0d0c36a8b5ad5d8e9a0f818235d85c85bc83593d"
+      },
+      {
+        "path": "src/algorithms/sorting/merge-sort/__test__/MergeSort.test.js",
+        "group": "src/algorithms/sorting/merge-sort",
+        "sha256": "9cec3a6bb8d06dd996a3ff57fccb91844a0dd13958d8b37309a9cfc0d2d472e7"
+      },
+      {
+        "path": "src/algorithms/sorting/quick-sort/QuickSort.js",
+        "group": "src/algorithms/sorting/quick-sort",
+        "sha256": "6458b194449ba7330f0a6c2e09ab96a5da46e187d86f500aeadc0f6b2336541e"
+      },
+      {
+        "path": "src/algorithms/sorting/quick-sort/QuickSortInPlace.js",
+        "group": "src/algorithms/sorting/quick-sort",
+        "sha256": "f453298fd23d14a24cc6c2faa3e217126aea36a2951439aa03c71c1b05a4e7f7"
+      },
+      {
+        "path": "src/algorithms/sorting/quick-sort/__test__/QuickSort.test.js",
+        "group": "src/algorithms/sorting/quick-sort",
+        "sha256": "8ea00b34056aad78cf46106d248e86937fe17c2446b91fed2afa7440c04623d7"
+      },
+      {
+        "path": "src/algorithms/sorting/quick-sort/__test__/QuickSortInPlace.test.js",
+        "group": "src/algorithms/sorting/quick-sort",
+        "sha256": "1ebbc41748640f992fd12d970b534768d6abb39fa86e09e3e99f4dcc837fbecc"
+      },
+      {
+        "path": "src/algorithms/sorting/selection-sort/SelectionSort.js",
+        "group": "src/algorithms/sorting/selection-sort",
+        "sha256": "30c076b7620c020b65c2680e171f06f8c43d8d55b884503e9e4ae824ee696c80"
+      },
+      {
+        "path": "src/algorithms/sorting/selection-sort/__test__/SelectionSort.test.js",
+        "group": "src/algorithms/sorting/selection-sort",
+        "sha256": "a035b54fd94170815a82f1718c892978de0a34c1702b0fbbd61052b6c82461c0"
+      },
+      {
+        "path": "src/algorithms/sorting/shell-sort/ShellSort.js",
+        "group": "src/algorithms/sorting/shell-sort",
+        "sha256": "21905813729c288a258396e7efd6296d860828861b80517c1fbdeb1cc163d2d9"
+      },
+      {
+        "path": "src/algorithms/sorting/shell-sort/__test__/ShellSort.test.js",
+        "group": "src/algorithms/sorting/shell-sort",
+        "sha256": "c6c7adf3aae2f20ff67dbe1446b6b9b92562467fb029f0ed92eca7c4f6874d4f"
+      },
+      {
+        "path": "src/algorithms/stack/valid-parentheses/__test__/validParentheses.test.js",
+        "group": "src/algorithms/stack/valid-parentheses",
+        "sha256": "e4a8bc02bcc5b9af4ae6b94c7d37a400ff084423569c036eb304da465726d668"
+      },
+      {
+        "path": "src/algorithms/stack/valid-parentheses/validParentheses.js",
+        "group": "src/algorithms/stack/valid-parentheses",
+        "sha256": "dbc57da28d6605ad3bd7a6e4a240daa4917940215629c09b9364e2de882c02b2"
+      },
+      {
+        "path": "src/algorithms/string/hamming-distance/__test__/hammingDistance.test.js",
+        "group": "src/algorithms/string/hamming-distance",
+        "sha256": "faf8d4bc15252da3457de3d3c157ad85c417e95f331f1244f1433bf87329e8fd"
+      },
+      {
+        "path": "src/algorithms/string/hamming-distance/hammingDistance.js",
+        "group": "src/algorithms/string/hamming-distance",
+        "sha256": "cbfc97ec83ea88728c9ff87b2a609095b47ba7a3d327a90356c4a55f76e052d0"
+      },
+      {
+        "path": "src/algorithms/string/knuth-morris-pratt/__test__/knuthMorrisPratt.test.js",
+        "group": "src/algorithms/string/knuth-morris-pratt",
+        "sha256": "8260f90cd220356437cf7281fa904d6898febbdb1bf9e58b69f2bb06e86c1469"
+      },
+      {
+        "path": "src/algorithms/string/knuth-morris-pratt/knuthMorrisPratt.js",
+        "group": "src/algorithms/string/knuth-morris-pratt",
+        "sha256": "5daf028fc3b104a9f4039d04d7a606a483360ddf136b669ed7875f252797ff67"
+      },
+      {
+        "path": "src/algorithms/string/levenshtein-distance/__test__/levenshteinDistance.test.js",
+        "group": "src/algorithms/string/levenshtein-distance",
+        "sha256": "416469ed5e54f7e1b2184dee3921b0e5e76a42a8922026a0fb92e5055b1564f3"
+      },
+      {
+        "path": "src/algorithms/string/levenshtein-distance/levenshteinDistance.js",
+        "group": "src/algorithms/string/levenshtein-distance",
+        "sha256": "e3a2c169fd958a1d9e533227d78be0ecf63fdcc2ce5b67090081c427ae420b31"
+      },
+      {
+        "path": "src/algorithms/string/longest-common-substring/__test__/longestCommonSubstring.test.js",
+        "group": "src/algorithms/string/longest-common-substring",
+        "sha256": "cb11480f3cb3108f424b8cfa1accd3604c17192c9747cbffb2ea5eaf0be76bd5"
+      },
+      {
+        "path": "src/algorithms/string/longest-common-substring/longestCommonSubstring.js",
+        "group": "src/algorithms/string/longest-common-substring",
+        "sha256": "1eed9a61f23c36c495f95e36173aeadf5a219b7cad3a94e3e2a3d6b3cd1c0c53"
+      },
+      {
+        "path": "src/algorithms/string/palindrome/__test__/isPalindrome.test.js",
+        "group": "src/algorithms/string/palindrome",
+        "sha256": "e6ca6c0341991c3808ef82238e2a95c53723e711016d51d565ba2b2a5f81c174"
+      },
+      {
+        "path": "src/algorithms/string/palindrome/isPalindrome.js",
+        "group": "src/algorithms/string/palindrome",
+        "sha256": "8fb1503ba688b2e55c634d800dcd4d1880d7ee8ea682ae744492294e97020567"
+      },
+      {
+        "path": "src/algorithms/string/rabin-karp/__test__/rabinKarp.test.js",
+        "group": "src/algorithms/string/rabin-karp",
+        "sha256": "3e4c1ddc5a3dc53fd43e78b470ace381fc9ce2f61255836dbd28d48201059cae"
+      },
+      {
+        "path": "src/algorithms/string/rabin-karp/rabinKarp.js",
+        "group": "src/algorithms/string/rabin-karp",
+        "sha256": "85eccd0c5895be13304ad79b840b32fa92385185a21dd6885377759dbc5be2b5"
+      },
+      {
+        "path": "src/algorithms/string/regular-expression-matching/__test__/regularExpressionMatching.test.js",
+        "group": "src/algorithms/string/regular-expression-matching",
+        "sha256": "21cf07596553490919dea0c54020033e9513b97def44af5c9c5a1a3bbb356e8c"
+      },
+      {
+        "path": "src/algorithms/string/regular-expression-matching/regularExpressionMatching.js",
+        "group": "src/algorithms/string/regular-expression-matching",
+        "sha256": "0d2689f458db6f274111b3503f9db580848cb63b91467b627a06d7ef455ee0b7"
+      },
+      {
+        "path": "src/algorithms/string/z-algorithm/__test__/zAlgorithm.test.js",
+        "group": "src/algorithms/string/z-algorithm",
+        "sha256": "5c096108764635e3ff2761ffe64e2a81d736cddab91361af5584a2e76a84e415"
+      },
+      {
+        "path": "src/algorithms/string/z-algorithm/zAlgorithm.js",
+        "group": "src/algorithms/string/z-algorithm",
+        "sha256": "cb0a6279a36a5a7cd743919180a08191e6d8f9c0a24f6aac9b08deb6ac9f2ff5"
+      },
+      {
+        "path": "src/algorithms/tree/breadth-first-search/__test__/breadthFirstSearch.test.js",
+        "group": "src/algorithms/tree/breadth-first-search",
+        "sha256": "a1c2aa562d55be788f137aa41205abebeb8a76949924aa36a7109e120359cb0a"
+      },
+      {
+        "path": "src/algorithms/tree/breadth-first-search/breadthFirstSearch.js",
+        "group": "src/algorithms/tree/breadth-first-search",
+        "sha256": "3888668052975d315f3c850a4c007da9230b005899f019cfeec8825c0ac54d83"
+      },
+      {
+        "path": "src/algorithms/tree/depth-first-search/__test__/depthFirstSearch.test.js",
+        "group": "src/algorithms/tree/depth-first-search",
+        "sha256": "87ae659b424779b25aaf723e26cddac871c83a361667676dd31d98bde36e8297"
+      },
+      {
+        "path": "src/algorithms/tree/depth-first-search/depthFirstSearch.js",
+        "group": "src/algorithms/tree/depth-first-search",
+        "sha256": "5022eee5fecea157ce200696b53f746f7551eb642753ff090326f92051fd83ce"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/__tests__/accumulatorBestTimeToBuySellStocks.test.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "fc2cb32d50deb4d1d3704f2591389c5ffae7b4e5c1a8af2173f07a7b6b408bfc"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/__tests__/dpBestTimeToBuySellStocks.test.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "f05a5da722d92ebd874e3ff1d9d9f32024da851b6935684125c2b2b5d6f73a7f"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/__tests__/dqBestTimeToBuySellStocks.test.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "b7144d8c4d041e15e41a8396b3826f1323b06a5015a89347bd4dd7b6a4ff5360"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/__tests__/peakvalleyBestTimeToBuySellStocks.test.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "2558aefcb2c1be52e7211cbe90e2538bbf8245ff6f7a8797709fd00781e71af4"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/accumulatorBestTimeToBuySellStocks.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "cee5d23046db2d21846d741fdc445a5577bda544bd096586fae1483db6c27448"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/dpBestTimeToBuySellStocks.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "fc08b58dd51f08a67575111ab611e738bacc51cb4a3cd22b4b3a1f80c8d6ca24"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/dqBestTimeToBuySellStocks.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "d7c71bb9236cda822e7d0866df497a09a91a6c21f438f6ab4ef93c6afc086fdb"
+      },
+      {
+        "path": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks/peakvalleyBestTimeToBuySellStocks.js",
+        "group": "src/algorithms/uncategorized/best-time-to-buy-sell-stocks",
+        "sha256": "b453d0bd8a22a442381fef87341683b3302df11377ef02b739f288c61e710889"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/__test__/backtrackingJumpGame.test.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "cfb8488a2ba50cfa48744dfc4fcf189fe6d2aca2064cb7de95a525797b15b882"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/__test__/dpBottomUpJumpGame.test.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "101acda6cd3909e77a337f3457572f658fa3f48a74832255b90a7a9c4f934b8c"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/__test__/dpTopDownJumpGame.test.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "915acea48994e1499e5f71ed7c39453607c8d5464f132ef2f8be21bccbb3b0b8"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/__test__/greedyJumpGame.test.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "90b966ff2f959724c576ea01e3c8961f6a68ad0d9206d50bd51abf0fe9dc739b"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/backtrackingJumpGame.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "f71e10de606c89ba9424d84a4f718b29559c43a0df17b48cbe1d9da29ac4440c"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/dpBottomUpJumpGame.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "57c820fe778999537c571349fbcdce081476399602268f3e51ee7933880acb51"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/dpTopDownJumpGame.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "80c5124ec50aab57ef16a82badc6e5a0965dd81cd336412ac2c61a3a4e448b00"
+      },
+      {
+        "path": "src/algorithms/uncategorized/jump-game/greedyJumpGame.js",
+        "group": "src/algorithms/uncategorized/jump-game",
+        "sha256": "48a52325a0addb43ba30ca73508bf58f42ece929ae4303f71f3f3fdb01d1c73b"
+      },
+      {
+        "path": "src/algorithms/uncategorized/knight-tour/__test__/knightTour.test.js",
+        "group": "src/algorithms/uncategorized/knight-tour",
+        "sha256": "1357dddb026b31e4c4a163451a2f98780190792077b80b93ab673e55273ddfcc"
+      },
+      {
+        "path": "src/algorithms/uncategorized/knight-tour/knightTour.js",
+        "group": "src/algorithms/uncategorized/knight-tour",
+        "sha256": "bd0cdc916d2ecffc8617e11d4c677124e18f77ce90d9588d1c13ef8cb5559752"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/QueenPosition.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "f4f211fa4b2b5dba3d9264e583c8875a426b86817f09e41371d6dd9476f810d3"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/__test__/QueensPosition.test.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "b7fee1c3a4018c050530378deb8bdf9e5bbf999dbc478bdedb2bca1975899ae2"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/__test__/nQueens.test.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "9bc6776d6084b1fa7fcfb208d90afad6edf08291c41b2d3b14962c86670118e8"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/__test__/nQueensBitwise.test.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "8bae5a676c7bee6d472349f1001cbaa90fae14473b63e53acb9ddcacbf0a53a9"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/nQueens.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "3771d94473bec1d108aed1941365c787b1cb00d9175192aaec5bc72eff4b35d0"
+      },
+      {
+        "path": "src/algorithms/uncategorized/n-queens/nQueensBitwise.js",
+        "group": "src/algorithms/uncategorized/n-queens",
+        "sha256": "c75856255c125e200812a3f735610b1dabe7437c50e048fa7e24bb7b842a94ce"
+      },
+      {
+        "path": "src/algorithms/uncategorized/rain-terraces/__test__/bfRainTerraces.test.js",
+        "group": "src/algorithms/uncategorized/rain-terraces",
+        "sha256": "fec7445d38e355ee8e27f30fe26b9cdcd6a5685a2c83862c60d24499806fd7b5"
+      },
+      {
+        "path": "src/algorithms/uncategorized/rain-terraces/__test__/dpRainTerraces.test.js",
+        "group": "src/algorithms/uncategorized/rain-terraces",
+        "sha256": "846601fab60e4ab31e623d787f1f07143afdfc8ee48e8006b476bacb403d7d20"
+      },
+      {
+        "path": "src/algorithms/uncategorized/rain-terraces/bfRainTerraces.js",
+        "group": "src/algorithms/uncategorized/rain-terraces",
+        "sha256": "8a6dbbb4e8431b04c53fc1925720a0a69e3d3eeff0d4a85e351f7423d63a799b"
+      },
+      {
+        "path": "src/algorithms/uncategorized/rain-terraces/dpRainTerraces.js",
+        "group": "src/algorithms/uncategorized/rain-terraces",
+        "sha256": "9877c13fad7972f01b921eee9d870f2f149ff8e77a54f23331c7523773afdf48"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/__test__/recursiveStaircaseBF.test.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "f011f1878bfdd7099d48fe2b2d9e677bcb6706570f98ef68f89296c8fd69f53a"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/__test__/recursiveStaircaseDP.test.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "602dcea7e05a69a1e656cc6646c08cfb19ab4d3ecf4a930d840919ac43d1a17c"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/__test__/recursiveStaircaseIT.test.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "abb0374a23ab8e4019be4f4e032e4f9866918a96265ad10d2fc713fc035104ad"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/__test__/recursiveStaircaseMEM.test.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "2d89d1ac255d98425fdce7f523c90b13d39d6d402dbb3c0807cdc06dd411c45c"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/recursiveStaircaseBF.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "5dc97ba29b931555ae499c5ec74192460f3f172181ff73d683e3ae76bb0d8b6a"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/recursiveStaircaseDP.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "c63dfd4f26cc17219d997a2a6f7a0e04ed40a848b0eae862dee14e2bab21ff18"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/recursiveStaircaseIT.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "4d9f6cbc46a44edbc0f5eb4d1819ed5c015ff2d7efe46653683aee30c0be7c08"
+      },
+      {
+        "path": "src/algorithms/uncategorized/recursive-staircase/recursiveStaircaseMEM.js",
+        "group": "src/algorithms/uncategorized/recursive-staircase",
+        "sha256": "ee842689c39df3184626a3ae5737922a3527f01e6328ab7979dbf648bc0cab8f"
+      },
+      {
+        "path": "src/algorithms/uncategorized/square-matrix-rotation/__test__/squareMatrixRotation.test.js",
+        "group": "src/algorithms/uncategorized/square-matrix-rotation",
+        "sha256": "2a31ecd5e5e1502536a98d56a8e1d5c9385e9061e2e99946c301c356ded1d114"
+      },
+      {
+        "path": "src/algorithms/uncategorized/square-matrix-rotation/squareMatrixRotation.js",
+        "group": "src/algorithms/uncategorized/square-matrix-rotation",
+        "sha256": "eb687915a782128138d9f5c97ac932e13fbea5f3779c4645cfafac5ef51220b7"
+      },
+      {
+        "path": "src/data-structures/bloom-filter/BloomFilter.js",
+        "group": "src/data-structures/bloom-filter",
+        "sha256": "4d569de28c00aec4dc38e6d52be76298ca858329817c99b8e5302130659fa16c"
+      },
+      {
+        "path": "src/data-structures/bloom-filter/__test__/BloomFilter.test.js",
+        "group": "src/data-structures/bloom-filter",
+        "sha256": "38161790d5036a2ef109bb419ca8fabcb79b60ab66886cfc3c1b6544b1ee0064"
+      },
+      {
+        "path": "src/data-structures/deque/Deque.js",
+        "group": "src/data-structures/deque",
+        "sha256": "620c0dda6489a420647bdd9dd2405fc8e23c7dfd2052f6c731910f99d30b938e"
+      },
+      {
+        "path": "src/data-structures/deque/__test__/Deque.test.js",
+        "group": "src/data-structures/deque",
+        "sha256": "f8a0c5902717c24886f4f19ef44a04d96298f37137db82239f9684d853d5e1fe"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/DisjointSet.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "f4933d39e4e156f181bc324f86b3260474dc62d427e30c98bd2ad4b1e3ee9c28"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/DisjointSetAdhoc.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "dec25da7f3dabe8adf171c9b716fa87510849ead4dfca978a25c5281ee40d85f"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/DisjointSetItem.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "05f6e2c96c1d1543eb9acaf357c4497506736d50db61893dabd55b47ffd00b17"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/__test__/DisjointSet.test.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "543de8ddadaa3cda06951f0fe4a112670d27d1fd5b1177670a69cd7d3f1d2bce"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/__test__/DisjointSetAdhoc.test.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "b4fc9987d7785f9847f4eef7cb10e1f1014eea887a2f7a6e267cdc764f788aae"
+      },
+      {
+        "path": "src/data-structures/disjoint-set/__test__/DisjointSetItem.test.js",
+        "group": "src/data-structures/disjoint-set",
+        "sha256": "618c0e9ec53042fb938fdb8472b6a35b32e6efcc52b95b0abe7d170ee245c57c"
+      },
+      {
+        "path": "src/data-structures/doubly-linked-list/DoublyLinkedList.js",
+        "group": "src/data-structures/doubly-linked-list",
+        "sha256": "b8733c6dc6ec38e9f274a3161c278a260e3b0f734ecbd0e21eb6f663831ce4e1"
+      },
+      {
+        "path": "src/data-structures/doubly-linked-list/DoublyLinkedListNode.js",
+        "group": "src/data-structures/doubly-linked-list",
+        "sha256": "1b1c918a707ec80827715d1bf8077a74968fefeaa29f41f98a707febfd77260a"
+      },
+      {
+        "path": "src/data-structures/doubly-linked-list/__test__/DoublyLinkedList.test.js",
+        "group": "src/data-structures/doubly-linked-list",
+        "sha256": "e4fb058118ded30fd76e80db3d76628f3e9c95ff077f5b4d122148a466a9c99a"
+      },
+      {
+        "path": "src/data-structures/doubly-linked-list/__test__/DoublyLinkedListNode.test.js",
+        "group": "src/data-structures/doubly-linked-list",
+        "sha256": "9773a086d2a6ddb185631c378d7d4badc7a2280b935999e53f6367c527265dd6"
+      },
+      {
+        "path": "src/data-structures/graph/Graph.js",
+        "group": "src/data-structures/graph",
+        "sha256": "88fda4a3fd573b85a951b342c84f4e5f7de991312486b947a7b190233abddff4"
+      },
+      {
+        "path": "src/data-structures/graph/GraphEdge.js",
+        "group": "src/data-structures/graph",
+        "sha256": "6332bfdd701bcc559109fc7ac514ee456adea8ed24163fa1a6b5587116f975c9"
+      },
+      {
+        "path": "src/data-structures/graph/GraphVertex.js",
+        "group": "src/data-structures/graph",
+        "sha256": "d73991e83ad39559d0fc5a361b58d555a5d859675af2691fb961249ef231effb"
+      },
+      {
+        "path": "src/data-structures/graph/__test__/Graph.test.js",
+        "group": "src/data-structures/graph",
+        "sha256": "a73dabf4acdef313c168a7c4af6dea3a7add0e23abff6ea08ca5a3578912371e"
+      },
+      {
+        "path": "src/data-structures/graph/__test__/GraphEdge.test.js",
+        "group": "src/data-structures/graph",
+        "sha256": "b0f159dbf7c7a76cba569b6761b243245bb47e960a4b1d9ca0a590577cfba25d"
+      },
+      {
+        "path": "src/data-structures/graph/__test__/GraphVertex.test.js",
+        "group": "src/data-structures/graph",
+        "sha256": "45e27d4f9b193577bbbb5d3718752200d6761c8114a42f4dd4e29d98ece08c93"
+      },
+      {
+        "path": "src/data-structures/hash-table/HashTable.js",
+        "group": "src/data-structures/hash-table",
+        "sha256": "c39d0635acee9731e6407f321b4f898a64f6dca031ce50a78dc600219d1f1846"
+      },
+      {
+        "path": "src/data-structures/hash-table/__test__/HashTable.test.js",
+        "group": "src/data-structures/hash-table",
+        "sha256": "f49954952122a60d4e0c837c11fd2b79c585a889765a547a13b088860df90354"
+      },
+      {
+        "path": "src/data-structures/linked-list/LinkedList.js",
+        "group": "src/data-structures/linked-list",
+        "sha256": "135350486ae57a453aa87cb3739f8219538f6f88a3b4021a1d442baacc38fac5"
+      },
+      {
+        "path": "src/data-structures/linked-list/LinkedListNode.js",
+        "group": "src/data-structures/linked-list",
+        "sha256": "f0c71815bb68bc45dff116fac9da1ac2b0152c1b130c6bb4943a46643b9f6743"
+      },
+      {
+        "path": "src/data-structures/linked-list/__test__/LinkedList.test.js",
+        "group": "src/data-structures/linked-list",
+        "sha256": "61c25a39313715b6d78e7bea39ec3acdacaa6a5a5bd8de8031dc0798f72a574e"
+      },
+      {
+        "path": "src/data-structures/linked-list/__test__/LinkedListNode.test.js",
+        "group": "src/data-structures/linked-list",
+        "sha256": "da90ea84ee1015d81715ea0d9c95763ce2c2f48d78748c5b6a629b50d2d00144"
+      },
+      {
+        "path": "src/data-structures/lru-cache/LRUCache.js",
+        "group": "src/data-structures/lru-cache",
+        "sha256": "c95676b91b5ae87a6fea77d515052d645343a7e162f6aca1ee9f00686a0fb853"
+      },
+      {
+        "path": "src/data-structures/lru-cache/LRUCacheOnMap.js",
+        "group": "src/data-structures/lru-cache",
+        "sha256": "16071841c43043b3c115511c7512a9e792af873d5e8fe5134a5bc66b4a5c06f2"
+      },
+      {
+        "path": "src/data-structures/lru-cache/__test__/LRUCache.test.js",
+        "group": "src/data-structures/lru-cache",
+        "sha256": "7cc63e419a69f16ece4ee4e0202efc2752ebc79834ff97a83fd5a5c8805ff576"
+      },
+      {
+        "path": "src/data-structures/lru-cache/__test__/LRUCacheOnMap.test.js",
+        "group": "src/data-structures/lru-cache",
+        "sha256": "ad57fe94f3d7b05b40e81c7ee49672d5e6eceb52c177271cf5d1f4df6bb34815"
+      },
+      {
+        "path": "src/data-structures/priority-queue/PriorityQueue.js",
+        "group": "src/data-structures/priority-queue",
+        "sha256": "fd05e627ed8ed6ce72d6c2a4920e76a470cbfba2af7a522247a4c5d4a0cc5649"
+      },
+      {
+        "path": "src/data-structures/priority-queue/__test__/PriorityQueue.test.js",
+        "group": "src/data-structures/priority-queue",
+        "sha256": "283f9c2e8906b2d9677320ae85354dd83ace3764c09c107667b0769c6ca993d4"
+      },
+      {
+        "path": "src/data-structures/queue/Queue.js",
+        "group": "src/data-structures/queue",
+        "sha256": "611420ede064c445612ee7eecd052b80061f88fb4536a69e8c564fc083ff11d1"
+      },
+      {
+        "path": "src/data-structures/queue/__test__/Queue.test.js",
+        "group": "src/data-structures/queue",
+        "sha256": "13c0aecb5c2b44abd0885eef25c4ad2930fca359bef6bc3059dcd653cbd48f59"
+      },
+      {
+        "path": "src/data-structures/tree/BinaryTreeNode.js",
+        "group": "src/data-structures/tree",
+        "sha256": "181f7957facd4e2a9fc57c0f6a26735e8c540a3549feed17830509b06b204ef8"
+      },
+      {
+        "path": "src/data-structures/tree/__test__/BinaryTreeNode.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "1b6819936e8a4d3d5fb79cbd2e1b05961fa31c45c87e18f302ddf07060ddc5e4"
+      },
+      {
+        "path": "src/data-structures/tree/avl-tree/AvlTree.js",
+        "group": "src/data-structures/tree",
+        "sha256": "9298d1a5386f038335577a3e88c9ea9040c4abed79b69c22951035876b35a453"
+      },
+      {
+        "path": "src/data-structures/tree/avl-tree/__test__/AvlTRee.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "c3dbb0f3d245d107e45176136c9a4b5c952c337f889e12aa12676859942321ff"
+      },
+      {
+        "path": "src/data-structures/tree/binary-search-tree/BinarySearchTree.js",
+        "group": "src/data-structures/tree",
+        "sha256": "ffa95da5e7cfaedcc6f7e17e398f595cd39e0ba010a25979417576ca725d8ece"
+      },
+      {
+        "path": "src/data-structures/tree/binary-search-tree/BinarySearchTreeNode.js",
+        "group": "src/data-structures/tree",
+        "sha256": "c945d86c075e478e5155fc5da4fba2c01ed0bdc6a5ea20d8d11de15dd68d1708"
+      },
+      {
+        "path": "src/data-structures/tree/binary-search-tree/__test__/BinarySearchTree.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "4bcd229e48387040dd5c2bbac54bd6951afce04d617111a04477fd8b68f4c4d5"
+      },
+      {
+        "path": "src/data-structures/tree/binary-search-tree/__test__/BinarySearchTreeNode.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "ee4c082b1b73573270d189694bb60a91b44f9238905e6a1d5c1710601f5a29d6"
+      },
+      {
+        "path": "src/data-structures/tree/fenwick-tree/FenwickTree.js",
+        "group": "src/data-structures/tree",
+        "sha256": "1d3c0507751d6f6c87bd014deaf5868996cc0be8e30ebba2909ecd420ca476f2"
+      },
+      {
+        "path": "src/data-structures/tree/fenwick-tree/__test__/FenwickTree.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "cb4eb20a36136c43eaf12efaf35612b302ce8b0b011d1b658e2e308ef29e7cc2"
+      },
+      {
+        "path": "src/data-structures/tree/red-black-tree/RedBlackTree.js",
+        "group": "src/data-structures/tree",
+        "sha256": "79bad157f4afe3b211d432b5ab3b5303b103ce97950565ae2328dca64cceabd9"
+      },
+      {
+        "path": "src/data-structures/tree/red-black-tree/__test__/RedBlackTree.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "16113224ce196e4683bad77d6caeaafa4673810acff444e59f2161e1691dc36b"
+      },
+      {
+        "path": "src/data-structures/tree/segment-tree/SegmentTree.js",
+        "group": "src/data-structures/tree",
+        "sha256": "6c5b32be0a01ff0a46d75165cd9dc6141c817751c33004fd63b2cdbe07d93412"
+      },
+      {
+        "path": "src/data-structures/tree/segment-tree/__test__/SegmentTree.test.js",
+        "group": "src/data-structures/tree",
+        "sha256": "488fbb21aae0e0291393bb331bf613934da111078281cb4ca96589e8aefe650c"
+      },
+      {
+        "path": "src/playground/__test__/playground.test.js",
+        "group": "src/playground/__test__",
+        "sha256": "2e02dc2a9ed5703e1b443d225c5566957aeb9e4966d97a0c778de9fc0c5850ff"
+      },
+      {
+        "path": "src/utils/comparator/Comparator.js",
+        "group": "src/utils/comparator",
+        "sha256": "23ebf27ed1980e430351ef05f4bb402abc368853360b00702599bad3f4a446a8"
+      },
+      {
+        "path": "src/utils/comparator/__test__/Comparator.test.js",
+        "group": "src/utils/comparator/__test__",
+        "sha256": "ddcf77f9f8d0a32d8f5be9067cb022b2412144bd4df1155b7bf1e61b6d740036"
+      }
+    ],
+    "val": [
+      {
+        "path": "src/algorithms/cryptography/rail-fence-cipher/__test__/railFenceCipher.test.js",
+        "group": "src/algorithms/cryptography/rail-fence-cipher",
+        "sha256": "de7f8966afae0ce758a045edcd674525d91fa8dd140efb400e96df399a0caddb"
+      },
+      {
+        "path": "src/algorithms/cryptography/rail-fence-cipher/railFenceCipher.js",
+        "group": "src/algorithms/cryptography/rail-fence-cipher",
+        "sha256": "c01f74a34849b2aa41db9faf5a6732a6f295bdc9130de3c4bb02fbbbb9f59cb1"
+      },
+      {
+        "path": "src/algorithms/graph/articulation-points/__test__/articulationPoints.test.js",
+        "group": "src/algorithms/graph/articulation-points",
+        "sha256": "dff918ca9f80378021a76f92576f9881d75388a1aacab4ca35a3b69371b9934c"
+      },
+      {
+        "path": "src/algorithms/graph/articulation-points/articulationPoints.js",
+        "group": "src/algorithms/graph/articulation-points",
+        "sha256": "8f3a134198a5acf862fad8fd5971d91def4ef6b9712f92fcccff4a2d2b9141a6"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/__test__/detectDirectedCycle.test.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "f50bbad61578816f0236c38406f8fb515b811ed0ff00fc85ac68cc326528a646"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/__test__/detectUndirectedCycle.test.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "33903c59407c3fe9773281379f5d513654547796d4aa6339e95f385e6c61607b"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/__test__/detectUndirectedCycleUsingDisjointSet.test.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "67028dbbae106aaef6d8d88a5ad53cd30a5b1bebd7bf83602d8ba5b539651940"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/detectDirectedCycle.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "610288da3297d24b4d765cbf81e2e69b51c7be4eddf0c176c58f58e4e5e927cc"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/detectUndirectedCycle.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "d686b0812258ee1c6000b710ce0687785c3de7182d84c5490b864402db2ef61e"
+      },
+      {
+        "path": "src/algorithms/graph/detect-cycle/detectUndirectedCycleUsingDisjointSet.js",
+        "group": "src/algorithms/graph/detect-cycle",
+        "sha256": "521752d8a68c0e54694e557ab62122455344a23f97890dad04f8848521caf5af"
+      },
+      {
+        "path": "src/algorithms/graph/prim/__test__/prim.test.js",
+        "group": "src/algorithms/graph/prim",
+        "sha256": "d9aeb13961efe54110c6be81a7b9f1d71779a5448830f44f79cdbe7535f1b1f1"
+      },
+      {
+        "path": "src/algorithms/graph/prim/prim.js",
+        "group": "src/algorithms/graph/prim",
+        "sha256": "417539d1459a0f948ecfcfef01d7354bc4c5a8a7841ceef244e2c7628e738707"
+      },
+      {
+        "path": "src/algorithms/image-processing/utils/imageData.js",
+        "group": "src/algorithms/image-processing/utils",
+        "sha256": "3d7301fb9c99d02519378cfa57cb8bf16b54d8b9a54ef9ed0f20d08fefe3cbe2"
+      },
+      {
+        "path": "src/algorithms/math/primality-test/__test__/trialDivision.test.js",
+        "group": "src/algorithms/math/primality-test",
+        "sha256": "da54092a9ec3f618cc601277cf1203900266fb115149c3413613a11816406219"
+      },
+      {
+        "path": "src/algorithms/math/primality-test/trialDivision.js",
+        "group": "src/algorithms/math/primality-test",
+        "sha256": "efadf39209f16d833c343b278899b66bbf333a8b17c59652e38960b6ea8e9fc4"
+      },
+      {
+        "path": "src/algorithms/sorting/Sort.js",
+        "group": "src/algorithms/sorting/Sort.js",
+        "sha256": "2cd5340e47283928b2f43a6c55d503ef8bb18e8604df379676a43a7ac18581b7"
+      },
+      {
+        "path": "src/algorithms/uncategorized/hanoi-tower/__test__/hanoiTower.test.js",
+        "group": "src/algorithms/uncategorized/hanoi-tower",
+        "sha256": "b160601896a7a58c7a5357ff38b97d48d666964f9226ed96a1d7214e5b9faa5f"
+      },
+      {
+        "path": "src/algorithms/uncategorized/hanoi-tower/hanoiTower.js",
+        "group": "src/algorithms/uncategorized/hanoi-tower",
+        "sha256": "c1d5eed9390d70e5c2593089ac5297a4fc51b87d29ee617c12886afece2614ff"
+      },
+      {
+        "path": "src/data-structures/trie/Trie.js",
+        "group": "src/data-structures/trie",
+        "sha256": "c61c79d3c75bf30f54e73dfeddda71bb3ead043fd50516d38e1369d1999d09ef"
+      },
+      {
+        "path": "src/data-structures/trie/TrieNode.js",
+        "group": "src/data-structures/trie",
+        "sha256": "d691b50ddb3bf6a93531a03cc5bb84ef173daca299cef77db7485b5158a5aa79"
+      },
+      {
+        "path": "src/data-structures/trie/__test__/Trie.test.js",
+        "group": "src/data-structures/trie",
+        "sha256": "4b5609969e495e69fca6b7187f2699e8f45c5ec1df931aadf54cbb4cfa845deb"
+      },
+      {
+        "path": "src/data-structures/trie/__test__/TrieNode.test.js",
+        "group": "src/data-structures/trie",
+        "sha256": "398ad0bb43b757f4d0491b8f2e49f1eb59434ac57a1204f8026e0f3cc7ee4726"
+      }
+    ],
+    "test": [
+      {
+        "path": "src/algorithms/graph/strongly-connected-components/__test__/stronglyConnectedComponents.test.js",
+        "group": "src/algorithms/graph/strongly-connected-components",
+        "sha256": "d8cd067dc603aa6048054cb4b7a8ed43ef1a24fcd37578055b830febc92d89f8"
+      },
+      {
+        "path": "src/algorithms/graph/strongly-connected-components/stronglyConnectedComponents.js",
+        "group": "src/algorithms/graph/strongly-connected-components",
+        "sha256": "ada37dcda31071bbaebfad26a0fb853d6e05210dae8c5b871879d91f9e03fe8c"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-distance/__tests__/euclideanDistance.test.js",
+        "group": "src/algorithms/math/euclidean-distance",
+        "sha256": "b951978790645eda33d0f900ee8363d8d3b59f2315ab6761fba8e16ed7cb4da7"
+      },
+      {
+        "path": "src/algorithms/math/euclidean-distance/euclideanDistance.js",
+        "group": "src/algorithms/math/euclidean-distance",
+        "sha256": "2fc253cbadabe00631b2b62f02a6fba576da107977129926ab506482260d0304"
+      },
+      {
+        "path": "src/algorithms/math/fast-powering/__test__/fastPowering.test.js",
+        "group": "src/algorithms/math/fast-powering",
+        "sha256": "2eaf7e6aafdb4aa9929117749cacf52ef4a1f49476333517238e3fff2e2a7ff0"
+      },
+      {
+        "path": "src/algorithms/math/fast-powering/fastPowering.js",
+        "group": "src/algorithms/math/fast-powering",
+        "sha256": "4986a4c02f15436c38bec8810b62f22ec7e38af34ab5e2e57c454bef01cb78d6"
+      },
+      {
+        "path": "src/algorithms/math/integer-partition/__test__/integerPartition.test.js",
+        "group": "src/algorithms/math/integer-partition",
+        "sha256": "15bfb924d85274b7763694b0be2bfa4b96b1a3700ca0e8878f6f97dfe58defd4"
+      },
+      {
+        "path": "src/algorithms/math/integer-partition/integerPartition.js",
+        "group": "src/algorithms/math/integer-partition",
+        "sha256": "d9c19e9ccd7e9d8e513447df2f9bd3298e16656b81961b0327f5df9a7ca4a32d"
+      },
+      {
+        "path": "src/algorithms/math/least-common-multiple/__test__/leastCommonMultiple.test.js",
+        "group": "src/algorithms/math/least-common-multiple",
+        "sha256": "d524b2b6e817c9e96e33e545ea019cc99aeb75d3a5dc4819506a8dfc8eaa4ba8"
+      },
+      {
+        "path": "src/algorithms/math/least-common-multiple/leastCommonMultiple.js",
+        "group": "src/algorithms/math/least-common-multiple",
+        "sha256": "98f558555bcd9a931a6516ebd8798565f33429254e3e537123d9a17f5b5c72ed"
+      },
+      {
+        "path": "src/algorithms/ml/k-means/__test__/kMeans.test.js",
+        "group": "src/algorithms/ml/k-means",
+        "sha256": "23b4f07be577c330b42851b1805bd81883bf1d061412b6b296ec838a10ccbf29"
+      },
+      {
+        "path": "src/algorithms/ml/k-means/kMeans.js",
+        "group": "src/algorithms/ml/k-means",
+        "sha256": "e4fdda0491f89c7f90321a51ab1342fdd96f408510ac83a03e2adf361e67bf9f"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/__test__/btPowerSet.test.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "14e7a8e8974f06b319f6a828bd81eba9eb92b2ac6618d99e8d0f61418c18eb3b"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/__test__/bwPowerSet.test.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "c88bfbfb0ddf3db234618fd555204b99e1963c0140b2a4ef8ad60b10faf017dd"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/__test__/caPowerSet.test.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "15a85dd73cfbbda6b5e8f5416c1ebdc8f080a990afcb84ee3b719aa3615f4e6e"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/btPowerSet.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "02a3556120f657cb21ca4f60f101f022edf8400d59b63c4b5511bf773d17e07f"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/bwPowerSet.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "d98d487afb31225492abccb41f4aaed8353481c1a0ef78ed6a46daedbcfec22f"
+      },
+      {
+        "path": "src/algorithms/sets/power-set/caPowerSet.js",
+        "group": "src/algorithms/sets/power-set",
+        "sha256": "5159f3855489a4f02d81f4daf234409b9217cce42733924142939f5072608ae8"
+      },
+      {
+        "path": "src/algorithms/sorting/radix-sort/RadixSort.js",
+        "group": "src/algorithms/sorting/radix-sort",
+        "sha256": "fd906dda966b6cccce7895d8b8c57e3700fdfaaf47927eb276aa7032263d01a6"
+      },
+      {
+        "path": "src/algorithms/sorting/radix-sort/__test__/RadixSort.test.js",
+        "group": "src/algorithms/sorting/radix-sort",
+        "sha256": "5f1d3180f45bfce648fc56e672829a2c718bfcbb6efdc33b5a9812b7b7928725"
+      },
+      {
+        "path": "src/algorithms/statistics/weighted-random/__test__/weightedRandom.test.js",
+        "group": "src/algorithms/statistics/weighted-random",
+        "sha256": "37c8246191fbac51d4c4b074e01a32aea3a3f25adf3d74da15b84ffb2e8c1150"
+      },
+      {
+        "path": "src/algorithms/statistics/weighted-random/weightedRandom.js",
+        "group": "src/algorithms/statistics/weighted-random",
+        "sha256": "7d3b56bbaa0cebf459c133e32fcca254f7781cd057e5f752a630296a2cc267f3"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/__test__/btUniquePaths.test.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "014de4ad42b3e16818de3055df19db617a9a145f9a75edd4ad3ca23b91e12c03"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/__test__/dpUniquePaths.test.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "aaf6fd6f65c1a2da9d9ab3046ac4fa7f9a0b53b8b826469d58146e3e1ca6e013"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/__test__/uniquePaths.test.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "97f1582a769b55f3be36650f348e76c31c9a432db6e44c9fa331a415a048e983"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/btUniquePaths.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "d793fcfe2a3531bfed305e981de029d2ec894c077f96221ddcc27956bcad230d"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/dpUniquePaths.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "2e59cdfc2a2b2a0a6ed6a2f580170e2f14e40d2e78fd571eb91a3fa066b606e9"
+      },
+      {
+        "path": "src/algorithms/uncategorized/unique-paths/uniquePaths.js",
+        "group": "src/algorithms/uncategorized/unique-paths",
+        "sha256": "94f06df76232f7da2277337c1fab244fbcf1f00e60bd38759175d17852d0cc43"
+      },
+      {
+        "path": "src/data-structures/heap/Heap.js",
+        "group": "src/data-structures/heap",
+        "sha256": "1fddf87d18f2babd52394b58e941ea64acd545f84f8883a2e2822fd09c0fe578"
+      },
+      {
+        "path": "src/data-structures/heap/MaxHeap.js",
+        "group": "src/data-structures/heap",
+        "sha256": "3a60e107bd4025456adbbbe8baa480c8c7b9c90708df3848d6beb80edf2615bc"
+      },
+      {
+        "path": "src/data-structures/heap/MaxHeapAdhoc.js",
+        "group": "src/data-structures/heap",
+        "sha256": "2f5f96a65c985a293202e350697de9c7f8627f4a3c711fd3cf45574fcccf1837"
+      },
+      {
+        "path": "src/data-structures/heap/MinHeap.js",
+        "group": "src/data-structures/heap",
+        "sha256": "b50abc78f17ff40d8637c40a7b1f31ee333478e0aacea788d6102df3cb348b46"
+      },
+      {
+        "path": "src/data-structures/heap/MinHeapAdhoc.js",
+        "group": "src/data-structures/heap",
+        "sha256": "194b4a3cfe825172dbf15d5359996245a043392e6bd23fae038837242f497255"
+      },
+      {
+        "path": "src/data-structures/heap/__test__/Heap.test.js",
+        "group": "src/data-structures/heap",
+        "sha256": "ac73860deae524025ba17d621b5cf00c9ff5afef02d8cf67791d60e073b854b8"
+      },
+      {
+        "path": "src/data-structures/heap/__test__/MaxHeap.test.js",
+        "group": "src/data-structures/heap",
+        "sha256": "c54a8a50d722cbbc85f6c9e06021e017f8068b2da59b3d1f1f8538ec35698a0f"
+      },
+      {
+        "path": "src/data-structures/heap/__test__/MaxHeapAdhoc.test.js",
+        "group": "src/data-structures/heap",
+        "sha256": "ad47ed47286ab2be902ffd22db3d5061eb076b6885060d25edb067986c47044a"
+      },
+      {
+        "path": "src/data-structures/heap/__test__/MinHeap.test.js",
+        "group": "src/data-structures/heap",
+        "sha256": "da08d66f88033f6b4f4c3893d324d2dca5054f367c1c555c24a306c3ad0e6022"
+      },
+      {
+        "path": "src/data-structures/heap/__test__/MinHeapAdhoc.test.js",
+        "group": "src/data-structures/heap",
+        "sha256": "a22afd5062dd07538d056dfc8f98a11e1f4178aacbe7ab84640e9f1530441f47"
+      },
+      {
+        "path": "src/data-structures/stack/Stack.js",
+        "group": "src/data-structures/stack",
+        "sha256": "c6aa2080522d40173d220ea11a4f704a6d93e2b748449f2e8dc2eceda8e4a9c1"
+      },
+      {
+        "path": "src/data-structures/stack/__test__/Stack.test.js",
+        "group": "src/data-structures/stack",
+        "sha256": "fe7bdf48754bf9f77c54b782930c58dab63f417941a64a7c0020fc564504214d"
+      },
+      {
+        "path": "src/playground/playground.js",
+        "group": "src/playground",
+        "sha256": "332088ee633daa35a5fd8ff893cc18b6ead4e139518fa847c88c9865b0fa12a6"
+      }
+    ]
+  },
+  "excluded_duplicate_paths": []
+}
