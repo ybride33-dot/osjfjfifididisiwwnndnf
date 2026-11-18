@@ -1,0 +1,22 @@
+[
+ {"id":"add","prompt":"인자 두 개를 받아 그 총합을 반환해줘"},
+ {"id":"add","prompt":"두 정수를 더한 숫자를 돌려주는 자바스크립트 함수를 작성해줘"},
+ {"id":"subtract","prompt":"앞의 인자에서 뒤 인자를 뺀 값을 리턴하는 함수"},
+ {"id":"subtract","prompt":"a와 b를 받아서 a에서 b를 차감하는 프로그램"},
+ {"id":"multiply","prompt":"인자 두 개를 받아 서로 곱한 값을 반환해줘"},
+ {"id":"multiply","prompt":"두 정수를 곱한 숫자를 돌려주는 자바스크립트 함수를 작성해줘"},
+ {"id":"square","prompt":"인자 하나를 받아 자신과 곱한 값을 리턴해줘"},
+ {"id":"square","prompt":"x의 이승을 계산하는 코드를 써줘"},
+ {"id":"absolute","prompt":"부호를 제거한 크기를 돌려주는 함수"},
+ {"id":"absolute","prompt":"음수든 양수든 절댓값을 반환하는 코드"},
+ {"id":"even","prompt":"정수 하나가 2로 나누어떨어지면 true인 함수"},
+ {"id":"even","prompt":"짝수면 true 아니면 false를 반환해줘"},
+ {"id":"maximum","prompt":"둘 중 더 큰 쪽을 반환하는 함수"},
+ {"id":"maximum","prompt":"두 숫자 중에서 가장 큰 것을 골라줘"},
+ {"id":"minimum","prompt":"둘 중 더 작은 쪽을 반환하는 함수"},
+ {"id":"minimum","prompt":"두 숫자 중에서 가장 작은 것을 골라줘"},
+ {"id":"array_sum","prompt":"숫자들의 배열을 받아 전체를 합산한 값을 리턴해줘"},
+ {"id":"array_sum","prompt":"주어진 목록 속 모든 정수의 총합"},
+ {"id":"reverse","prompt":"리스트의 마지막 요소부터 첫 요소까지 순서를 거꾸로 반환해"},
+ {"id":"reverse","prompt":"배열을 받아서 순서가 반대인 새 배열을 줘"}
+]
