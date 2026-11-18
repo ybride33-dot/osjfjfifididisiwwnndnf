@@ -1,0 +1,10 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
+const html=fs.readFileSync('index.html','utf8');
+for(const str of ['generativelanguage.googleapis.com','LLM.gemAsk','LLM.GEM','LLM.hasGem','GMODELS','gemContents','Gemini 키(선택)'])assert.ok(!html.includes(str),'Removed '+str);
+assert.ok(html.includes('text.pollinations.ai/openai'),'Existing separate online service is untouched');
+assert.ok(html.includes('gemma-2-2b-it'),'Different Gemma model is untouched');
+assert.ok(html.includes("if(k==='jvs-gk')"),'Historical secret remains excluded from backups');
+assert.ok(!html.includes("removeItem('jvs-gk')"),'Existing local key not deleted without explicit instruction');
+let begin=html.indexOf('async function brainBench(rounds){'),end=html.indexOf('/* ================= 학습 기관',begin);assert.ok(begin>0&&end>begin);
+const ctx=vm.createContext({brain:async()=>({reply:'test'}),LLM:{ready:false,busy:false},performance:{now:()=>0},store:{set(){}}});vm.runInContext(html.slice(begin,end),ctx);
+(async()=>{const b=await ctx.brainBench(3);assert.ok(b.rules&&b.phone);assert.equal(Object.hasOwn(b,'gemini'),false);console.log('PASS Gemini API, settings and benchmark removed; backup exclusions and other providers preserved');})().catch(e=>{console.error(e);process.exitCode=1});

@@ -4,7 +4,7 @@ assert.ok(!/Qwen2\.5-0\.5B-Instruct|Qwen2\.5-1\.5B-Instruct|Qwen\/Qwen2\.5-0\.5B
 assert.ok(!html.includes('brwLoad(){')&&!html.includes('skullRemoteRun(){'));
 assert.ok(html.includes('gemma-2-2b-it'),'unrelated existing model not deleted or substituted');
 assert.match(html,/lk==='lite'\|\|lk==='std'/);assert.match(html,/store\.set\('jvs-llm','off'\)/);
-assert.match(html,/기존 기록은 보존됩니다/);assert.match(html,/coding-engine\.js/);assert.match(fs.readFileSync('sw.js','utf8'),/jarvis-v4-single-79/);
+assert.match(html,/기존 기록은 보존됩니다/);assert.match(html,/coding-engine\.js/);assert.ok(Number((fs.readFileSync('sw.js','utf8').match(/jarvis-v4-single-(\d+)/)||[])[1])>=79);
 const start=html.indexOf('const LLM={eng:null'),end=html.indexOf('\n};',start)+3;
 assert.ok(start>0&&end>start);const ctx=vm.createContext({navigator:{gpu:{}},console,store:{get(){},set(){}}});vm.runInContext(html.slice(start,end)+';globalThis.model=LLM;',ctx);
 (async()=>{for(const kind of ['lite','std','unknown',null])await assert.rejects(ctx.model.load(kind),/제거/);assert.deepEqual(Object.keys(ctx.model.MODELS),['pro']);console.log('PASS disabled Qwen runners, old-config migration, load guard, unrelated features retained');})().catch(e=>{console.error(e);process.exitCode=1});
