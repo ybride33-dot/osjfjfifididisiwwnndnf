@@ -1,0 +1,30 @@
+SETUP {"parameters": 44544, "code_files": {"train": 297, "validation": 22, "test": 41}, "instruction_train": 216, "instruction_validation": 44, "ctx": 80, "heads": 4}
+INITIAL {'loss': 4.847419, 'next_char_accuracy': 0.010482, 'positions': 30720} instruction_val_loss 4.664191
+PRETRAIN 500 loss 2.4748 val {'loss': 2.580475, 'next_char_accuracy': 0.329297, 'positions': 10240} seconds 5.9
+PRETRAIN 1000 loss 2.3611 val {'loss': 2.402034, 'next_char_accuracy': 0.37168, 'positions': 10240} seconds 11.9
+PRETRAIN 1500 loss 2.1358 val {'loss': 2.211973, 'next_char_accuracy': 0.427832, 'positions': 10240} seconds 17.6
+PRETRAIN 2000 loss 2.027 val {'loss': 2.015359, 'next_char_accuracy': 0.482812, 'positions': 10240} seconds 23.3
+PRETRAIN 2500 loss 1.8448 val {'loss': 1.910011, 'next_char_accuracy': 0.510254, 'positions': 10240} seconds 29.3
+PRETRAIN 3000 loss 1.567 val {'loss': 1.841272, 'next_char_accuracy': 0.528125, 'positions': 10240} seconds 36.0
+PRETRAIN 3500 loss 1.6661 val {'loss': 1.76295, 'next_char_accuracy': 0.54873, 'positions': 10240} seconds 42.4
+PRETRAIN 4000 loss 1.8087 val {'loss': 1.713952, 'next_char_accuracy': 0.561719, 'positions': 10240} seconds 49.0
+PRETRAIN 4500 loss 1.4231 val {'loss': 1.694353, 'next_char_accuracy': 0.569824, 'positions': 10240} seconds 55.8
+PRETRAIN 5000 loss 1.3555 val {'loss': 1.660162, 'next_char_accuracy': 0.576074, 'positions': 10240} seconds 62.2
+PRETRAIN 5500 loss 1.5238 val {'loss': 1.645802, 'next_char_accuracy': 0.585156, 'positions': 10240} seconds 68.6
+PRETRAIN 6000 loss 1.1461 val {'loss': 1.629915, 'next_char_accuracy': 0.588477, 'positions': 10240} seconds 74.6
+PRETRAIN_SELECTED 6000 {'loss': 1.674114, 'next_char_accuracy': 0.56543, 'positions': 30720}
+INSTRUCT 500 loss 0.0045 validation 0.017137 seconds 80.5
+INSTRUCT 1000 loss 0.0009 validation 0.013839 seconds 86.3
+INSTRUCT 1500 loss 0.0005 validation 0.015921 seconds 93.0
+INSTRUCT 2000 loss 0.0002 validation 0.013351 seconds 99.1
+INSTRUCT 2500 loss 0.0001 validation 0.014255 seconds 105.4
+INSTRUCT 3000 loss 0.0001 validation 0.014217 seconds 111.7
+INSTRUCT 3500 loss 0.0001 validation 0.014055 seconds 118.0
+INSTRUCT 4000 loss 0.0 validation 0.014317 seconds 124.1
+INSTRUCT 4500 loss 0.0 validation 0.014361 seconds 130.3
+INSTRUCT 5000 loss 0.0 validation 0.015359 seconds 136.4
+INSTRUCT 5500 loss 0.0 validation 0.015344 seconds 142.2
+INSTRUCT 6000 loss 0.0 validation 0.016022 seconds 148.5
+INSTRUCT 6500 loss 0.0 validation 0.01574 seconds 154.6
+INSTRUCT 7000 loss 0.0 validation 0.016146 seconds 160.5
+DONE {"model": "jarvis-small-conditional-causal-transformer-v1", "parameters": 44544, "architecture": "one causal self-attention transformer block, four attention heads, learned hashed Korean prompt condition, character-level JavaScript decoding", "ctx": 80, "dimension": 48, "heads": 4, "ff": 96, "features": 256, "seed": 20261119, "code_files": {"train": 297, "validation": 22, "test": 41}, "code_initial_test": {"loss": 4.847419, "next_char_accuracy": 0.010482, "positions": 30720}, "code_pretrained_test": {"loss": 1.674114, "next_char_accuracy": 0.56543, "positions": 30720}, "code_final_test": {"loss": 5.320509, "next_char_accuracy": 0.253418, "positions": 30720}, "pretrain_steps_run": 6000, "pretrain_selected_step": 6000, "instruction_steps_run": 7000, "instruction_selected_step": 2000, "batch": 16, "train_tasks": 22, "train_prompts": 216, "validation_total": 44, "validation_exact": 38, "validation_loss": 0.013351, "initial_instruction_validation_loss": 4.664191, "weight_change_l1": 7413.0914, "note": "Test comparisons use exact source match against canonical handwritten answers. Instruction tasks and phrasing are narrow; no general programming claim."}
