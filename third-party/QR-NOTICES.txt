@@ -1,0 +1,11 @@
+QR libraries distributed locally for OP QR tools
+
+qrcode-generator 1.4.4
+Copyright (c) 2009 Kazuhiko Arase; MIT License, see qrcode-generator-MIT.txt.
+Source: https://github.com/kazuhikoarase/qrcode-generator
+Distribution file: vendor/qrcode-generator.js from npm qrcode-generator@1.4.4.
+
+jsQR 1.4.0
+Copyright and contributors are as documented in the upstream package; Apache License 2.0, see jsQR-APACHE-2.0.txt.
+Source: https://github.com/cozmo/jsQR
+Distribution file: vendor/jsqr.js from npm jsqr@1.4.0.
