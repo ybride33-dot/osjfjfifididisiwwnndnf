@@ -1,0 +1,11 @@
+# Natural-language coding pipeline (experimental)
+
+`자비스 코딩 대화 숫자 배열에서 짝수만 골라 두 배로 만든 다음 합계를 구해줘 | [{"input":[-3,2,4],"output":12}]`
+
+This translates recognized Korean phrases to the explicit operations in `coding-pipeline.js` using hand-written rules. It does not train a model or supply open-ended code generation. It displays the inferred operation order, checks optional examples in the existing bounded interpreter, and offers JavaScript copy/download actions. It never automatically executes the generated code or arbitrary user JavaScript. A wrong example is reported; it does not repair itself. Unsupported or leftover text is rejected, but accepted requests can still be misunderstood; exact-match example results do not establish correctness for all inputs.
+
+`자비스 코딩 대화 도움말` shows usage. If translation fails, `자비스 코딩 설계 도움말` lists explicit operations. Up to ten operations; JSON input/output with the same limits and semantics as `tools/CODING_PIPELINE.md`; examples are optional and one `|` separates examples. This is a parser for a narrow set of literal expressions, not general Korean, not an independent scientific measure of intelligence.
+
+Development used `tests/natural-pipeline-cases.json` and `tests/natural-pipeline-fresh.json`; both were examined while refining rules, so they are not independent test results. `tests/natural-pipeline-final.json` was drafted after those changes and not used to revise the rules. Of 10 supported-intent examples 8 translated to the expected sequence and 2 were held back; all 10 deliberately unsupported examples were rejected. The short, hand-written examples share vocabulary with development cases and cannot establish general accuracy. A high-confidence misinterpretation was observed on a previous probe and fixed; other mistakes remain possible.
+
+Tests: `node tests/natural-pipeline.test.js` (development, post-development examples, accepted examples with independently specified outputs and trusted fixed code, routing), `NODE_PATH=<playwright-node-modules> node tests/natural-pipeline-browser.test.js` (v20.31→current service worker update, mobile emulation, chat, code download, cached offline reload, saved OP note). The latter is not an actual Galaxy A17 device test.
