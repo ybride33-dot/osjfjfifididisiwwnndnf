@@ -1,10 +1,5 @@
-const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
-const html=fs.readFileSync('index.html','utf8');
-assert.ok(!/Qwen2\.5-0\.5B-Instruct|Qwen2\.5-1\.5B-Instruct|Qwen\/Qwen2\.5-0\.5B|neopolita\/qwen2\.5|@wllama\/wllama/i.test(html),'all explicit Qwen runners removed');
-assert.ok(!html.includes('brwLoad(){')&&!html.includes('skullRemoteRun(){'));
-assert.ok(html.includes('gemma-2-2b-it'),'unrelated existing model not deleted or substituted');
-assert.match(html,/lk==='lite'\|\|lk==='std'/);assert.match(html,/store\.set\('jvs-llm','off'\)/);
-assert.match(html,/기존 기록은 보존됩니다/);assert.match(html,/coding-engine\.js/);assert.ok(Number((fs.readFileSync('sw.js','utf8').match(/jarvis-v4-single-(\d+)/)||[])[1])>=79);
-const start=html.indexOf('const LLM={eng:null'),end=html.indexOf('\n};',start)+3;
-assert.ok(start>0&&end>start);const ctx=vm.createContext({navigator:{gpu:{}},console,store:{get(){},set(){}}});vm.runInContext(html.slice(start,end)+';globalThis.model=LLM;',ctx);
-(async()=>{for(const kind of ['lite','std','unknown',null])await assert.rejects(ctx.model.load(kind),/제거/);assert.deepEqual(Object.keys(ctx.model.MODELS),['pro']);console.log('PASS disabled Qwen runners, old-config migration, load guard, unrelated features retained');})().catch(e=>{console.error(e);process.exitCode=1});
+const fs=require('node:fs'),assert=require('node:assert/strict');const html=fs.readFileSync('index.html','utf8');
+assert.ok(!/Qwen2\.5-0\.5B-Instruct|Qwen2\.5-1\.5B-Instruct|Qwen\/Qwen2\.5-0\.5B|neopolita\/qwen2\.5|@wllama\/wllama/i.test(html),'Qwen runners absent');
+assert.ok(!html.includes('brwLoad(){')&&!html.includes('skullRemoteRun(){')&&!html.includes('gemma-2-2b-it'),'all user-removed model routes absent');
+assert.ok(!html.includes("removeItem('jvs-llm')"),'previous settings not erased');assert.match(html,/기존 기록은 보존됩니다/);assert.match(html,/coding-engine\.js/);assert.ok(Number((fs.readFileSync('sw.js','utf8').match(/jarvis-v4-single-(\d+)/)||[])[1])>=87);
+console.log('PASS Qwen/Gemma runners remain removed; previous preferences and coding tools retained');

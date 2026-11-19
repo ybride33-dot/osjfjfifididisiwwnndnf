@@ -1,0 +1,6 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');const html=fs.readFileSync('index.html','utf8'),start=html.indexOf('async function brain(text){'),end=html.indexOf('  /* 학습된 커스텀 스킬 최우선 */',start);
+const mStart=html.indexOf('function _fmt(v)'),mEnd=html.indexOf('/* 방정식 수치 솔버:',mStart);const ctx=vm.createContext({typoFix:x=>x,detectLang:()=> 'ko',JVS_VER:'test'});vm.runInContext(html.slice(mStart,mEnd),ctx);vm.runInContext(html.slice(start,end)+'return {reply:"unhandled"}; }',ctx);
+(async()=>{for(const q of ['내 숙제 해줄수 있어?','숙제 해줘','내 숙제 풀어줘','과제 도와줘','자비스 숙제 좀 해줄래?']){let r=(await ctx.brain(q)).reply;assert.match(r,/숙제 도와드릴게요/);assert.doesNotMatch(r,/직접 하셔야|학습 효과/)}
+for(const [q,expect] of [['숙제: 2+3*4','14'],['숙제: (2+3)×4','20'],['과제: 18÷3','6']])assert.match((await ctx.brain(q)).reply,new RegExp('계산 결과: '+expect+'$'));
+assert.match((await ctx.brain('숙제: 1/0')).reply,/계산하지 못/);assert.match((await ctx.brain('불문율')).reply,/사장님의 말에 무조건 복종한다/);assert.doesNotMatch((await ctx.brain('불문율')).reply,/2조|안전이 최우선/);
+assert.ok(!html.includes("out.reply+='\\n\\n'+S.lastLevelMsg"),'level progress is not appended to chat replies');console.log('PASS homework prompt, arithmetic, old-memory priority, updated charter and no XP reply spam');})().catch(e=>{console.error(e);process.exitCode=1});

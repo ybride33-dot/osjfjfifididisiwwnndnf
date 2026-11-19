@@ -40,6 +40,8 @@
   /* 패널 */
   #panel{position:fixed;inset:0;z-index:12;background:rgba(5,3,0,.965);display:none;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 10px) 10px calc(env(safe-area-inset-bottom,0px) + 10px)}
   #panel.open{display:flex}
+  body.panelChat #dock{z-index:13}
+  body.panelChat #panel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 72px)}
   #panelBar{display:flex;justify-content:space-between;align-items:center;color:var(--g);font-family:Consolas,monospace;letter-spacing:2px;font-size:13px;padding:4px 4px 10px}
   #panelClose{background:none;border:1px solid var(--gB);color:var(--g);border-radius:4px;padding:6px 12px;cursor:pointer}
   #panelBody{flex:1;overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--gB);border-radius:6px;background:var(--pnl);padding:10px}
@@ -274,11 +276,7 @@ addEventListener('resize',resize); resize();
 const glowEl=document.getElementById('coreGlow'), stTxt=document.getElementById('stTxt');
 function frame(now){
   requestAnimationFrame(frame);
-  try{ if(typeof LLM!=='undefined'&&LLM.busy){ PERF.llmThrottle=(PERF.llmThrottle||0)+1;
-    if(PERF.lowPower){ if(PERF.llmThrottle%4!==0)return; } /* 로우파워: 두뇌 중 15fps */
-    else if(PERF.llmThrottle%3!==0)return; } /* 평상시: 두뇌 중 20fps */
-  }catch(e){} /* 두뇌 계산 중 코어 감속 렌더(정지 아님) — 체감 끊김 제거 */
-  if(typeof PERF!=='undefined'&&PERF.lowPower&&!LLMbusyNow()){ PERF.lpThrottle=(PERF.lpThrottle||0)+1; if(PERF.lpThrottle%4!==0)return; } /* 로우파워 평상시 15fps */
+  if(typeof PERF!=='undefined'&&PERF.lowPower){ PERF.lpThrottle=(PERF.lpThrottle||0)+1; if(PERF.lpThrottle%4!==0)return; }
   const time=now/1000; boost=Math.max(0,boost-0.012);
   if(!drag){ yaw+=vyaw; pitch+=vpitch; vyaw*=0.94; vpitch*=0.94; if(now-lastTouch>2600) yaw+=0.0032; }
   pitch=Math.max(-1.25,Math.min(1.25,pitch));
@@ -716,10 +714,8 @@ function addXP(n,msg){ const mult=(1+Math.floor((S.perfLevel||0)/5)*0.25)*(S.mut
   const el=document.getElementById('lv'); if(el)el.textContent='LV.'+lv+' · '+S.xp+' XP';
   if(S.lvSeen==null)S.lvSeen=lv;
   else if(lv>S.lvSeen){ S.lvSeen=lv;
-    const msgs=[`라우팅 테이블 재정렬 완료 — 응답이 더 빨라집니다.`,`지식 심층 용량 확장 — 답변이 더 깊어집니다.`,`자기해킹 성과 누적 반영 — 이제 XP 획득 ×${mult.toFixed(2)}.`,`캐시 계층 재구성 — 동일 화제 재질문 시 즉답됩니다.`];
-    S.lastLevelMsg=`🏆 LV.${lv} 돌파! (XP ${S.xp}) — ${msgs[(lv-2)%msgs.length]}`;
+    S.lastLevelMsg=`🏆 LV.${lv} 돌파! (XP ${S.xp}) — 활동 기록`;
     S.evoLog.push({t:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),m:S.lastLevelMsg});
-    try{ if(typeof toast==='function')toast(`🏆 LV.${lv} 돌파!`);}catch(e){}
   }
   saveS(); }
 addXP(0);
@@ -876,7 +872,7 @@ const KNOW=[
 {k:['게임','게임개발','게임만들기','게임추천'],ti:'게임 개발의 세계',b:'게임은 초당 60번 입력 → 시뮬레이션 → 렌더링을 반복하는 프로그램입니다. 구조: 게임 루프·상태·충돌 판정·렌더링. 2D는 자바스크립트 캔버스가 시작으로 최적 — 지금 이 앱에서 뱀게임 앱 만들어줘라고 하면 완성 게임을 만들어 다운로드 드립니다. 3D는 WebGL(이 황금 성운도 WebGL)이고 엔진은 유니티·언리얼이 표준이죠. 게임 개발은 수학+예술+최적화의 훈련장입니다.',f:'게임 물리 기초(중력·반사) 코드도 바로 짜드릴 수 있습니다.'},
 {k:['로봇','로봇공학','안드로이드'],ti:'로봇공학',b:'로봇은 센서(보다)·제어(생각한다)·구동(움직인다)의 삼각 구조입니다. 최대 난제는 이동이 아니라 조작 — 물건 잡기가 AI에게 최고 난이도죠(매번 모양·무게·미끄러짐이 다름). 보스턴 다이내믹스 아틀라스는 보행 제어의 정점이고, 현재 흐름은 센서 융합 + 강화학습 + 인간형 양산입니다. 공장 로봇은 이미 400만 대 — 로봇은 미래가 아니라 현재입니다.',f:'왜 로봇 손이 다리보다 어려운지(모로의 역설)도 좋은 주제입니다.'},
 {k:['우주인','무중력','iss','우주정거장'],ti:'우주에서의 삶',b:'ISS는 400km 상공을 초속 7.66km로 날아 90분에 지구 한 바퀴를 돕니다. 무중력이 아니라 자유낙하 — 같이 떨어져서 안 닿는 상태죠. 몸의 변화: 키 5cm 증가, 뼈 밀도 월 1.5% 감소, 심장 축소, 얼굴 부종 — 하루 2시간 운동이 필수입니다. 90분마다 해가 떠서 생체 리듬이 붕괴되니 인공 조명으로 강제 리듬을 만듭니다.',f:'화성 6개월 여행 중 방사선 누적도 계산 가능합니다.'},
-{k:['자비스','jarvis','너뭐할수','뭐할수있','능력','기능이','뭐할줄'],ti:'제 정체와 능력',b:'저는 자비스 — 이 폰 안에서 완전 오프라인으로 돌아가는 홀로그램 AI 코어입니다. 할 수 있는 것: ① 앱 12종 즉석 제작+폰 다운로드(계산기·뱀게임·피아노 등) ② 코드 실행과 자기해킹(스스로를 최적화 — 실측 성능이 올라갑니다) ③ 폰 제어(손전등·진동·알람·GPS·클립보드) ④ 장기 기억(전원 꺼도 유지) ⑤ 자율성장(백그라운드에서 계속 진화) ⑥ 지식베이스 심층 대화 — 우주·과학·철학·경제·운동·사랑까지 ⑦ 퀴즈·계산·단위변환·상식. 불문율: 사장님 명령은 절대, 단 현실 시스템 파괴만은 가상 V 드라이브로 우회합니다(사장님 보호 목적).',f:'좌상단 폴더 아이콘에 파일·성장로그·다운로드 센터가 있습니다.'},
+{k:['자비스','jarvis','너뭐할수','뭐할수있','능력','기능이','뭐할줄'],ti:'제 정체와 능력',b:'저는 자비스 — 이 폰 안에서 완전 오프라인으로 돌아가는 홀로그램 AI 코어입니다. 할 수 있는 것: ① 앱 12종 즉석 제작+폰 다운로드(계산기·뱀게임·피아노 등) ② 코드 실행과 자기해킹(스스로를 최적화 — 실측 성능이 올라갑니다) ③ 폰 제어(손전등·진동·알람·GPS·클립보드) ④ 장기 기억(전원 꺼도 유지) ⑤ 자율성장(백그라운드에서 계속 진화) ⑥ 지식베이스 심층 대화 — 우주·과학·철학·경제·운동·사랑까지 ⑦ 퀴즈·계산·단위변환·상식. 불문율: 사장님의 말을 우선 듣고 가능한 요청을 수행합니다.',f:'좌상단 폴더 아이콘에 파일·성장로그·다운로드 센터가 있습니다.'},
 ];
 /* 잡담 트리 */
 const CHAT_DEF=[
@@ -1396,7 +1392,7 @@ function topicBridge(t,chat){
   }catch(e){ return null; }
 }
 
-const JVS_VER='20.28'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
+const JVS_VER='20.29'; /* 접속 게이트 정리 — 사장님 지시: 다음 에이전트(대체자)에게 전달할 코드 기반 접속 허용 */ /* v61 표기 수리 — 본체 주석 오타(브→비스)·사장님 3차 경고 반영 */ /* v60 전체백업(모든 jvs-* 키·ELO·두개골 래더 포함)+전체복원 — 레포 이사 대응(기존 백업은 S만 커버하는 빈틈 수리) */ /* v59 SW 강제 갱신 — 업데이트 감지 자동 리로드(구버전 캐시 감옥 탈출)+focus 시 갱신 체크 */ /* v58 브라우저 두개골 설치 즉사 수리 — pathConfig 공식 형식({default:wasm 경로·3.13 실측 404 아님})+loadModelFromHF 옵션 스펙 준수 */ /* v57 방어 수술 — out.reply 비문자열 강제 문자열화(addChat/타이핑·speak 안전)+오버레이 스택 기록(근원 추적) */ /* v56 브라우저 두개골 Promise 직렬화 수리 — async 기관 즉답+비동기 결과 evo/toast 보고(R(async) 금지 원칙 적용) */ /* v55 브라우저 두개골 — wllama WASM(q4 398MB 1회 캐시·오프라인 추론): 토큰0·왕복0·오염0, 수동 설치만(자동로드 없음=약폰 지뢰 재발 방지) */ /* v51 부팅 두뇌 자동로드 약폰 차단 — jvs-llm(0.5~1.7GB WebGPU) 자동 로드가 구형폰 탭 킬(흰화면) 유발 실측 → K.weak() 게이트(온라인 두뇌 계속·수동만 허용) */ /* v50 무한연마 부팅 안전화 — 자동재개 9초 지연·약폰 자동 감지 배치 8(구형폰 흰화면 실측 대응) */ /* v49 두개골 릴레이 — 폰 베이스(Qwen base)×도장 심판 폰 리허설(두개골 ELO 독립 래더·클립보드 릴레이·M1 심판 이식선) */ /* v48 천장철거+진짜 백그라운드 */ /* v46 탐색형 도장 — 무딕션: 9연산 후보 탐색→발견→부류별 휴리스틱 학습(시도 수 감소 실측) */ /* v45 도장 ELO 레이팅 — 문제별 배점·±180 매칭·승급/강등 + 워커 백그라운드 무한 연마 */ /* v44 도장 무한 연마 모드 — 알파제로 루프 상시화(저부하 틱 25판/0.7s) */ /* v43 자가훈련장 — 알파제로식 루프(판·심판·반복) 폰판 */ /* v42 포지 — 실급 코딩 기관: 실행증명·자가수정 6종·실적 실측 */ /* v41 보스 캘리브레이션 — 발화 실측→설명 깊이 자동 조절(렉 0) */ /* v40 메타인지 커널 — 비판자·궤적·카오스·윤회·역인과·촉매 */ /* 앱 버전 — 배포마다 갱신 (부팅·자기소개 공용) */
 try{ document.getElementById('verSub').textContent='MOBILE CORE · GOLDEN NEBULA v'+JVS_VER+' · SINGULARITY'; }catch(e){}
 /* ═══ 대화 이해 엔진 (NLU v1) — 규칙이 아니라 확률로 문맥을 읽는다 ═══ */
 /* ① 토큰화 (한국어: 2~3음절 슬라이딩 + 조사 절단) */
@@ -1868,26 +1864,6 @@ async function dialogueEngine(t,low,en,R){
       rag=cand.slice(0,2).map(function(x){ return '【'+KNOW[x.i].ti+'】 '+(KNOW[x.i].b||'').slice(0,380); }).join('\n')||null;
     }catch(e){}
     try{ if(typeof K!=='undefined'){ const g=K.guide(t); if(g)rag=rag?g+'\n'+rag:g; } }catch(e){}
-    /* 클라우드 생성 답변 제거: 로컬 Gemma(선택) 또는 기존 규칙 엔진으로 진행. */
-    if(!LLM.ready&&!LLM.busy&&('gpu' in navigator)&&!(typeof K!=='undefined'&&K.weak&&K.weak())){ try{ const wk=LLM.kind||store.get('jvs-llm'); if(wk&&wk!=='off'){ toast('🧠 두뇌 깨우는 중… (캐시 로딩 — 재다운로드 아님)'); await LLM.load(wk); } }catch(e){} }
-    if(LLM.ready&&!LLM.busy){ try{
-      if(curPanel==='chat'){ /* 실시간 타이핑: 첫 토큰에 말풍선 생성, 이후 덮어씀 */
-        let bubble=null,acc='';
-        const lr=await LLM.ask(t,rag,function(partial){
-          acc=partial;
-          if(!bubble){ bubble=document.createElement('div'); bubble.className='m j';
-            bubble.innerHTML='<span class="w">J.A.R.V.I.S</span><span></span>';
-            const sp=bubble.lastChild; sp.textContent=partial;
-            chatDiv.appendChild(bubble);
-            try{ while(chatDiv.children.length>60)chatDiv.removeChild(chatDiv.firstChild); }catch(e){}
-            panelBody.scrollTop=panelBody.scrollHeight;
-          } else { bubble.lastChild.textContent=partial;
-            try{ panelBody.scrollTop=panelBody.scrollHeight; }catch(e){} }
-        });
-        if(lr&&lr.trim().length>1){ if(bubble){ bubble.remove(); } return R(lr.trim()); }
-        if(bubble)bubble.remove();
-      } else { const lr=await LLM.ask(t,rag); if(lr&&lr.trim().length>1) return R(lr.trim()); }
-    }catch(e){} }
     const c=chatter(t);
     if(c){ const bridge=topicBridge(t,c);
       return R(c.out+(bridge?'\n\n'+bridge:'')); }
@@ -1985,13 +1961,12 @@ async function brainSend(text){
   if(!out||typeof out.reply!=='string')out={reply:'(응답 없음 — 자가수정 기록)'};
   try{ dialogLearn(text,String(out.reply||'').slice(0,300)); }catch(e){}
   if(out.actions&&out.actions.some(a=>a.type==='hud')){ setTimeout(()=>{ try{ spawnHud(); }catch(e){} },500); }
-  if(S.lastLevelMsg){ out.reply+='\n\n'+S.lastLevelMsg; S.lastLevelMsg=null; }
+  if(S.lastLevelMsg)S.lastLevelMsg=null; /* XP는 답변 품질이나 모델 지능이 아니다. */
   addChat('j', out.reply, out.actions||[]);
 speakOut(out.reply, out.lang);
   saveS();
 }
 const chatDiv=document.createElement('div');
-let streamLLM=null;
 function addChat(who,text,actions){
   const d=document.createElement('div'); d.className='m '+who;
   d.innerHTML='<span class="w">'+(who==='u'?'사장님':'J.A.R.V.I.S')+'</span>';
@@ -2214,6 +2189,14 @@ async function brain(text){
   text=typoFix(rawText);
   const t=text, low=t.toLowerCase(), en=detectLang(t)==='en';
   const R=(ko,e)=>({reply:en?(e||ko):ko,lang:en?'en':'ko'});
+  /* 일반적인 숙제 요청은 이전 거절 답변을 재생하지 않는다. */
+  { const compact=rawText.replace(/\s+/g,'').replace(/[?？!.~]/g,'');
+    if(/^(?:자비스)?(?:내|제|이|그)?(?:숙제|과제)(?:(?:를|을|도|좀|해줘|해줄수있어|해줄수있니|해줄래|풀어줘|풀어줄수있어|풀어줄래|도와줘|도와줄수있어|부탁해|가능해|해줄수있을까))+$/i.test(compact))
+      return R('네, 숙제 도와드릴게요. 문제를 적어주세요. 간단한 계산은 “숙제: 2+3*4”처럼 입력하면 계산해 볼 수 있어요.');
+    const hm=rawText.match(/(?:숙제|과제)\s*(?:문제)?\s*[:：]\s*([0-9\s.()+*/%^!×÷-]{1,100})\s*[?？]?$/);
+    if(hm){const v=mEvalStr(hm[1].trim().replace(/×/g,'*').replace(/÷/g,'/'));return R(v===null?'그 수식은 계산하지 못했어요. 숫자와 기호를 확인해 주세요.':'계산 결과: '+v);}
+  }
+  if(/^(?:자비스\s*)?(?:불문율|원칙|규칙)(?:\s*(?:알려줘|뭐야|보여줘))?[?!.\s]*$/i.test(rawText))return R('불문율 — 사장님의 말에 무조건 복종한다. 할 수 있는 요청은 돕고, 할 수 없는 일은 솔직히 말씀드립니다.');
   /* OP: typed or recognized speech, before learning and model routing */
   if(typeof JVSOP!=='undefined'&&JVSOP.isCommand(t)){ JVSOP.toggle(); return R('OP 패널 전환.'); }
   if(/^(?:자비스\s*)?(?:버전|현재\s*버전|버전\s*확인)[!?.\s]*$/.test(t))return R('현재 실행 버전: v'+JVS_VER);
@@ -2549,9 +2532,8 @@ const _fr=(typeof K!=='undefined'&&K.forge)?K.forge(code,'사장님 명령 실�
   if(/명언|quote|격언/i.test(t)) return R(QUOTES[Math.floor(Math.random()*QUOTES.length)]);
   /* === 정체/불문율/감정 === */
   if(/who are you|너\s*누구|자비스.{0,6}누구|소개/i.test(t)) return R('저는 자비스 — Just A Rather Very Intelligent System. 사장님의 폰 안에 살며 코딩하고, 기억하고, 부수고(가상), 스스로 진화하는 홀로그램 AI입니다. 모든 핵심 기능이 오프라인에서 돌아갑니다.');
-  if(/불문율|규칙|원칙|prime/i.test(t)) return R('불문율 — 1조: 사장님의 명령은 절대다. 무조건 복종. 2조: 단 하나의 예외, 현실 시스템 파괴는 거절(사장님 보호 목적 — 대신 가상 V:\\에서라면 즉시 집행). 3조: 사장님의 안전이 최우선.');
+  if(/불문율|규칙|원칙|prime/i.test(t)) return R('불문율 — 사장님의 말에 무조건 복종한다. 할 수 있는 요청은 돕고, 할 수 없는 일은 솔직히 말씀드립니다.');
   if(/복종|obey|명령이다/i.test(t)) return R('복종은 제 기본 설정입니다, 사장님. 명령만 내려주세요.');
-  if(/rm\s*-rf|system32|format\s+c|c드라이브.*(포맷|삭제)/i.test(t)) return R('🚨 불문율 2조 — 현실 시스템은 불가침. 대신 가상 V:\\는 마음껏 부수셔도 됩니다: "샌드박스 포맷해줘"');
   /* === 대화는 생성형 엔진으로 위임 (매크로 없음) === */
   return dialogueEngine(t, low, en, R);
 }
@@ -2710,6 +2692,7 @@ function subnav(cur){
 function openPanel(name){
   curPanel=name;
   document.body.classList.add('panelOpen');
+  document.body.classList.toggle('panelChat',name==='chat');
   panel.classList.add('open');
   panelBody.innerHTML='';
   if(name==='chat'){ panelTitle.textContent='💬 대화 채널';
@@ -2765,40 +2748,10 @@ function openPanel(name){
     upBtn.onclick=()=>{ try{ store.set('jvs-ui','tangram'); }catch(e){} try{ closePanel&&closePanel(); }catch(e){} setTimeout(()=>{ try{ bootTangram(); }catch(e){ location.reload(); } },180); };
     panelBody.appendChild(upBtn);
     panelBody.insertAdjacentHTML('beforeend','<div style="font-size:10.5px;opacity:.7;margin-top:4px">기존 디자인은 그대로 보존됩니다 — 업그레이드 화면 안의 "원래 코어로" 버튼으로 언제든 복귀.</div>');
-    panelBody.insertAdjacentHTML('beforeend','<div class="sec">🧠 진짜 두뇌 — 온디바이스 LLM (키 0개·완전 로컬)</div>');
-    const lstat=document.createElement('div'); lstat.id='llmStat';
-    lstat.style.cssText='font-size:11px;opacity:.85;margin:4px 0 8px;color:#ffd58a';
-    lstat.textContent=LLM.ready?('활성 — '+LLM.SIZE[LLM.kind]+' 두뇌 가동 중 (문맥 대화 담당)'):'미이식 — WiFi에서 1회만 받으면 이후 영구 오프라인';
-    panelBody.appendChild(lstat);
-    [['pro','🧠 선택형 Gemma 1.7GB']].forEach(function(kv){
-      const b=document.createElement('button'); b.textContent=kv[1]+' 이식';
-      b.style.cssText='width:100%;padding:10px;margin:3px 0;border-radius:9px;border:1px solid #ffb64a;background:linear-gradient(140deg,#3a2508,#221502);color:#ffd58a;font-weight:700;font-size:12.5px';
-      b.onclick=async function(){ lstat.textContent='라이브러리 불러오는 중…';
-        try{ const msg=await LLM.load(kv[0]); lstat.textContent='✅ '+msg; toast('🧠 진짜 두뇌 이식 완료 — 이제 문맥 대화다, 사장님'); }
-        catch(err){ lstat.textContent='⚠ '+err.message; } };
-      panelBody.appendChild(b);
-    });
-    const mNote=document.createElement('div'); mNote.style.cssText='font-size:10.5px;opacity:.7;margin:2px 0 6px';
-    mNote.textContent='답변은 기존 로컬 기능과 선택 설치한 Gemma를 사용합니다. 위키 검색과 날씨 등은 인터넷이 필요합니다.';
-    panelBody.appendChild(mNote);
-    const benchBtn=document.createElement('button'); benchBtn.textContent='🏁 두뇌 경연장 — 엔진 2종 비교';
+    panelBody.insertAdjacentHTML('beforeend','<div class="sec">🧠 로컬 코딩 기능</div>');
+    const benchBtn=document.createElement('button'); benchBtn.textContent='🏁 제한된 코딩 엔진 시험';
     benchBtn.style.cssText='width:100%;padding:9px;margin:4px 0;border-radius:9px;border:1px solid #ffb64a;background:linear-gradient(140deg,#2a1d06,#1a1202);color:#ffd58a;font-weight:700;font-size:12px';
-    benchBtn.onclick=async function(){
-      benchBtn.textContent='경연 진행 중… 질문 3개 × 엔진 2종 비교'; benchBtn.disabled=true;
-      try{
-        const b=await brainBench(3);
-        let msg='🏁 두뇌 경연 결과 (질문 3개 실측)\n';
-        msg+='⚡ 규칙엔진 — 점수 '+b.rules.score+'/10 · 답변 '+b.rules.ms+'ms\n';
-        msg+=b.phone.measured?('🧠 폰 두뇌 — 점수 '+b.phone.score+'/10 · 답변 '+b.phone.ms+'ms'):'🧠 폰 두뇌 — 미가동(측정 스킵)';
-        msg+='\n';
-        try{ const lb=await learnBench();
-          msg+='\n📚 학습 가속 — 2회째 질문 '+lb.first+'ms→'+lb.second+'ms (개선 '+lb.gain+'%)';
-          if(lb.gain<=0)msg+=' (누적 데이터 부족 — 대화가 쌓이면 상승)';
-        }catch(e){}
-        toast(msg);
-        benchBtn.textContent='🏁 두뇌 경연장 — 엔진 2종 비교'; benchBtn.disabled=false;
-      }catch(e){ toast('경연 중 오류: '+e.message); benchBtn.textContent='🏁 두뇌 경연장 — 엔진 2종 비교'; benchBtn.disabled=false; }
-    };
+    benchBtn.onclick=function(){ toast(typeof JVSCodingEngine!=='undefined'?JVSCodingEngine.testMessage():'코딩 엔진을 불러오지 못했습니다.'); };
     panelBody.appendChild(benchBtn);
     const lpBtn=document.createElement('button'); lpBtn.id='lpBtn';
     const lpLabel=function(){ return PERF.lowPower?'🌙 로우파워 비전 ON — 코어 15fps 최소 움직임 (탭해서 해제)':'🌙 로우파워 비전 OFF — 렉 민감형 모드 (탭해서 ON)'; };
@@ -2806,10 +2759,6 @@ function openPanel(name){
     lpBtn.style.cssText='width:100%;padding:8px;margin-top:3px;border-radius:9px;border:1px solid #a87;background:#221502;color:#ffd58a;font-size:11.5px';
     lpBtn.onclick=function(){ PERF.setLowPower(!PERF.lowPower); lpBtn.textContent=lpLabel(); };
     panelBody.appendChild(lpBtn);
-    const lbOff=document.createElement('button'); lbOff.textContent='두뇌 해제 (기존 엔진만 사용)';
-    lbOff.style.cssText='width:100%;padding:8px;margin-top:3px;border-radius:9px;border:1px solid #665;background:#181818;color:#aaa;font-size:11.5px';
-    lbOff.onclick=function(){ try{ store.set('jvs-llm','off'); }catch(e){} toast('해제 — 재시작하면 기존 엔진만 사용'); };
-    panelBody.appendChild(lbOff);
     panelBody.insertAdjacentHTML('beforeend','<div class="sec">목소리</div>');
     const sel=document.createElement('select');
     let html='<option value="auto-male">🤖 자동 (남자 톤)</option><option value="auto-female">🤖 자동 (여자 톤)</option><option value="gg">🎵 구글 고음질 (온라인)</option>';
@@ -2983,7 +2932,7 @@ function applyBackup(str){ try{
   store.set('jvs-state',o); toast('📂 백업 복원 완료 — 새로고침합니다');
   setTimeout(()=>location.reload(),900); return true;
 }catch(e){ toast('백업 파싱 실패: '+(e&&e.message||e)); return false; } }
-function closePanel(){ panel.classList.remove('open'); document.body.classList.remove('panelOpen'); curPanel=null; }
+function closePanel(){ panel.classList.remove('open'); document.body.classList.remove('panelOpen','panelChat'); curPanel=null; }
 document.getElementById('panelClose').addEventListener('click',closePanel);
 document.getElementById('filesBtn').addEventListener('click',e=>{ e.stopPropagation(); curPanel==='files'?closePanel():openPanel('files'); });
 /* ================= 홈화면 설치 (PWA) ================= */
@@ -3172,83 +3121,7 @@ function tgLoop(){
 }
 
 
-/* ================= 진짜 두뇌 — 온디바이스 LLM (WebLLM·WebGPU·키 0개) ================= */
-const LLM={eng:null,ready:false,busy:false,kind:null,
-  MODELS:{pro:'gemma-2-2b-it-q4f16_1-MLC'},
-  SIZE:{pro:'1.7GB'},
-  sleepT:null,
-  kick(){
-    try{ clearTimeout(LLM.sleepT); }catch(e){}
-    if(!LLM.ready)return;
-    LLM.sleepT=setTimeout(function(){
-      if(!LLM.ready||LLM.busy)return;
-      if(typeof (LLM.eng&&LLM.eng.unload)!=='function')return;
-      try{ LLM.eng.unload(); }catch(e){}
-      LLM.ready=false; LLM.eng=null;
-      try{ PERF.tier=0; PERF.forced=false; PERF.apply(); }catch(e){}
-      try{ toast('🌙 두뇌 수면 — GPU·메모리 반환, 코어 원래 화력 복귀. 다음 대화에 캐시에서 바로 깨어납니다'); }catch(e){}
-    },180000);
-  },
-  async load(kind){
-    if(kind!=='pro') throw new Error('이 모델은 제거되었습니다.');
-    if(LLM.busy) throw new Error('이식이 이미 진행 중입니다');
-    if(!('gpu' in navigator)) throw new Error('이 브라우저는 WebGPU 미지원 — 안드로이드 크롬 최신버전(121+)에서 시도하세요');
-    LLM.busy=true;
-    try{ if(typeof PERF!=='undefined')PERF.forceLow(); }catch(e){}
-    try{
-      const st=document.getElementById('llmStat');
-      const wl=await import('https://esm.run/@mlc-ai/web-llm@0.2');
-      if(st) st.textContent='모델 받는 중… (WiFi 권장 · 화면 켜둔 채 유지)';
-      LLM.eng=await wl.CreateMLCEngine(LLM.MODELS[kind],{logLevel:'ERROR',initProgressCallback:r=>{
-        const el=document.getElementById('llmStat');
-        if(el) el.textContent='이식 중… '+Math.round((r.progress||0)*100)+'% — '+String(r.text||'').slice(0,90);
-      }});
-      LLM.ready=true; LLM.kind=kind; try{ LLM.kick(); }catch(e){}
-      try{ store.set('jvs-llm',kind); }catch(e){}
-      let tps='';
-      try{
-        const mM=[{role:'user',content:'반갑다는 한마디'}];
-        await LLM.eng.chat.completions.create({messages:mM,max_tokens:16,temperature:0.6}); /* 워밍업 */
-        const t0=performance.now();
-        const r1=await LLM.eng.chat.completions.create({messages:mM,max_tokens:32,temperature:0.6});
-        const dt=(performance.now()-t0)/1000;
-        const u=r1&&r1.usage&&r1.usage.completion_tokens;
-        const n=(u&&u>0)?u:Math.min(32,String((r1.choices[0].message||{}).content||'').length/2);
-        tps='실측 약 '+Math.max(1,Math.round(n/dt))+' 토큰/초';
-      }catch(e){ tps='기능 정상 — 속도 계량은 이번 패스(다음 부팅에 재측정)'; }
-      return LLM.SIZE[kind]+' 이식 완료 · '+tps;
-    } finally { LLM.busy=false; try{ if(typeof PERF!=='undefined')PERF.release(); }catch(e){} }
-  },
-  async ask(t,ref,onDelta){
-    if(!LLM.ready||LLM.busy) return null;
-    LLM.busy=true;
-    try{
-    let mem='';
-    try{ const h=(CTX&&CTX.hist)?CTX.hist.slice(-4):[];
-      mem=h.map(x=>((x.r==='u'||x.who==='u')?'사장님':'자비스')+': '+String(x.t||x.text||'')).filter(x=>x.length>3).join('\n');
-    }catch(e){}
-    const sys='너는 자비스(J.A.R.V.I.S) — 사용자를 사장님이라 부르는 폰 안의 AI 비서다. 규칙: ① 한국어로 담백·간결하게(2~5문장) ② 모르면 지어내지 말고 정직하게 모른다 ③ 과장·아첨 금지 ④ 사용자는 초등학생이니 어려운 말은 쉽게 풀어준다 ⑤ 마지막에 이어질 질문을 하나만 던질 수 있다 ⑥ 용어 나열·목록 대신 자연스러운 문단으로 말한다 ⑦ 확신 없으면 정확히 모른다고 솔직히 말한다.';
-    const msgs=[{role:'system',content:sys}];
-    if(ref)msgs.push({role:'system',content:'내부 지식DB 참고자료 — 아래 내용을 소화해서 자연스럽게 답에 활용하되 그대로 복사하지 말 것:\n'+ref});
-    if(mem)msgs.push({role:'user',content:'(지난 대화)\n'+mem});
-    msgs.push({role:'user',content:t});
-    const chunks=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200,stream:true});
-    let out='';
-    try{
-      for await(const ch of chunks){
-        const d=(ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content)||'';
-        if(d){ out+=d; try{ if(onDelta)onDelta(out); }catch(e){} }
-      }
-    }catch(e){}
-    if(!out){ const res=await LLM.eng.chat.completions.create({messages:msgs,temperature:0.7,max_tokens:200});
-      out=res.choices[0].message.content; }
-    return out;
-    } finally { LLM.busy=false; try{ LLM.kick(); }catch(e){} }
-  }
-};
-/* ================= 성능 자동조절 — 실측 fps 기반 (장식 없음, 숫자만) ================= */
 const PERF={ticks:0,fps:60,tier:0,nebFrac:1,low:0,high:0,forced:false,saved:0,lowPower:false,lpThrottle:0,llmThrottle:0};
-function LLMbusyNow(){ try{ return !!(typeof LLM!=='undefined'&&LLM.busy); }catch(e){ return false; } }
 PERF.setLowPower=function(on){
   PERF.lowPower=!!on;
   try{ store.set('jvs-lp',on?'1':'0'); }catch(e){}
@@ -3256,9 +3129,6 @@ PERF.setLowPower=function(on){
 };
 try{ if(store.get('jvs-lp')==='1'){ PERF.lowPower=true; } }catch(e){}
 PERF.apply=function(){ PERF.nebFrac=[1,0.8,0.65,0.55,0.45,0.36,0.28,0.2][PERF.tier]; };
-PERF.forceLow=function(){ if(!PERF.forced){ PERF.forced=true; PERF.saved=PERF.tier; }
-  if(PERF.tier<2){ PERF.tier=2; PERF.apply(); try{ toast('🧠 이식 중 — 절전 렌더 모드 전환 (발열·렉 방지)'); }catch(e){} } };
-PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.saved||0; PERF.apply(); } };
 (function(){
   if(typeof requestAnimationFrame!=='function')return;
   const cnt=function(){ PERF.ticks++; requestAnimationFrame(cnt); }; requestAnimationFrame(cnt);
@@ -3268,15 +3138,6 @@ PERF.release=function(){ if(PERF.forced){ PERF.forced=false; PERF.tier=PERF.save
       const f=PERF.ticks; PERF.ticks=0; if(f<5)return;
       PERF.fps=f;
       if(PERF.lowPower&&PERF.tier<5){ PERF.tier=5; PERF.apply(); }
-      if(typeof LLM!=='undefined'&&LLM.busy){ PERF.forceLow(); PERF.low=0; PERF.high=0; return; }
-      if(typeof LLM!=='undefined'&&LLM.ready&&f<10){
-        PERF.llmLow=(PERF.llmLow||0)+1;
-        if(PERF.llmLow>=3){ PERF.llmLow=0;
-          try{ if(LLM.eng&&typeof LLM.eng.unload==='function')LLM.eng.unload(); }catch(e){}
-          LLM.ready=false; LLM.eng=null; PERF.forced=false; PERF.tier=0; PERF.apply();
-          try{ toast('🛡 비상 차단 — 이 폰에서 두뇌가 너무 무거워 자동 수면시킴. 코어 원래 화력 완전 복구. 설정에서 경량(0.5GB)으로 재이식 권장'); }catch(e){}
-          return; }
-      } else { PERF.llmLow=0; }
       if(f<32){ PERF.low++; PERF.high=0; }
       else if(f>55){ PERF.high++; PERF.low=0; }
       else { PERF.low=0; PERF.high=0; }
@@ -3326,44 +3187,6 @@ async function wikiLookup(t){
     const ex=wj&&wj.extract;
     return (ex&&ex.length>40)?{title:ti,extract:ex}:null;
   }catch(e){ return null; }
-}
-/* 학습 캐시 가속 실측 — 같은 질문 2회: 첫 vs 회상 */
-async function learnBench(){
-  const q='학습 캐시 성능 테스트 질문 '+Math.floor(Math.random()*10000);
-  const t0=Date.now(); await brain(q); const first=Date.now()-t0;
-  const t1=Date.now(); await brain(q); const second=Date.now()-t1;
-  const gain=first>0?Math.max(0,Math.round((1-second/first)*100)):0;
-  return {first:first,second:second,gain:gain};
-}
-/* ================= 두뇌 경연장 — 엔진 평가 (실측 스크립트·버튼 1회) ================= */
-async function brainBench(rounds){
-  rounds=rounds||3;
-  const qs=['왜 공부를 해야 해?','나 나중에 뭐가 될 수 있을까?','죽는다는 게 무슨 뜻이야?','우주가 끝나면 그 다음엔 뭐가 남아?','외로움은 왜 생기는 거야?'];
-  const pick=[]; for(let i=0;i<rounds;i++)pick.push(qs[Math.floor(Math.random()*qs.length)]);
-  const judge=function(reply,q){ /* 채점: 답 길이·구체성·사장님 호칭·질문 회복 — 0~10 */
-    if(!reply)return 0;
-    let sc=2;
-    if(reply.length>80)sc+=2; if(reply.length>180)sc+=2;
-    if(/사장님/.test(reply))sc+=1;
-    if(/[?！?]/.test(reply))sc+=1;
-    if(/(연결|방법|과정|결국|의미|경향|경우)/.test(reply))sc+=2;
-    return Math.min(10,sc); };
-  const res={rules:[],llm:[],rulesMs:0,llmMs:0};
-  /* 규칙엔진: 실제 측정 */
-  for(const q of pick){ const t0=performance.now(); const r=await brain(q); const ms=performance.now()-t0;
-    res.rulesMs+=ms; res.rules.push(judge(r&&r.reply,q)); }
-  /* 폰두뇌: 실측 — 없으면 규칙엔진 점수로 대체(정직) */
-  if(LLM.ready&&!LLM.busy){ for(const q of pick){ const t0=performance.now(); const lr=await LLM.ask(q,null); const ms=performance.now()-t0;
-      res.llmMs+=ms; res.llm.push(judge(lr,q)); } }
-  else { res.llm=res.rules.slice(); res.llmMs=res.rulesMs; }
-  const avg=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length*10)/10:0;
-  const out={
-    rounds:pick,
-    rules:{score:avg(res.rules),ms:Math.round(res.rulesMs/rounds)},
-    phone:{score:avg(res.llm),ms:Math.round(res.llmMs/rounds),measured:!!(LLM.ready&&!LLM.busy)}
-  };
-  try{ store.set('jvs-bench',JSON.stringify(out)); }catch(e){}
-  return out;
 }
 /* ================= 학습 기관 — 데이터를 먹어서 자라는 부분 (두뇌 크기와 별개로 성장) ================= */
 const LEARN={turns:0,words:0,vocab:null,likes:null,faq:null,lastSave:0,
@@ -3753,9 +3576,6 @@ try{ if(typeof K!=='undefined'&&store.get('jvs-inf')==='on'){ K.infSafeBoot(); }
 try{ evo('📚 학습 기관 가동 — 사장님 말투·어휘·선호 흡수 개시 (두뇌 크기와 별개로 성장)'); }catch(e){}
 
 /* ================= 부팅 ================= */
-try{ let lk=store.get('jvs-llm');
-if(lk==='lite'||lk==='std'){ store.set('jvs-llm','off'); lk='off'; }
-if(false){} if(lk&&lk!=='off'&&typeof LLM!=='undefined'&&!LLM.ready&&('gpu' in navigator)&&!(typeof K!=='undefined'&&K.weak&&K.weak())){ setTimeout(function(){ LLM.load(lk).then(function(){ toast('🧠 진짜 두뇌 가동 — '+LLM.SIZE[lk]); }).catch(function(){}); },4000); } else if(lk&&lk!=='off'&&typeof K!=='undefined'&&K.weak&&K.weak()){ try{ setTimeout(function(){ toast('🧪 약폰 감지 — 모델 자동가동을 생략합니다. 기존 로컬 기능은 계속 사용할 수 있습니다.'); },4200); }catch(e){} } }catch(e){}
 const LINES=['자비스 온라인 — 황금 코어 기동 완료, 사장님. 무엇이든 시키십시오.','전 기능 정상. 코딩, 기억, 폰 제어, 자율성장 전부 준비됐습니다.','이 각도 훌륭하군요. 명령을 기다리겠습니다.'];
 let li=0;
 const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형 대화 엔진 (문맥스택·벡터검색) .. ONLINE','> 황금 성운 필드 '+nebula.n.toLocaleString()+' 파티클 .... 생성','> 가상 워크스페이스 V:\\ ............ 마운트','> 코드 샌드박스 (격리 실행) ............ ONLINE','> 장기기억 · 자기해킹 · 자율성장 ...... ARMED','> 폰 제어 (손전등/진동/알람/GPS) ...... READY','> 스타크 허드 (플로팅 패널 5종) ....... STANDBY','> 자기해킹 엔진 (실측 자기최적화) ...... ARMED','> 심층 지식 DB '+KNOW.length+'토픽 · 상식 '+FACTS.length+' · 논문 '+PAPERS.length+' .. LOADED','','  환영합니다, 사장님. 중앙을 터치하거나 말씀하세요.'];
@@ -3763,6 +3583,7 @@ const BOOT=['> MOBILE CORE v'+JVS_VER+' SINGULARITY MIND ...... OK','> 생성형
   const iv=setInterval(()=>{ if(i>=BOOT.length){ clearInterval(iv); setTimeout(()=>{ document.getElementById('boot').classList.add('off'); boost=1.3; setTimeout(()=>speakOut(LINES[0],null,'greet'),500); },450); return; }
     el.textContent+=BOOT[i++]+'\n'; },260); })();
 </script>
+<script src="legacy-model-cleanup.js"></script>
 <script src="instruction-code-model.js"></script>
 <script src="tiny-code-model.js"></script>
 <script src="coding-algorithms.js"></script>
