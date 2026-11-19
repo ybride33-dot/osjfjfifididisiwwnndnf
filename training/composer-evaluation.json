@@ -1,0 +1,1263 @@
+{
+  "metadata": {
+    "model": "jarvis-composer-v1",
+    "architecture": "neural network, four independent categorical heads for structured numeric-array programs; fixed renderer, not an open-ended language model",
+    "features": 512,
+    "hidden": 96,
+    "heads": [
+      4,
+      3,
+      5,
+      13
+    ],
+    "parameters": 51673,
+    "seed": 73319,
+    "steps": 6000,
+    "best_step": 500,
+    "batch": 128,
+    "train_combinations": 637,
+    "validation_combinations": 72,
+    "test_combinations": 71,
+    "train_examples": 6370,
+    "test_before": {
+      "exact": 0,
+      "total": 71,
+      "head_correct": [
+        20,
+        25,
+        9,
+        6
+      ]
+    },
+    "validation_after": {
+      "exact": 72,
+      "total": 72,
+      "head_correct": [
+        72,
+        72,
+        72,
+        72
+      ]
+    },
+    "test_after": {
+      "exact": 71,
+      "total": 71,
+      "head_correct": [
+        71,
+        71,
+        71,
+        71
+      ]
+    },
+    "split": "sha256 on full operation combination; whole combination held out; component phrases and individual operations also appear in training; same synthetic pattern templates"
+  },
+  "held_out": [
+    {
+      "prompt": "주어진 숫자 배열에서 모든 원소들을 원래 값을 사용해서 가장 큰 값을 찾아줘",
+      "expected": [
+        0,
+        0,
+        0,
+        3
+      ],
+      "predicted": [
+        0,
+        0,
+        0,
+        3
+      ],
+      "minimum_head_probability": 0.97971,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 원소들을 두 배하여 가장 큰 값을 찾아줘",
+      "expected": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "predicted": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "minimum_head_probability": 0.97262,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 원소들을 두 배하여 순차 누적합 배열을 돌려줘",
+      "expected": [
+        0,
+        0,
+        3,
+        8
+      ],
+      "predicted": [
+        0,
+        0,
+        3,
+        8
+      ],
+      "minimum_head_probability": 0.98549,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 원소들을 두 배하여 중앙값을 계산해 반환해",
+      "expected": [
+        0,
+        0,
+        3,
+        10
+      ],
+      "predicted": [
+        0,
+        0,
+        3,
+        10
+      ],
+      "minimum_head_probability": 0.95463,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 짝수 원소들을 제곱하여 개수를 돌려줘",
+      "expected": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "predicted": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "minimum_head_probability": 0.94791,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 짝수 원소들을 제곱하여 가장 큰 값을 찾아줘",
+      "expected": [
+        0,
+        1,
+        1,
+        3
+      ],
+      "predicted": [
+        0,
+        1,
+        1,
+        3
+      ],
+      "minimum_head_probability": 0.97286,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 짝수 원소들을 절대값을 계산해서 오름차순으로 정렬해 반환해",
+      "expected": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "predicted": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "minimum_head_probability": 0.99184,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 짝수 원소들을 절대값을 계산해서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        0,
+        1,
+        2,
+        8
+      ],
+      "predicted": [
+        0,
+        1,
+        2,
+        8
+      ],
+      "minimum_head_probability": 0.98857,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 짝수 원소들을 부호를 뒤집어서 곱을 계산해줘",
+      "expected": [
+        0,
+        1,
+        4,
+        2
+      ],
+      "predicted": [
+        0,
+        1,
+        4,
+        2
+      ],
+      "minimum_head_probability": 0.95528,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 홀수 원소들을 두 배하여 개수를 돌려줘",
+      "expected": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "predicted": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "minimum_head_probability": 0.97634,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 홀수 원소들을 두 배하여 결과 목록을 돌려줘",
+      "expected": [
+        0,
+        2,
+        3,
+        5
+      ],
+      "predicted": [
+        0,
+        2,
+        3,
+        5
+      ],
+      "minimum_head_probability": 0.98179,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 홀수 원소들을 두 배하여 오름차순으로 정렬해 반환해",
+      "expected": [
+        0,
+        2,
+        3,
+        6
+      ],
+      "predicted": [
+        0,
+        2,
+        3,
+        6
+      ],
+      "minimum_head_probability": 0.98302,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 홀수 원소들을 부호를 뒤집어서 가장 큰 값을 찾아줘",
+      "expected": [
+        0,
+        2,
+        4,
+        3
+      ],
+      "predicted": [
+        0,
+        2,
+        4,
+        3
+      ],
+      "minimum_head_probability": 0.96411,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 모든 홀수 원소들을 부호를 뒤집어서 오름차순으로 정렬해 반환해",
+      "expected": [
+        0,
+        2,
+        4,
+        6
+      ],
+      "predicted": [
+        0,
+        2,
+        4,
+        6
+      ],
+      "minimum_head_probability": 0.9865,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 원래 값을 사용해서 오름차순으로 정렬해 반환해",
+      "expected": [
+        1,
+        0,
+        0,
+        6
+      ],
+      "predicted": [
+        1,
+        0,
+        0,
+        6
+      ],
+      "minimum_head_probability": 0.92108,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 제곱하여 오름차순으로 정렬해 반환해",
+      "expected": [
+        1,
+        0,
+        1,
+        6
+      ],
+      "predicted": [
+        1,
+        0,
+        1,
+        6
+      ],
+      "minimum_head_probability": 0.94936,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 절대값을 계산해서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        1,
+        0,
+        2,
+        8
+      ],
+      "predicted": [
+        1,
+        0,
+        2,
+        8
+      ],
+      "minimum_head_probability": 0.97233,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 두 배하여 개수를 돌려줘",
+      "expected": [
+        1,
+        0,
+        3,
+        1
+      ],
+      "predicted": [
+        1,
+        0,
+        3,
+        1
+      ],
+      "minimum_head_probability": 0.95969,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 두 배하여 가장 작은 값을 찾아줘",
+      "expected": [
+        1,
+        0,
+        3,
+        4
+      ],
+      "predicted": [
+        1,
+        0,
+        3,
+        4
+      ],
+      "minimum_head_probability": 0.96614,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 부호를 뒤집어서 합계를 반환해줘",
+      "expected": [
+        1,
+        0,
+        4,
+        0
+      ],
+      "predicted": [
+        1,
+        0,
+        4,
+        0
+      ],
+      "minimum_head_probability": 0.95748,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 원소들을 부호를 뒤집어서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        1,
+        0,
+        4,
+        8
+      ],
+      "predicted": [
+        1,
+        0,
+        4,
+        8
+      ],
+      "minimum_head_probability": 0.95409,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 원래 값을 사용해서 합계를 반환해줘",
+      "expected": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "predicted": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "minimum_head_probability": 0.97741,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 원래 값을 사용해서 가장 작은 값을 찾아줘",
+      "expected": [
+        1,
+        1,
+        0,
+        4
+      ],
+      "predicted": [
+        1,
+        1,
+        0,
+        4
+      ],
+      "minimum_head_probability": 0.96781,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 제곱하여 합계를 반환해줘",
+      "expected": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "predicted": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "minimum_head_probability": 0.97587,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 제곱하여 결과 목록을 돌려줘",
+      "expected": [
+        1,
+        1,
+        1,
+        5
+      ],
+      "predicted": [
+        1,
+        1,
+        1,
+        5
+      ],
+      "minimum_head_probability": 0.97953,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 제곱하여 중복을 빼고 배열로 돌려줘",
+      "expected": [
+        1,
+        1,
+        1,
+        7
+      ],
+      "predicted": [
+        1,
+        1,
+        1,
+        7
+      ],
+      "minimum_head_probability": 0.95907,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 두 배하여 가장 큰 값을 찾아줘",
+      "expected": [
+        1,
+        1,
+        3,
+        3
+      ],
+      "predicted": [
+        1,
+        1,
+        3,
+        3
+      ],
+      "minimum_head_probability": 0.94947,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 짝수 원소들을 두 배하여 평균을 계산해 반환해",
+      "expected": [
+        1,
+        1,
+        3,
+        9
+      ],
+      "predicted": [
+        1,
+        1,
+        3,
+        9
+      ],
+      "minimum_head_probability": 0.98751,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 원래 값을 사용해서 가장 큰 값을 찾아줘",
+      "expected": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "predicted": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "minimum_head_probability": 0.96346,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 원래 값을 사용해서 가장 빈번한 값을 반환해",
+      "expected": [
+        1,
+        2,
+        0,
+        11
+      ],
+      "predicted": [
+        1,
+        2,
+        0,
+        11
+      ],
+      "minimum_head_probability": 0.9773,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 제곱하여 가장 큰 값을 찾아줘",
+      "expected": [
+        1,
+        2,
+        1,
+        3
+      ],
+      "predicted": [
+        1,
+        2,
+        1,
+        3
+      ],
+      "minimum_head_probability": 0.95878,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 절대값을 계산해서 결과 목록을 돌려줘",
+      "expected": [
+        1,
+        2,
+        2,
+        5
+      ],
+      "predicted": [
+        1,
+        2,
+        2,
+        5
+      ],
+      "minimum_head_probability": 0.96759,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 두 배하여 평균을 계산해 반환해",
+      "expected": [
+        1,
+        2,
+        3,
+        9
+      ],
+      "predicted": [
+        1,
+        2,
+        3,
+        9
+      ],
+      "minimum_head_probability": 0.98408,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 부호를 뒤집어서 곱을 계산해줘",
+      "expected": [
+        1,
+        2,
+        4,
+        2
+      ],
+      "predicted": [
+        1,
+        2,
+        4,
+        2
+      ],
+      "minimum_head_probability": 0.95117,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 부호를 뒤집어서 가장 큰 값을 찾아줘",
+      "expected": [
+        1,
+        2,
+        4,
+        3
+      ],
+      "predicted": [
+        1,
+        2,
+        4,
+        3
+      ],
+      "minimum_head_probability": 0.92624,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 부호를 뒤집어서 중앙값을 계산해 반환해",
+      "expected": [
+        1,
+        2,
+        4,
+        10
+      ],
+      "predicted": [
+        1,
+        2,
+        4,
+        10
+      ],
+      "minimum_head_probability": 0.95855,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 양수 홀수 원소들을 부호를 뒤집어서 최대 연속 합을 반환해",
+      "expected": [
+        1,
+        2,
+        4,
+        12
+      ],
+      "predicted": [
+        1,
+        2,
+        4,
+        12
+      ],
+      "minimum_head_probability": 0.96619,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 원래 값을 사용해서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        2,
+        0,
+        0,
+        8
+      ],
+      "predicted": [
+        2,
+        0,
+        0,
+        8
+      ],
+      "minimum_head_probability": 0.97301,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 제곱하여 합계를 반환해줘",
+      "expected": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "predicted": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "minimum_head_probability": 0.97043,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 제곱하여 곱을 계산해줘",
+      "expected": [
+        2,
+        0,
+        1,
+        2
+      ],
+      "predicted": [
+        2,
+        0,
+        1,
+        2
+      ],
+      "minimum_head_probability": 0.96682,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 제곱하여 가장 큰 값을 찾아줘",
+      "expected": [
+        2,
+        0,
+        1,
+        3
+      ],
+      "predicted": [
+        2,
+        0,
+        1,
+        3
+      ],
+      "minimum_head_probability": 0.95614,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 제곱하여 오름차순으로 정렬해 반환해",
+      "expected": [
+        2,
+        0,
+        1,
+        6
+      ],
+      "predicted": [
+        2,
+        0,
+        1,
+        6
+      ],
+      "minimum_head_probability": 0.95537,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 제곱하여 최대 연속 합을 반환해",
+      "expected": [
+        2,
+        0,
+        1,
+        12
+      ],
+      "predicted": [
+        2,
+        0,
+        1,
+        12
+      ],
+      "minimum_head_probability": 0.93978,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 절대값을 계산해서 평균을 계산해 반환해",
+      "expected": [
+        2,
+        0,
+        2,
+        9
+      ],
+      "predicted": [
+        2,
+        0,
+        2,
+        9
+      ],
+      "minimum_head_probability": 0.95781,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 두 배하여 가장 큰 값을 찾아줘",
+      "expected": [
+        2,
+        0,
+        3,
+        3
+      ],
+      "predicted": [
+        2,
+        0,
+        3,
+        3
+      ],
+      "minimum_head_probability": 0.9538,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 두 배하여 가장 빈번한 값을 반환해",
+      "expected": [
+        2,
+        0,
+        3,
+        11
+      ],
+      "predicted": [
+        2,
+        0,
+        3,
+        11
+      ],
+      "minimum_head_probability": 0.95185,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 원소들을 부호를 뒤집어서 오름차순으로 정렬해 반환해",
+      "expected": [
+        2,
+        0,
+        4,
+        6
+      ],
+      "predicted": [
+        2,
+        0,
+        4,
+        6
+      ],
+      "minimum_head_probability": 0.9625,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 원래 값을 사용해서 최대 연속 합을 반환해",
+      "expected": [
+        2,
+        1,
+        0,
+        12
+      ],
+      "predicted": [
+        2,
+        1,
+        0,
+        12
+      ],
+      "minimum_head_probability": 0.93787,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 제곱하여 개수를 돌려줘",
+      "expected": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "predicted": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "minimum_head_probability": 0.94349,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 제곱하여 중복을 빼고 배열로 돌려줘",
+      "expected": [
+        2,
+        1,
+        1,
+        7
+      ],
+      "predicted": [
+        2,
+        1,
+        1,
+        7
+      ],
+      "minimum_head_probability": 0.95014,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 제곱하여 평균을 계산해 반환해",
+      "expected": [
+        2,
+        1,
+        1,
+        9
+      ],
+      "predicted": [
+        2,
+        1,
+        1,
+        9
+      ],
+      "minimum_head_probability": 0.98301,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 제곱하여 중앙값을 계산해 반환해",
+      "expected": [
+        2,
+        1,
+        1,
+        10
+      ],
+      "predicted": [
+        2,
+        1,
+        1,
+        10
+      ],
+      "minimum_head_probability": 0.992,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 짝수 원소들을 절대값을 계산해서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        2,
+        1,
+        2,
+        8
+      ],
+      "predicted": [
+        2,
+        1,
+        2,
+        8
+      ],
+      "minimum_head_probability": 0.97571,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 홀수 원소들을 원래 값을 사용해서 오름차순으로 정렬해 반환해",
+      "expected": [
+        2,
+        2,
+        0,
+        6
+      ],
+      "predicted": [
+        2,
+        2,
+        0,
+        6
+      ],
+      "minimum_head_probability": 0.97572,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 음수 홀수 원소들을 절대값을 계산해서 평균을 계산해 반환해",
+      "expected": [
+        2,
+        2,
+        2,
+        9
+      ],
+      "predicted": [
+        2,
+        2,
+        2,
+        9
+      ],
+      "minimum_head_probability": 0.97637,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 원소들을 원래 값을 사용해서 가장 작은 값을 찾아줘",
+      "expected": [
+        3,
+        0,
+        0,
+        4
+      ],
+      "predicted": [
+        3,
+        0,
+        0,
+        4
+      ],
+      "minimum_head_probability": 0.98629,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 원소들을 원래 값을 사용해서 중복을 빼고 배열로 돌려줘",
+      "expected": [
+        3,
+        0,
+        0,
+        7
+      ],
+      "predicted": [
+        3,
+        0,
+        0,
+        7
+      ],
+      "minimum_head_probability": 0.96587,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 원소들을 제곱하여 가장 작은 값을 찾아줘",
+      "expected": [
+        3,
+        0,
+        1,
+        4
+      ],
+      "predicted": [
+        3,
+        0,
+        1,
+        4
+      ],
+      "minimum_head_probability": 0.98912,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 원소들을 두 배하여 중복을 빼고 배열로 돌려줘",
+      "expected": [
+        3,
+        0,
+        3,
+        7
+      ],
+      "predicted": [
+        3,
+        0,
+        3,
+        7
+      ],
+      "minimum_head_probability": 0.94979,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 원소들을 부호를 뒤집어서 평균을 계산해 반환해",
+      "expected": [
+        3,
+        0,
+        4,
+        9
+      ],
+      "predicted": [
+        3,
+        0,
+        4,
+        9
+      ],
+      "minimum_head_probability": 0.97816,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 원래 값을 사용해서 평균을 계산해 반환해",
+      "expected": [
+        3,
+        1,
+        0,
+        9
+      ],
+      "predicted": [
+        3,
+        1,
+        0,
+        9
+      ],
+      "minimum_head_probability": 0.98752,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 제곱하여 오름차순으로 정렬해 반환해",
+      "expected": [
+        3,
+        1,
+        1,
+        6
+      ],
+      "predicted": [
+        3,
+        1,
+        1,
+        6
+      ],
+      "minimum_head_probability": 0.98069,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 절대값을 계산해서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        3,
+        1,
+        2,
+        8
+      ],
+      "predicted": [
+        3,
+        1,
+        2,
+        8
+      ],
+      "minimum_head_probability": 0.98391,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 부호를 뒤집어서 곱을 계산해줘",
+      "expected": [
+        3,
+        1,
+        4,
+        2
+      ],
+      "predicted": [
+        3,
+        1,
+        4,
+        2
+      ],
+      "minimum_head_probability": 0.92768,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 부호를 뒤집어서 오름차순으로 정렬해 반환해",
+      "expected": [
+        3,
+        1,
+        4,
+        6
+      ],
+      "predicted": [
+        3,
+        1,
+        4,
+        6
+      ],
+      "minimum_head_probability": 0.97059,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 짝수 원소들을 부호를 뒤집어서 가장 빈번한 값을 반환해",
+      "expected": [
+        3,
+        1,
+        4,
+        11
+      ],
+      "predicted": [
+        3,
+        1,
+        4,
+        11
+      ],
+      "minimum_head_probability": 0.9789,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 홀수 원소들을 원래 값을 사용해서 가장 작은 값을 찾아줘",
+      "expected": [
+        3,
+        2,
+        0,
+        4
+      ],
+      "predicted": [
+        3,
+        2,
+        0,
+        4
+      ],
+      "minimum_head_probability": 0.98802,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 홀수 원소들을 제곱하여 가장 빈번한 값을 반환해",
+      "expected": [
+        3,
+        2,
+        1,
+        11
+      ],
+      "predicted": [
+        3,
+        2,
+        1,
+        11
+      ],
+      "minimum_head_probability": 0.98234,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 홀수 원소들을 부호를 뒤집어서 곱을 계산해줘",
+      "expected": [
+        3,
+        2,
+        4,
+        2
+      ],
+      "predicted": [
+        3,
+        2,
+        4,
+        2
+      ],
+      "minimum_head_probability": 0.92365,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 홀수 원소들을 부호를 뒤집어서 결과 목록을 돌려줘",
+      "expected": [
+        3,
+        2,
+        4,
+        5
+      ],
+      "predicted": [
+        3,
+        2,
+        4,
+        5
+      ],
+      "minimum_head_probability": 0.9836,
+      "match": true
+    },
+    {
+      "prompt": "주어진 숫자 배열에서 0이 아닌 홀수 원소들을 부호를 뒤집어서 순차 누적합 배열을 돌려줘",
+      "expected": [
+        3,
+        2,
+        4,
+        8
+      ],
+      "predicted": [
+        3,
+        2,
+        4,
+        8
+      ],
+      "minimum_head_probability": 0.98509,
+      "match": true
+    }
+  ]
+}

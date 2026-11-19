@@ -1,0 +1,22 @@
+[
+ {"prompt":"배열에서 짝수만 골라 제곱한 것들의 합을 구해줘","program":{"filters":["even"],"map":"square","reducer":"sum"}},
+ {"prompt":"정수 목록에서 양수이면서 홀수인 값만 두 배로 바꾸고 배열로 돌려줘","program":{"filters":["positive","odd"],"map":"double","reducer":"array"}},
+ {"prompt":"숫자 배열의 음수를 절댓값으로 바꾼 다음 가장 큰 값을 찾아줘","program":{"filters":["negative"],"map":"abs","reducer":"max"}},
+ {"prompt":"배열에 있는 음수 중 짝수만 그대로 두고 모두 더해줘","program":{"filters":["negative","even"],"map":"identity","reducer":"sum"}},
+ {"prompt":"배열에서 홀수들의 개수를 알려줘","program":{"filters":["odd"],"map":"identity","reducer":"count"}},
+ {"prompt":"리스트에서 0이 아닌 수들의 부호를 반대로 한 다음 합계를 반환해줘","program":{"filters":["nonzero"],"map":"negate","reducer":"sum"}},
+ {"prompt":"숫자 배열을 변형하지 말고 평균을 계산해줘","program":{"filters":[],"map":"identity","reducer":"mean"}},
+ {"prompt":"정수 배열에서 양수들을 제곱하고 가장 작은 값을 돌려줘","program":{"filters":["positive"],"map":"square","reducer":"min"}},
+ {"prompt":"정수 배열의 홀수 원소를 절댓값으로 만든 뒤 중복을 제거해줘","program":{"filters":["odd"],"map":"abs","reducer":"unique"}},
+ {"prompt":"수 배열에서 양수인 짝수들을 두 배로 만들고 오름차순 정렬해","program":{"filters":["positive","even"],"map":"double","reducer":"sort"}},
+ {"prompt":"배열에서 음수인 홀수만 골라 절댓값의 평균을 구해줘","program":{"filters":["negative","odd"],"map":"abs","reducer":"mean"}},
+ {"prompt":"정수 배열에서 모든 수의 제곱을 구하고 결과 목록을 반환해줘","program":{"filters":[],"map":"square","reducer":"array"}},
+ {"prompt":"배열의 짝수들을 변환 없이 누적합으로 만들어줘","program":{"filters":["even"],"map":"identity","reducer":"prefix"}},
+ {"prompt":"정수 배열 중 음수만 뽑아 각각 부호를 바꾼 후 최대값을 구해","program":{"filters":["negative"],"map":"negate","reducer":"max"}},
+ {"prompt":"배열의 양수만 제곱해서 모두 합산하는 함수를 만들어줘","program":{"filters":["positive"],"map":"square","reducer":"sum"}},
+ {"prompt":"정수 리스트에서 0을 뺀 숫자를 그대로 곱해줘","program":{"filters":["nonzero"],"map":"identity","reducer":"product"}},
+ {"prompt":"리스트의 양수인 홀수를 제곱한 값을 작은 순서로 정렬해줘","program":{"filters":["positive","odd"],"map":"square","reducer":"sort"}},
+ {"prompt":"숫자 배열의 0보다 작은 값을 두 배한 결과의 중앙값을 반환","program":{"filters":["negative"],"map":"double","reducer":"median"}},
+ {"prompt":"정수 배열의 모든 짝수를 제곱한 뒤 최빈값을 찾아줘","program":{"filters":["even"],"map":"square","reducer":"mode"}},
+ {"prompt":"배열의 모든 수를 그대로 놔두고 연속된 부분의 최대 합을 구해줘","program":{"filters":[],"map":"identity","reducer":"maxsub"}}
+]

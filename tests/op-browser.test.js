@@ -10,7 +10,7 @@ const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://local
  await context.route('https://api.open-meteo.com/**',async route=>{await route.fulfill({json:{current:{temperature_2m:12.3}}}).catch(()=>{});});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.goto('http://127.0.0.1:'+port+'/',{waitUntil:'load'});await page.locator('#boot.off').waitFor({timeout:20000});
- assert.equal(await page.evaluate(()=>JVS_VER),'20.29');
+ assert.equal(await page.evaluate(()=>JVS_VER),'20.30');
  await page.locator('#inp').fill('op');await page.locator('#send').tap();await page.locator('#opHud').waitFor();
  assert.equal(await page.locator('#opClose').evaluate(e=>getComputedStyle(e).pointerEvents),'auto');
  assert.equal(await page.locator('#opClose').evaluate(e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e;}),true);
