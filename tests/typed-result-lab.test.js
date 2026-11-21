@@ -34,7 +34,7 @@ assert.match(lab.message('function(){globalThis.bad=1}'),/고정 예제만 선�
 assert.equal(globalThis.bad,undefined);
 const html=fs.readFileSync('index.html','utf8'),sw=fs.readFileSync('sw.js','utf8');
 assert.match(html,/<script src="typed-result-lab\.js"><\/script>/);
-assert.match(sw,/\.\/typed-result-lab\.js/);assert.match(sw,/jarvis-v4-single-94/);
+assert.match(sw,/\.\/typed-result-lab\.js/);assert.match(sw,/jarvis-v4-single-95/);
 const start=html.indexOf('async function brain(text){'),end=html.indexOf('  /* 학습된 커스텀 스킬 최우선 */',start);
 assert.ok(start>=0&&end>start);
 const ctx=vm.createContext({typoFix:x=>x,detectLang:()=> 'ko',JVSTypedResultLab:lab});

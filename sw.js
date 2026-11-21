@@ -1,5 +1,5 @@
 /* J.A.R.V.I.S 오프라인 캐시 — 설치 후 서버·인터넷 없이 실행 */
-const CV='jarvis-v4-single-94';
+const CV='jarvis-v4-single-95';
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CV).then(c=>c.addAll(['./','./index.html','./legacy-model-cleanup.js','./instruction-code-model.js','./coding-auditor.js','./typed-result-lab.js','./transformer-coding-model.js','./tiny-code-model.js','./coding-algorithms.js','./coding-engine.js','./composer-model.js','./coding-pipeline.js','./natural-pipeline.js','./op-tools.js','./op-qr.js','./vendor/qrcode-generator.js','./vendor/jsqr.js','./op-hud.js','./science-library.js','./code-corpus.js','./code-corpus.json','./code-lab.js','./code-school.js','./brain-pack.js','./games.js','./knowledge-pack3.js'].map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.indexOf('jarvis-v4-')===0&&k!==CV).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 self.addEventListener('fetch',e=>{ const r=e.request; if(r.method!=='GET')return;

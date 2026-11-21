@@ -16,11 +16,11 @@ const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://local
   assert.equal(await p.evaluate(()=>JVS_VER),'20.34');await p.evaluate(()=>{S.ws['업데이트-검사.txt']='기존 내용 보존';saveS()});
   await p.evaluate(()=>navigator.serviceWorker.ready);await p.reload();await p.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:15000});
   assert.equal(await p.evaluate(()=>typeof JVSTypedResultLab),'undefined');
-  for(const f of ['index.html','sw.js','typed-result-lab.js'])fs.copyFileSync(path.join(root,f),path.join(dir,f));
+  for(const f of ['index.html','sw.js','typed-result-lab.js','op-hud.js','op-tools.js'])fs.copyFileSync(path.join(root,f),path.join(dir,f));
   await p.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration();await reg.update();});
   try{await p.waitForFunction(()=>typeof JVSTypedResultLab!=='undefined',{timeout:20000});}
   catch{await p.reload();await p.waitForFunction(()=>typeof JVSTypedResultLab!=='undefined',{timeout:20000});}
-  assert.equal(await p.evaluate(()=>JVS_VER),'20.35');
+  assert.equal(await p.evaluate(()=>JVS_VER),'20.36');
   assert.equal(await p.evaluate(()=>localStorage.getItem('upgrade-test-marker')),'keep');
   assert.equal(await p.evaluate(()=>S.ws['업데이트-검사.txt']),'기존 내용 보존');
   assert.match(await p.evaluate(async()=>(await brain('자비스 결과 비교 1')).reply),/태그 비교: 다름/);
