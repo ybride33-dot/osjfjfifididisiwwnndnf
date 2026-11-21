@@ -1,0 +1,229 @@
+{
+  "node_observations": [
+    {
+      "id": "zero",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": 0
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "negative_zero",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": "-0"
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "nan",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": "NaN"
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "positive_infinity",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": "+Infinity"
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "negative_infinity",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": "-Infinity"
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "null",
+      "outcome": "returned",
+      "value": {
+        "t": "null"
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "one",
+      "outcome": "returned",
+      "value": {
+        "t": "number",
+        "v": 1
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "bigint_one",
+      "outcome": "returned",
+      "value": {
+        "t": "bigint",
+        "v": "1"
+      },
+      "raw": {
+        "status": "json_error",
+        "name": "TypeError"
+      }
+    },
+    {
+      "id": "array_undefined",
+      "outcome": "returned",
+      "value": {
+        "t": "array",
+        "items": [
+          {
+            "t": "undefined"
+          }
+        ]
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": [
+            null
+          ]
+        }
+      }
+    },
+    {
+      "id": "array_hole",
+      "outcome": "returned",
+      "value": {
+        "t": "array",
+        "items": [
+          {
+            "t": "hole"
+          }
+        ]
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": [
+            null
+          ]
+        }
+      }
+    },
+    {
+      "id": "object_empty",
+      "outcome": "returned",
+      "value": {
+        "t": "object",
+        "proto": "object",
+        "entries": []
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": {}
+        }
+      }
+    },
+    {
+      "id": "object_undefined",
+      "outcome": "returned",
+      "value": {
+        "t": "object",
+        "proto": "object",
+        "entries": [
+          [
+            "x",
+            {
+              "t": "undefined"
+            }
+          ]
+        ]
+      },
+      "raw": {
+        "status": "json",
+        "data": {
+          "value": {}
+        }
+      }
+    },
+    {
+      "id": "throw_type",
+      "outcome": "threw",
+      "thrown": {
+        "t": "error",
+        "name": "TypeError",
+        "message": "fixed"
+      }
+    },
+    {
+      "id": "throw_range",
+      "outcome": "threw",
+      "thrown": {
+        "t": "error",
+        "name": "RangeError",
+        "message": "fixed"
+      }
+    },
+    {
+      "id": "cycle_unsupported",
+      "outcome": "returned",
+      "value": {
+        "t": "object",
+        "proto": "object",
+        "entries": [
+          [
+            "self",
+            {
+              "t": "unsupported",
+              "reason": "repeat_reference"
+            }
+          ]
+        ]
+      },
+      "raw": {
+        "status": "json_error",
+        "name": "TypeError"
+      }
+    }
+  ]
+}
